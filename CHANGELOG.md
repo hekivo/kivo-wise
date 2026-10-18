@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — 3.0.0
+## [3.0.0](https://github.com/hekivo/kivo-wise/compare/superpowers-sage-v2.11.1...kivo-wise-v3.0.0) (2026-10-18)
 
 ### ⚠ BREAKING CHANGES
 

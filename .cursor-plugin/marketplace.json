@@ -11,7 +11,7 @@
     {
       "name": "kivo-wise",
       "description": "Roots stack (Sage, Acorn, Radicle) skills for AI-assisted WordPress development through Lando.",
-      "version": "3.0.0-alpha.1",
+      "version": "3.0.0",
       "source": {
         "source": "github",
         "repo": "hekivo/kivo-wise",

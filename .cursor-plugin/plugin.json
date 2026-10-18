@@ -1,7 +1,7 @@
 {
   "name": "kivo-wise",
   "description": "WordPress on the Roots stack for AI assistants: detects Sage theme, Acorn mu-plugin or Radicle, routes to profile-aware skills, runs everything through Lando, reads official docs from a versioned corpus",
-  "version": "3.0.0-alpha.1",
+  "version": "3.0.0",
   "hooks": "./hooks/cursor-hooks.json",
   "author": {
     "name": "hekivo",
