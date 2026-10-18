@@ -36,13 +36,14 @@ const EVENT_MAP = {
   },
   PreToolUse: {
     // PreToolUse with matcher 'Bash' maps to Cursor's beforeShellExecution (needs matcher field)
-    // PreToolUse with matcher 'Write|Edit' maps to Cursor's beforeFileEdit
+    // PreToolUse on the file-editing tools maps to Cursor's beforeFileEdit
     matchers: {
       Bash: {
         event: 'beforeShellExecution',
         matcher: 'git commit', // Cursor-level matcher for the pre-commit hook
       },
       'Write|Edit': 'beforeFileEdit',
+      'Write|Edit|MultiEdit|NotebookEdit': 'beforeFileEdit',
     },
   },
   PostCompact: 'preCompact',
@@ -52,7 +53,7 @@ const EVENT_MAP = {
 
 /**
  * Rewrite a Claude Code command for Cursor: Claude uses ${CLAUDE_PLUGIN_ROOT}/...,
- * Cursor uses ./... (relative to plugin root).
+ * Cursor uses ./... (relative to plugin root). Hooks are `node "<path>.mjs"` commands.
  */
 function rewriteCommand(claudeCommand) {
   return claudeCommand.replace(/\$\{CLAUDE_PLUGIN_ROOT\}\//g, './');

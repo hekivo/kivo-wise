@@ -11,9 +11,9 @@
  *
  * Gera (todos derivados, marcados como GENERATED):
  *   .agents/plugins/marketplace.json   — manifesto de marketplace (formato 0.137)
- *   plugins/superpowers-sage/          — o plugin com conteúdo REAL:
+ *   plugins/kivo-wise/                 — o plugin com conteúdo REAL:
  *       .codex-plugin/plugin.json      (cópia do manifesto canônico)
- *       skills/  hooks/                (cópia do que o plugin.json declara)
+ *       skills/  hooks/  AGENTS.md     (cópia do que o plugin.json declara + regras universais)
  *
  * Fonte da verdade permanece a raiz (Claude Code lê de lá). Este script só
  * espelha pro subdir que o Codex precisa.
@@ -32,7 +32,7 @@ import process from 'node:process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
-const PLUGIN_NAME = 'superpowers-sage';
+const PLUGIN_NAME = 'kivo-wise';
 
 const MANIFEST_SRC = resolve(ROOT, '.codex-plugin', 'plugin.json');
 const PLUGIN_DIR = resolve(ROOT, 'plugins', PLUGIN_NAME);
@@ -40,7 +40,7 @@ const MARKETPLACE = resolve(ROOT, '.agents', 'plugins', 'marketplace.json');
 
 const GENERATED_NOTE =
   'GENERATED por scripts/build-codex-plugin.mjs — NÃO edite à mão. ' +
-  'Fonte: skills/ hooks/ .codex-plugin/plugin.json na raiz do repo.';
+  'Fonte: skills/ hooks/ AGENTS.md .codex-plugin/plugin.json na raiz do repo.';
 
 // Dirs/arquivos da raiz que o plugin do Codex precisa (o que .codex-plugin/plugin.json declara).
 const MIRROR = ['skills', 'hooks'];
@@ -59,7 +59,7 @@ function buildArtifacts() {
   const marketplace = {
     name: `${PLUGIN_NAME}-marketplace`,
     interface: {
-      displayName: manifest.interface?.displayName ?? 'Superpowers Sage',
+      displayName: manifest.interface?.displayName ?? 'Kivo Wise',
     },
     plugins: [
       {
@@ -78,19 +78,14 @@ function buildArtifacts() {
     JSON.stringify(manifest, null, 2) + '\n';
   out[`plugins/${PLUGIN_NAME}/GENERATED.md`] = `# ${GENERATED_NOTE}\n`;
 
-  // 2b. AGENTS.md — regras universais espelhadas de CLAUDE.md para ferramentas
-  // que carregam AGENTS.md como instrução sempre-on (OpenAI Codex etc.). Diferente
-  // do Claude Code, o Codex NÃO carrega o CLAUDE.md do plugin nem auto-carrega o
-  // AGENTS.md do diretório do plugin — ele lê o AGENTS.md do PROJETO (cwd pra cima)
-  // e ~/.codex/AGENTS.md. Por isso geramos o canônico aqui (fonte única: CLAUDE.md)
-  // e o usuário Codex traz para o root do projeto (ver README → OpenAI Codex).
-  const claudeMd = readFileSync(resolve(ROOT, 'CLAUDE.md'), 'utf8');
-  const agentsBody =
-    '<!-- GENERATED de CLAUDE.md por scripts/build-codex-plugin.mjs — não edite à mão. -->\n' +
-    '<!-- Regras universais superpowers-sage para Codex e ferramentas que leem AGENTS.md. -->\n\n' +
-    claudeMd;
-  out['AGENTS.md'] = agentsBody;
-  out[`plugins/${PLUGIN_NAME}/AGENTS.md`] = agentsBody;
+  // 2b. AGENTS.md — the universal rules, hand-written at the repo root. Codex does
+  // not load a plugin's own context file; it reads the PROJECT's AGENTS.md (cwd and
+  // up) and ~/.codex/AGENTS.md. We mirror the root file into the plugin so Codex
+  // users can copy it into their project (see README → OpenAI Codex).
+  const agentsMd = readFileSync(resolve(ROOT, 'AGENTS.md'), 'utf8');
+  out[`plugins/${PLUGIN_NAME}/AGENTS.md`] =
+    '<!-- GENERATED from the root AGENTS.md by scripts/build-codex-plugin.mjs — do not edit by hand. -->\n\n' +
+    agentsMd;
 
   // 3. conteúdo espelhado (skills/, hooks/) — arquivos reais
   for (const dir of MIRROR) {

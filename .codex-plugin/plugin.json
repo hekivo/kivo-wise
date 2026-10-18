@@ -1,41 +1,38 @@
 {
-  "name": "superpowers-sage",
-  "version": "2.11.1",
-  "description": "Modern WordPress development with Sage, Acorn & Lando. Workflow skills (architecture-discovery, plan-generator, building, designing, verifying), design tool integration, content modeling, visual verification, and lifecycle hooks.",
+  "name": "kivo-wise",
+  "version": "3.0.0-alpha.1",
+  "description": "WordPress on the Roots stack for AI assistants: detects Sage theme, Acorn mu-plugin or Radicle, routes to profile-aware skills, runs everything through Lando, reads official docs from a versioned corpus",
   "author": {
-    "name": "codigodoleo",
-    "url": "https://github.com/codigodoleo"
+    "name": "hekivo",
+    "url": "https://github.com/hekivo"
   },
-  "homepage": "https://github.com/codigodoleo/superpowers-sage",
-  "repository": "https://github.com/codigodoleo/superpowers-sage",
+  "homepage": "https://github.com/hekivo/kivo-wise",
+  "repository": "https://github.com/hekivo/kivo-wise",
   "license": "MIT",
   "keywords": [
     "wordpress",
     "sage",
     "acorn",
+    "radicle",
+    "mu-plugin",
+    "bedrock",
     "lando",
     "roots",
     "livewire",
     "acf",
     "tailwind",
     "blade",
-    "paper",
-    "stitch",
-    "figma",
-    "pencil",
-    "design-tools",
-    "visual-verification",
-    "architecture",
-    "content-modeling"
+    "docs-brain",
+    "architecture"
   ],
   "skills": "./skills/",
   "hooks": "./hooks/hooks.json",
   "interface": {
-    "displayName": "Superpowers Sage",
-    "shortDescription": "Sage + Acorn + Lando skills for AI-assisted WordPress development.",
-    "longDescription": "Bundle of skills, agents, slash commands, and lifecycle hooks for building modern WordPress sites on Roots Sage with Acorn (Laravel IoC) and Lando local development. Covers architecture discovery, plan generation, parallel building, ACF Composer blocks, Livewire, Eloquent, routes, middleware, queues, performance, security, design tool integration (Paper, Stitch, Figma, Pencil) and visual verification.",
-    "developerName": "codigodoleo",
+    "displayName": "Kivo Wise",
+    "shortDescription": "Roots stack (Sage, Acorn, Radicle) skills for AI-assisted WordPress development through Lando.",
+    "longDescription": "Skills, agents, slash commands and lifecycle hooks for WordPress on the Roots stack. Detects whether the project is a Sage theme, an Acorn mu-plugin or a Radicle application, routes to profile-aware skills, runs wp, composer and node tooling through Lando, and reads official documentation from a versioned corpus.",
+    "developerName": "hekivo",
     "category": "Development",
-    "websiteURL": "https://github.com/codigodoleo/superpowers-sage"
+    "websiteURL": "https://github.com/hekivo/kivo-wise"
   }
 }
