@@ -1,3 +1,5 @@
+> Historical document from superpowers-sage 2.x. It describes features that were removed or replaced in kivo-wise 3.0 and is kept for reference only.
+
 # Plugin Expansion — Master Index
 
 > **For agentic workers:** This is the orchestrator index. Execution plans live per-wave in `2026-04-18-plugin-expansion-onda-N.md`. Use superpowers:subagent-driven-development or superpowers:executing-plans per wave file. Track wave-level progress here.

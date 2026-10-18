@@ -1,3 +1,5 @@
+> Historical document from superpowers-sage 2.x. It describes features that were removed or replaced in kivo-wise 3.0 and is kept for reference only.
+
 # Feedback Cluster A — Worktrees Detection & CSS Cascade Spec-Driven Generation
 
 **Date:** 2026-04-20

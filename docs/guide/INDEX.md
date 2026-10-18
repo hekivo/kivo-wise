@@ -1,51 +1,42 @@
-# Superpowers Sage — Usage Guide
+# Kivo Wise
 
-This guide covers all features of the `superpowers-sage` plugin: workflow skills (invokable slash commands), reference skills (auto-loaded technical deep-dives), agents (isolated subagent specialists), slash commands, hooks (lifecycle automation), and token efficiency.
+kivo-wise is a plugin for AI assistants working on WordPress sites built on the Roots stack. It detects the project profile (`sage-theme`, `acorn-mu-plugin` or `radicle-app`), loads a short factual context at session start, and routes each request to one profile-aware skill. All project commands run through the project's runner (Lando).
 
-For installation and compatibility, see the [README](../../README.md).
+For installation and setup, see the [README](../../README.md).
 
----
+## Which skill for which task
 
-## Quick Decision Table
+`roots-router` makes this choice for you; this table is the same map.
 
-| If you want to… | Run |
+| If you want to... | Skill |
 |---|---|
-| Understand a new project | `/onboarding` |
-| Discover + plan a new feature | `/architecture-discovery` → `/plan-generator` → `/building` |
-| Set up design tokens and UI atoms | `/sage-design-system` |
-| Implement from an existing plan | `/building` |
-| Add a single new ACF block | `/block-scaffolding` |
-| Evolve an existing block | `/block-refactoring` |
-| Add a contact form to a block | `/block-scaffolding` (Phase 0c detects it) or `/sage-forms` |
-| Extract design from Paper/Figma/Stitch/Pencil | `/designing` |
-| Verify implementation matches design | `/verifying` |
-| Review code before PR | `/reviewing` |
-| Debug a Sage/Acorn/Lando issue | `/debugging` |
-| Debug a Livewire component specifically | `/debugging` (routes to `livewire-debugger` agent) |
-| Migrate data between fields or post types | `/migrating` |
-| Model content: CPT vs ACF vs Options Page | `/modeling` |
-| Set up AI/MCP tools | `/ai-setup` |
-| Author a new MCP ability endpoint | `/abilities-authoring` |
-| Install a WordPress plugin via Composer | `/install-plugin` |
-
----
+| Know what kind of project this is | `roots-triage` |
+| Get a map of an unfamiliar project | `roots-onboarding` |
+| Change providers, composers, Blade, config | `acorn-stack` |
+| Create a block, post type, field group or provider | `acorn-scaffolding` |
+| Work with ACF validation, save flow or admin JS | `acf-native` |
+| Add a Livewire component | `acorn-livewire` |
+| Add a route or JSON endpoint | `acorn-routes-api` |
+| Run work in the background, cache or log | `acorn-background` |
+| Store data with Eloquent or migrations | `acorn-data` |
+| Place a hook correctly | `wp-hooks-lifecycle` |
+| Escape output, check input and permissions | `wp-security-escaping` |
+| Fix Vite, Tailwind or asset problems | `tailwind-vite-assets` |
+| Install a plugin with Composer | `wp-composer-plugins` |
+| Run or write tests | `testing-wp` |
+| Find the cause of a broken page | `roots-debugging` |
+| Review a diff before the merge request | `roots-reviewing` |
+| Look up official documentation | `docs-brain` |
+| Run a command in Lando | `lando-wp` |
 
 ## Reference
 
-| File | What it covers |
+| Page | What it covers |
 |---|---|
-| [skills.md](skills.md) | All 19 workflow skills · 17 reference skills · architectural preferences |
-| [agents.md](agents.md) | All 11 agents — purpose, invocation, input, output |
-| [commands.md](commands.md) | 3 slash commands: `/acf-register`, `/livewire-new`, `/sage-status` |
-| [hooks.md](hooks.md) | Session-start, keyword router (32 entries), post-edit, diagnostics |
-| [token-efficiency.md](token-efficiency.md) | How the plugin saves tokens + model-tier vs cost vs fidelity |
-| [troubleshooting.md](troubleshooting.md) | Environment gotchas (Lando/Docker, ACF, Figma seat, fonts) — symptom → fix |
-
-## Practical Guides
-
-| File | What it covers |
-|---|---|
-| [how-to.md](how-to.md) | **Start here** — step-by-step: interactions × prompts × expected results |
-| [workflows/first-session.md](workflows/first-session.md) | What to do in the first session on a new project |
-| [workflows/implement-feature.md](workflows/implement-feature.md) | Full plan-driven feature loop from discovery to PR |
-| [workflows/scaffold-block.md](workflows/scaffold-block.md) | New block scaffold, form integration, block refactoring |
+| [skills.md](skills.md) | The 22 skills and the third-party skills |
+| [agents.md](agents.md) | The four read-only agents |
+| [commands.md](commands.md) | `/roots-detect` and `/roots-status` |
+| [hooks.md](hooks.md) | What each hook does and how to debug it |
+| [token-efficiency.md](token-efficiency.md) | How the plugin keeps its context small |
+| [troubleshooting.md](troubleshooting.md) | Environment problems: symptom, cause, fix |
+| [provenance.md](../provenance.md) | Where each skill's content came from |

@@ -1,5 +1,36 @@
 # Changelog
 
+## Unreleased — 3.0.0
+
+### ⚠ BREAKING CHANGES
+
+* **rename:** the plugin and the repository are now `kivo-wise` (`hekivo/kivo-wise`); install with `claude plugin marketplace add hekivo/kivo-wise` and `claude plugin install kivo-wise@kivo-wise`. The `superpowers-sage` name, marketplace and `superpowers-sage:` skill/agent prefixes are gone.
+* **manifests:** the duplicated root `plugin.json` and the stale root `hooks.json` were removed; `.claude-plugin/plugin.json` and `hooks/hooks.json` are the only sources. The plugin-root `CLAUDE.md` became `AGENTS.md` (hand-written; mirrored into `plugins/kivo-wise/` for Codex).
+* **detector:** `scripts/detect-sage-project.mjs` is replaced by `scripts/detect-roots-project.mjs`, which classifies the site layout (`radicle`, `bedrock`, `composer-wordpress`, `plain-wordpress`), every Acorn app (`sage-theme`, `acorn-theme`, `acorn-mu-plugin`, `acorn-plugin`, `radicle-app`) and the Lando runtime, and honours a `.roots-stack.json` flag. The old script remains as a deprecated shim with a different JSON shape.
+* **hooks:** rewritten in Node (stdin JSON in, JSON out) with profile-aware protected files; the bash hooks and `hooks/lib.sh` are removed.
+* **skills:** consolidated into profile-aware skills (Sage theme / Acorn mu-plugin / Radicle); design-tool, forms and migration skills and agents are removed.
+* **skills:** `sageing` is removed. Its routing map is superseded by `roots-router` (profile x intent routing, `references/routing.json`, `references/keywords.json`, `references/decision-tree.md`). Its design-tool routing and MCP query patterns are not carried over; skills that still link to `sageing/references/mcp-query-patterns.md` are rewritten in the skill consolidation phase.
+* **skills:** `scripts/validate-skills.mjs` enforces the new skill contract (frontmatter allow-list, name equal to folder, "Use when" descriptions, six sections, 500-line cap, no tool names). Existing skills fail it until they are consolidated; CI runs it on the whole tree.
+* **agent eval notes** moved from `agents/__evals__/` to `evals/agents/`.
+
+### Features
+
+* **skills:** add `roots-router`, `roots-triage` (with `references/triage.schema.json`) and `lando-wp`.
+* `docs-brain` CLI and the `kivo-wisdom` corpus for versioned official documentation.
+* **scripts:** add `scripts/sync-project-skills.mjs` (`--to <dir>`, default `.agents/skills`; `--include-gpl`; `--check`). It copies the plugin skills into a project for Cursor, Codex and Copilot, writes a `GENERATED.md` (plugin version, date, skill and file lists), exits 1 on drift in `--check` and never deletes files the target's `GENERATED.md` does not list. Covered by `test/sync-project-skills.test.mjs`.
+* **third-party:** the manifest loads `third-party/` (official WordPress agent skills, GPL-2.0-or-later) next to `skills/`; the folders stay separate to keep the licence boundary, and the sync script skips them unless `--include-gpl` is passed.
+
+### Bug Fixes
+
+* **hooks:** the SessionStart context carries a `commands:` line that tells the agent to write every wp/acorn/composer/node/test command exactly as on the runner line (with an example from the detected runner) and to label CI/deploy commands separately; it replaces the weaker "never run … outside the runner" clause.
+* **hooks:** the prompt router lets a `_triage` skill (roots-debugging) win a multi-match, so "Livewire errors since the deploy" opens debugging first; roots-debugging gets deploy-staleness keywords and triggers.
+* **skills:** fixes from the eval run: runner-filled commands and labelled deploy commands in the Procedure of the building skills; acf-native detects ACF first and solves the no-ACF case with `register_post_meta` and `rest_pre_insert_{post_type}`; roots-debugging is read-only on shared environments and reports in the Evidence / Root cause / Fix / Prevention shape; tailwind-vite-assets gives the two-key plugin manifest and a `Vite::asset()` check; wp-performance and wp-phpstan resolve `third-party/` paths from the plugin root; the auditor, Livewire and architect agents get stricter report formats.
+* **skills:** descriptions rewritten from a Jev routing review (`dev/jev-review/`): about 30% shorter (always-on cost ~7,280 to ~5,810 tokens), every one valid plain YAML (the old `acorn-livewire` description was cut at ` #[Locked]` by strict parsers), Livewire errors after a deploy routed to roots-debugging, roots-router limited to choosing between skills, and tailwind-vite-assets no longer points to the removed `wp-block-native`. `validate-skills.mjs` rejects `: ` and ` #` in unquoted descriptions. The keyword router has fewer wrong hints (`acf field`, `migration` and `object cache` removed, specific phrases added).
+
+### Documentation
+
+* **readme, docs:** README rewritten for 3.0 (profiles, install, what loads, docs brain, other assistants, development, upgrade notes). The Docsify guide describes only the shipped skills, agents, commands and hooks; the how-to and workflow pages for removed features are deleted, and the superpowers-sage history documents carry a "historical" note.
+
 ## [2.11.1](https://github.com/hekivo/superpowers-sage/compare/superpowers-sage-v2.11.0...superpowers-sage-v2.11.1) (2026-06-08)
 
 

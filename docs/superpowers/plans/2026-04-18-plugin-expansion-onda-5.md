@@ -1,3 +1,5 @@
+> Historical document from superpowers-sage 2.x. It describes features that were removed or replaced in kivo-wise 3.0 and is kept for reference only.
+
 # Plugin Expansion — Onda 5 Implementation Plan (scoped)
 
 > **Status:** Scoped scaffolding. Expand to full TDD when Onda 4 closes. **Strategic pillar** — this wave is the core differentiator of the expansion.

@@ -1,3 +1,5 @@
+> Historical document from superpowers-sage 2.x. It describes features that were removed or replaced in kivo-wise 3.0 and is kept for reference only.
+
 # Spec — sage-design-system + sage-block-architecting
 
 **Data:** 2026-04-17  

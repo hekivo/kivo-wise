@@ -1,3 +1,5 @@
+> Historical document from superpowers-sage 2.x. It describes features that were removed or replaced in kivo-wise 3.0 and is kept for reference only.
+
 # Usage Guide Design
 
 **Goal:** Produce a complete, practical usage guide for `superpowers-sage` as a `docs/guide/` directory, and slim the README down to an introduction + link hub. Covers all features present as of v2.9.0 plus the token-optimization changes made on 2026-05-28.

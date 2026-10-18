@@ -1,289 +1,150 @@
-# Superpowers Sage
+# kivo-wise
 
-Agent plugin for modern WordPress development with the **Roots ecosystem** — works with **Claude Code**, **VS Code (GitHub Copilot)**, **Cursor**, **OpenAI Codex**, and any AI assistant that supports the agent plugin format. Workflow skills, design tool integration, visual verification, content modeling, and zero-token automation hooks for **Sage**, **Acorn**, and **Lando** projects.
+A plugin for AI assistants working on WordPress sites built on the [Roots](https://roots.io) stack. It works out which kind of project it is in, gives the assistant a short factual summary at session start, and routes each request to one skill written for that profile. Project commands run through the project's runner (Lando); official documentation is read from a versioned corpus.
 
-**[Full documentation →](https://hekivo.github.io/superpowers-sage/)**
+kivo-wise 3.0 is the successor of `superpowers-sage` (see [Upgrading](#upgrading-from-superpowers-sage-2x)).
 
-## Prerequisites
+## Profiles
 
-| Requirement | Version |
+The plugin detects the project layout and every Acorn app in it, then picks the active profile:
+
+| Profile | What it is |
 |---|---|
-| [Lando](https://lando.dev) | 3.x |
-| [Sage](https://roots.io/sage/) + [Acorn](https://roots.io/acorn/) | 11+ / 4+ |
-| PHP | 8.2+ |
-| Node.js | 20+ |
+| `sage-theme` | A Sage theme with Acorn (blocks, Blade, composers inside the theme) |
+| `acorn-mu-plugin` | Acorn running inside a must-use plugin, with themes as consumers |
+| `radicle-app` | A Radicle project: Acorn at the site root, Bedrock layout |
 
-## Installation
+Detection is done by `scripts/detect-roots-project.mjs`. It also finds the layout (`radicle`, `bedrock`, `composer-wordpress`, `plain-wordpress`), stack versions and the runner (Lando, DDEV or none). To pin the answer, write a `.roots-stack.json` flag at the project root with `/roots-detect --write`; the flag wins over the heuristics.
 
-> **One repository, four loaders.** The same plugin installs identically regardless of your AI assistant. Pick the section for your tool below.
+## Install
 
----
+Requirements: Node.js 20+, and Lando 3.x for projects that use it.
 
-### Claude Code
-
-```bash
-claude plugin marketplace add codigodoleo/superpowers-sage
-claude plugin install superpowers-sage@superpowers-sage-marketplace
-```
-
-Alternatively, install directly from the repository URL:
+Claude Code:
 
 ```bash
-claude plugin install --source https://github.com/codigodoleo/superpowers-sage
+claude plugin marketplace add hekivo/kivo-wise
+claude plugin install kivo-wise@kivo-wise
 ```
 
-Verify the installation:
+From a local clone, for one session:
 
 ```bash
-claude plugin list
+claude --plugin-dir /path/to/kivo-wise
 ```
 
----
+Other assistants are covered in [Cursor, Codex and Copilot](#cursor-codex-and-copilot).
 
-### VS Code (GitHub Copilot Chat)
+## What loads
 
-1. Enable the preview feature in your settings:
+**Session context.** At session start a hook runs the detector and adds up to 1,500 characters: the profile and app path, namespace, stack versions (Acorn, Livewire, ACF Composer, Poet, WordPress), the runner commands, the reading order (project guidelines first, then native WordPress/ACF/Acorn behaviour, then custom code) and the skill routing table. Outside a Roots project it adds nothing.
 
-   ```json
-   // settings.json
-   "chat.plugins.enabled": true
-   ```
+**Hooks** (Node scripts, no model tokens):
 
-2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and run:
+| Event | Hook | Effect |
+|---|---|---|
+| SessionStart | `session-start.mjs` | Injects the detected context |
+| UserPromptSubmit | `user-prompt-router.mjs` | Hints one skill when exactly one matches the prompt |
+| PreToolUse (Write, Edit) | `protect-files.mjs` | Denies edits to `.env*`, `wp-config.php`, core, `vendor/`, uploads and build output; Radicle scaffolding is protected too |
+| PreToolUse (Bash) | `pre-commit-attribution.mjs` | Reminds a "no AI attribution" rule from `AGENTS.md`/`CLAUDE.md` before `git commit` |
+| PostToolUse (Write, Edit) | `post-edit-reminder.mjs` | Reminds the cache command after PHP or Blade changes |
 
-   ```
-   Chat: Install Plugin From Source
-   ```
+**Skills** (name and purpose; the full descriptions are in each `SKILL.md`):
 
-3. Enter the repository URL:
-
-   ```
-   https://github.com/codigodoleo/superpowers-sage
-   ```
-
-**Alternative — install via Extensions view:**  
-Search `@agentPlugins` in the Extensions sidebar, or add the repository as a marketplace source in your settings:
-
-```json
-// settings.json
-"chat.plugins.marketplaces": [
-  "codigodoleo/superpowers-sage"
-]
-```
-
-Then search for and install `superpowers-sage` from the Extensions view.
-
----
-
-### Cursor
-
-> **Note:** We consistently see significantly better results with **Claude CLI + Sonnet**. This plugin was designed around Claude Code's execution model — worktrees, hooks, subagent dispatch, MCP tool routing — and those features are unavailable in Cursor. You get the skill instructions, but none of the automation. If you have access to the Claude CLI, it's worth using that instead.
-
-Recent Cursor versions removed the "paste repo URL" plugin installation UI. The reliable approach is a one-time clone + symlink:
-
-```bash
-# Clone once to a shared location
-git clone https://github.com/codigodoleo/superpowers-sage ~/.ai-plugins/superpowers-sage
-
-# In each project root, symlink into .cursor/rules/
-ln -s ~/.ai-plugins/superpowers-sage/skills .cursor/rules/superpowers-sage-skills
-ln -s ~/.ai-plugins/superpowers-sage/agents .cursor/rules/superpowers-sage-agents
-```
-
-On **Windows** (Command Prompt as Administrator):
-
-```cmd
-mklink /D .cursor\rules\superpowers-sage-skills %USERPROFILE%\.ai-plugins\superpowers-sage\skills
-mklink /D .cursor\rules\superpowers-sage-agents %USERPROFILE%\.ai-plugins\superpowers-sage\agents
-```
-
-To update: `git -C ~/.ai-plugins/superpowers-sage pull` — all projects pick up changes automatically via the symlinks.
-
-Cursor discovers skills and agents from `.cursor/rules/` automatically. Hooks are loaded from `hooks/cursor-hooks.json`.
-
----
-
-### OpenAI Codex
-
-The plugin ships in the current
-[Codex plugin format](https://developers.openai.com/codex/plugins/build): a
-marketplace manifest at `.agents/plugins/marketplace.json` and the plugin under
-`plugins/superpowers-sage/`.
-
-Install (Codex CLI ≥ 0.137):
-
-```bash
-codex plugin marketplace add codigodoleo/superpowers-sage
-codex plugin add superpowers-sage@superpowers-sage-marketplace
-```
-
-**Activate the house rules (important).** Unlike Claude Code, Codex does **not**
-load a plugin's `CLAUDE.md` — it reads `AGENTS.md` from the project root (and
-`~/.codex/AGENTS.md`). The plugin ships the same universal rules as a generated
-[`AGENTS.md`](AGENTS.md). Bring them into your Sage project once:
-
-```bash
-# from your project root — appends the superpowers-sage universal rules
-curl -fsSL https://raw.githubusercontent.com/codigodoleo/superpowers-sage/main/AGENTS.md >> AGENTS.md
-```
-
-Without this, Codex still loads the skills on demand, but the always-on house
-conventions (ACF Composer field shapes, transient caching, Blade escaping by
-field type, Livewire-on-Bedrock route) won't fire one-shot. In measured runs,
-delivering these rules via `AGENTS.md` lifted Codex's house-convention adherence
-from 62% to 86%.
-
-To run against a local model (e.g. Ollama), point Codex at it via
-`~/.codex/config.toml`:
-
-```toml
-model = "your-model"
-model_provider = "local_ollama"
-
-[model_providers.local_ollama]
-name = "Ollama"
-base_url = "http://localhost:11434/v1/"
-wire_api = "responses"   # Codex ≥ 0.137 dropped "chat"
-```
-
-> **`AGENTS.md`, `plugins/superpowers-sage/`, and
-> `.agents/plugins/marketplace.json` are generated — do not edit them by hand.**
-> The source of truth is `skills/`, `hooks/`, `.codex-plugin/plugin.json`, and
-> `CLAUDE.md` at the repo root (`AGENTS.md` is mirrored from `CLAUDE.md`). After
-> changing those, run `node scripts/build-codex-plugin.mjs` (CI enforces sync via
-> `--check`). Codex copies the plugin into its cache on install and does **not**
-> follow symlinks, so the directory must hold real files.
-
----
-
-### Local / Generic (any compatible assistant)
-
-Clone the repository and register the plugin directory:
-
-```bash
-git clone https://github.com/codigodoleo/superpowers-sage ~/.ai-plugins/superpowers-sage
-```
-
-Then point your AI assistant to the cloned directory. For tools that support `chat.pluginLocations` (VS Code) or `--plugin-dir` (Claude Code):
-
-```json
-// VS Code settings.json
-"chat.pluginLocations": {
-  "/Users/you/.ai-plugins/superpowers-sage": true
-}
-```
-
-```bash
-# Claude Code — session-scoped
-claude --plugin-dir ~/.ai-plugins/superpowers-sage
-```
-
----
-
-### Design Tools (optional)
-
-These MCP integrations unlock the `/designing` and `/verifying` skills. Configure once per machine independent of which AI assistant you use:
-
-`/designing` routes by the URL or path the user provides — `paper.design/*` → Paper MCP, `figma.com/*` → Figma, Stitch host → Stitch, or a local `.pen` path / `design/` folder → Pencil. Paper is the preferred cloud source when available.
-
-```bash
-# Paper.design (preferred) — screenshots + computed styles + JSX per section
-# See https://paper.design for MCP install instructions
-
-# Stitch (Google) — extract screens and sections from designs
-claude mcp add stitch -- npx -y @anthropic/stitch-mcp
-
-# Figma — extract frames and layers from designs
-claude mcp add figma -- npx -y figma-developer-mcp --figma-api-key=YOUR_KEY
-
-# Pencil — local .pen file design tool (no URL — routes by file path or design/ folder)
-claude mcp add pencil -- npx -y @anthropic/pencil-mcp
-
-# Playwright — capture implementation screenshots for visual verification
-claude mcp add playwright -- npx -y @anthropic/playwright-mcp
-```
-
-### Design tool routing
-
-| Tool | Trigger | Token source | Structural reference |
-|---|---|---|---|
-| Paper | URL `paper.design/*` | `get_computed_styles` | `.reference.jsx` |
-| Figma | URL `figma.com/*` | `get_variable_defs` | `get_design_context` |
-| Stitch | Stitch host URL | `get_screen` | `get_screen` |
-| Pencil | Path `*.pen` or `design/` folder | `get_variables()` | `batch_get` JSON |
-
-### Pencil `.pen` file conventions
-
-```
-design/
-  ├── design-system.lib.pen   ← global tokens — always read first
-  ├── components.lib.pen      ← reusable component masters
-  ├── component-map.md        ← generated by pencil-extractor (do not edit)
-  └── [page-name].pen         ← one file per site route
-```
-
-Rules:
-- `*.lib.pen` files are system/library files, never pages
-- `*design-system*.lib.pen` has highest priority for token extraction
-- `component-map.md` is generated — never edited manually
-
-For VS Code, add MCP servers in `.vscode/mcp.json` or user settings under `"mcp"`.
-
----
-
-## Compatibility Matrix
-
-| Feature | Claude Code | VS Code Copilot | Cursor | Codex | Notes |
-|---|---|---|---|---|---|
-| Workflow skills (`/building`, etc.) | ✅ | ✅ | ✅ | ✅ | All loaders read `skills/` |
-| Custom agents | ✅ | ✅ | ✅ | ✅ | All loaders read `agents/` |
-| Hooks (lifecycle automation) | ✅ | ✅ | ✅ | ✅ | Claude/VS Code/Codex use `hooks/hooks.json`; Cursor uses `hooks/cursor-hooks.json` |
-| MCP design tools | ✅ | ✅ | ✅ | ✅ | Configure per tool's MCP settings |
-| Marketplace install | ✅ | ✅ | — | ✅ | Cursor installs direct from repository; Codex via `~/.agents/plugins/marketplace.json` |
-| Namespaced skills | `superpowers-sage:building` | `superpowers-sage:building` | `/building` | `superpowers-sage:building` | Cursor may omit namespace prefix |
-
-## Getting Started
-
-After installing, open your Sage project and run:
-
-```
-/onboarding
-```
-
-This analyzes your project, detects installed packages, design tools, and active plans, then suggests next steps.
-
-> **Plugin-level rules** live in [`CLAUDE.md`](CLAUDE.md) at the plugin
-> root — universal Roots/Bedrock/Lando/Tailwind v4 constraints that
-> apply to every session.
-
-## Documentation
-
-Full usage guide in [`docs/guide/`](docs/guide/):
-
-> **New here? Start with the [How-To](docs/guide/how-to.md)** — a practical,
-> step-by-step walkthrough of the real flow (orient → design → foundation →
-> architect → build → verify → ship) with the prompt you type and the result to
-> expect at each step.
-
-| File | What it covers |
+| Skill | Purpose |
 |---|---|
-| [how-to.md](docs/guide/how-to.md) | **Practical step-by-step: interactions × prompts × expected results** |
-| [INDEX.md](docs/guide/INDEX.md) | Quick decision table + links to all sections |
-| [skills.md](docs/guide/skills.md) | All 19 workflow skills + 17 reference skills + architectural preferences |
-| [agents.md](docs/guide/agents.md) | All 11 agents — purpose, invocation, input, output |
-| [commands.md](docs/guide/commands.md) | 3 slash commands: `/acf-register`, `/livewire-new`, `/sage-status` |
-| [hooks.md](docs/guide/hooks.md) | Session-start behavior, keyword router (32 entries), diagnostics |
-| [token-efficiency.md](docs/guide/token-efficiency.md) | How the plugin saves tokens + model-tier vs cost vs fidelity |
-| [troubleshooting.md](docs/guide/troubleshooting.md) | Environment gotchas (Lando/Docker, ACF, Figma seat, fonts) — symptom → fix |
+| `roots-router` | Pick the skill for a request from profile and intent |
+| `roots-triage` | Run the detector, explain its output, write `.roots-stack.json` |
+| `roots-onboarding` | Read-only map of an unfamiliar project |
+| `roots-debugging` | Triage a broken page, boot error or stale cache |
+| `roots-reviewing` | Convention audit of a diff before the merge request |
+| `lando-wp` | Lando command semantics and common failures |
+| `docs-brain` | Look up official docs in a versioned corpus |
+| `acorn-stack` | Providers, composers, Blade, config and boot per profile |
+| `acorn-scaffolding` | New blocks, post types, field groups, providers, commands |
+| `acf-native` | ACF validation, save flow and admin JS with native hooks |
+| `acorn-livewire` | Livewire 4 components inside Acorn |
+| `acorn-routes-api` | Acorn routes, controllers and REST endpoints |
+| `acorn-background` | Cron, queues, scheduling, Redis, cache and logs |
+| `acorn-data` | Eloquent models, migrations and custom tables |
+| `wp-hooks-lifecycle` | Hook timing and placement |
+| `wp-security-escaping` | Escaping, sanitizing, nonces and capabilities |
+| `tailwind-vite-assets` | Tailwind 4 and Vite per profile |
+| `testing-wp` | PHPUnit, Pest and Playwright |
+| `wp-composer-plugins` | Plugins and themes through Composer |
+| `wp-abilities-mcp` | Abilities API and MCP for AI agents |
+| `wp-performance` | Profiling and object cache |
+| `wp-phpstan` | PHPStan for Acorn projects |
 
-### Practical guides
+`third-party/` holds copies of official WordPress agent skills (`wp-rest-api`, `wp-abilities-api`, `wp-performance`, `wp-phpstan`). The manifest loads them next to `skills/`. They are GPL-2.0-or-later; see `third-party/UPSTREAM.md`.
 
-| File | What it covers |
-|---|---|
-| [workflows/first-session.md](docs/guide/workflows/first-session.md) | What to do in the first session on a new project |
-| [workflows/implement-feature.md](docs/guide/workflows/implement-feature.md) | Full plan-driven feature loop from discovery to PR |
-| [workflows/scaffold-block.md](docs/guide/workflows/scaffold-block.md) | New block scaffold, form integration, block refactoring |
+**Agents** (read-only): `acorn-reviewer`, `livewire-debugger`, `roots-architect`, `tailwind-v4-auditor`.
+
+**Commands**: `/roots-detect [--write] [--path=<dir>]` and `/roots-status`.
+
+The rules that apply to every session (Lando for all commands, protected files, Tailwind 4, Acorn routes and Poet, escaping by field type) are in [`AGENTS.md`](AGENTS.md).
+
+## Docs brain
+
+`packages/docs-brain` is a CLI that builds a grep-friendly markdown corpus of official documentation at the versions the project locks.
+
+```bash
+docs-brain resolve          # lock files -> documentation versions
+docs-brain update           # fetch sources and write the corpus
+docs-brain status --check   # project and upstream drift; exit 1 on drift
+docs-brain search "query"   # search the corpus (rg when available)
+```
+
+The corpus lives in a separate private repository. Each project points to it in `.docs-brain.json`; the plugin ships no corpus. The `docs-brain` skill defines the lookup order and how to search.
+
+## Cursor, Codex and Copilot
+
+These assistants do not load Claude Code plugins, so copy the skills into the project:
+
+```bash
+node /path/to/kivo-wise/scripts/sync-project-skills.mjs --to .agents/skills
+```
+
+This copies every `skills/<name>/` folder and writes `.agents/skills/GENERATED.md` (plugin version, date, skill and file lists). Third-party GPL skills are skipped unless you pass `--include-gpl`. Run the same command with `--check` in CI to fail when the copy is stale; it prints the missing, changed and extra files. The script never deletes a file that `GENERATED.md` does not list.
+
+Codex (CLI 0.137 or newer) can also install the plugin directly:
+
+```bash
+codex plugin marketplace add hekivo/kivo-wise
+codex plugin add kivo-wise@kivo-wise
+```
+
+Codex does not load a plugin's own context file; it reads `AGENTS.md` from the project root. Append the plugin's rules to the project once: `curl -fsSL https://raw.githubusercontent.com/hekivo/kivo-wise/main/AGENTS.md >> AGENTS.md`.
+
+`plugins/kivo-wise/` and `.agents/plugins/marketplace.json` are generated by `node scripts/build-codex-plugin.mjs`; do not edit them. Cursor hooks (`hooks/cursor-hooks.json`) are generated from `hooks/hooks.json` by `scripts/sync-cursor-hooks.mjs`.
+
+## Development
+
+```bash
+node --test test/                       # detector, hooks, sync script
+node scripts/validate-skills.mjs        # skill contract (add -q for a short run)
+node scripts/test-validate-skills.mjs   # tests for the validator
+node scripts/build-codex-plugin.mjs     # regenerate the Codex layout (--check in CI)
+claude plugin validate . --strict       # manifest, skills, hooks, agents
+cd packages/docs-brain && npm test      # docs-brain CLI
+```
+
+A skill must have `name` equal to its folder, a description that starts with "Use when", the six standard sections, and stay under 500 lines. The guide is a [Docsify site](docs/guide/INDEX.md); `docs/provenance.md` records where each skill's content came from.
+
+## Upgrading from superpowers-sage 2.x
+
+The plugin and repository were renamed to `kivo-wise` (`hekivo/kivo-wise`; GitHub redirects the old URL). Uninstall `superpowers-sage`, install `kivo-wise` with the commands above, and replace the `superpowers-sage:` prefix with `kivo-wise:` wherever you referenced a skill or agent.
+
+Removed in 3.0, with no replacement unless noted:
+
+- Bash hooks and `hooks/lib.sh` (rewritten in Node), and `scripts/detect-sage-project.mjs` (a deprecated shim remains; use `detect-roots-project.mjs`).
+- Skills: `sageing` (now `roots-router`), `onboarding`, `architecture-discovery`, `architecting`, `plan-generator`, `building`, `reviewing`, `debugging`, `modeling`, `designing`, `verifying`, `sage-design-system`, `sage-block-architecting`, `block-scaffolding`, `block-refactoring`, `sage-forms`, `migrating`, `ai-setup`, `abilities-authoring`, `install-plugin`. Their consolidated successors are listed above (`roots-*`, `acorn-*`, `wp-*`).
+- Agents: `design-extractor`, `pencil-extractor`, `visual-verifier`, `forms`, `acorn-migration`, `content-modeler`, `sage-architect`, `sage-debugger`, `sage-reviewer` (the last three became `roots-architect`, `livewire-debugger` and `acorn-reviewer`).
+- Commands: `/acf-register`, `/livewire-new`, `/sage-status` (now `/roots-status`).
+- Design-tool integrations (Paper, Figma, Stitch, Pencil).
+
+See the [changelog](CHANGELOG.md) for the full list.
 
 ## License
 
-MIT
+MIT. The folders in `third-party/` are copies of official WordPress skills under GPL-2.0-or-later; see `third-party/LICENSE`.

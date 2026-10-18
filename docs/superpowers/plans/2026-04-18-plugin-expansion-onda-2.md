@@ -1,3 +1,5 @@
+> Historical document from superpowers-sage 2.x. It describes features that were removed or replaced in kivo-wise 3.0 and is kept for reference only.
+
 # Plugin Expansion — Onda 2 Implementation Plan (scoped)
 
 > **Status:** Scoped scaffolding. Full TDD breakdown is generated when Onda 1 closes (see completion criteria in `2026-04-18-plugin-expansion-onda-1.md`).

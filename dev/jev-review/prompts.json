@@ -1,0 +1,99 @@
+{
+  "_note": "Gold labels for the routing review. 3 requests per skill plus 'none' requests. `profile` is optional context sent as state.",
+  "prompts": [
+    {"id": "acf-1", "expected": "acf-native", "profile": "acorn-mu-plugin", "text": "Editors must not be able to publish a case study without a client logo. Drafts should still save. Where do I hook this so the error shows on the field?"},
+    {"id": "acf-2", "expected": "acf-native", "profile": "radicle-app", "text": "I need the 'region' select field choices to come from a taxonomy instead of being hardcoded in the field group. This is a Radicle project, not sure ACF is even installed."},
+    {"id": "acf-3", "expected": "acf-native", "profile": "sage-theme", "text": "Quero esconder o campo 'cta_url' quando o toggle 'show_cta' estiver desligado, e rodar uma rotina depois que o post salvar os campos. Qual o jeito certo com ACF?"},
+
+    {"id": "bg-1", "expected": "acorn-background", "profile": "acorn-mu-plugin", "text": "Sending the HubSpot sync inside the request makes the form take 6 seconds. I want to push it to a queue job and retry on failure. Do we use Action Scheduler or Laravel queues here?"},
+    {"id": "bg-2", "expected": "acorn-background", "profile": "sage-theme", "text": "Create a wp acorn command that reimports the price list every night at 3am. How do I schedule it so it actually runs on the server?"},
+    {"id": "bg-3", "expected": "acorn-background", "profile": "radicle-app", "text": "Logs from Log::info() end up nowhere in the container. I want them on stderr in production and in storage/logs locally."},
+
+    {"id": "data-1", "expected": "acorn-data", "profile": "radicle-app", "text": "I need a custom table for webinar registrations with an Eloquent model and a migration that runs on deploy."},
+    {"id": "data-2", "expected": "acorn-data", "profile": "acorn-mu-plugin", "text": "My Eloquent model over the posts table throws \"Table 'wp_wp_posts' doesn't exist\". What's wrong with the prefix?"},
+    {"id": "data-3", "expected": "acorn-data", "profile": "sage-theme", "text": "Should event attendees be post meta, a custom post type or their own table? We expect ~200k rows and need to filter by date and status."},
+
+    {"id": "lw-1", "expected": "acorn-livewire", "profile": "sage-theme", "text": "Build a Livewire search box that filters the resources archive as the user types, with a debounce."},
+    {"id": "lw-2", "expected": "acorn-livewire", "profile": "radicle-app", "text": "How do I add livewire/livewire to this Radicle project and render my first component in a Blade view?"},
+    {"id": "lw-3", "expected": "acorn-livewire", "profile": "acorn-mu-plugin", "text": "My multi-step signup wizard component loses the step property on submit and the user id can be tampered with from the browser. How should the properties be declared?"},
+
+    {"id": "routes-1", "expected": "acorn-routes-api", "profile": "acorn-mu-plugin", "text": "I need a webhook endpoint that HubSpot can POST to, authenticated with an API key header and rate limited."},
+    {"id": "routes-2", "expected": "acorn-routes-api", "profile": "radicle-app", "text": "I added Route::get('/api/templates') in routes/api.php but it returns a WordPress 404. route:list shows nothing."},
+    {"id": "routes-3", "expected": "acorn-routes-api", "profile": "sage-theme", "text": "Devo usar register_rest_route ou uma rota do Acorn para expor um JSON de cases pro front em React?"},
+
+    {"id": "scaf-1", "expected": "acorn-scaffolding", "profile": "sage-theme", "text": "Create a new 'Testimonials' Gutenberg block with ACF Composer: quote, author, photo, and two style variants."},
+    {"id": "scaf-2", "expected": "acorn-scaffolding", "profile": "acorn-mu-plugin", "text": "Add a 'webinar' custom post type with an 'event_type' taxonomy in the mu-plugin. We use Poet."},
+    {"id": "scaf-3", "expected": "acorn-scaffolding", "profile": "radicle-app", "text": "Generate a View Composer and a Blade component for the site footer menu."},
+
+    {"id": "stack-1", "expected": "acorn-stack", "profile": "acorn-mu-plugin", "text": "My new service provider is never booted. Where are providers registered in this mu-plugin: config/app.php, composer extra.acorn.providers or withProviders()?"},
+    {"id": "stack-2", "expected": "acorn-stack", "profile": "sage-theme", "text": "Should this binding go in register() or boot() of the provider? It depends on the config repository."},
+    {"id": "stack-3", "expected": "acorn-stack", "profile": "acorn-mu-plugin", "text": "Running lando wp acorn says \"'acorn' is not a registered wp command\". ACORN_BASEPATH points to the mu-plugin. What's off with Application::configure()?"},
+
+    {"id": "docs-1", "expected": "docs-brain", "profile": "sage-theme", "text": "What does the official ACF 6.8 documentation say about acf/validate_value for repeater sub-fields? Check the docs for our version."},
+    {"id": "docs-2", "expected": "docs-brain", "profile": null, "text": "Our .docs-brain.json lock says livewire 4.1. Search the corpus INDEX for how wire:navigate handles scripts."},
+    {"id": "docs-3", "expected": "docs-brain", "profile": "radicle-app", "text": "Antes de escrever código, confere no manual do Acorn 5 se withRouting aceita apiPrefix. Quero a fonte oficial, não de memória."},
+
+    {"id": "lando-1", "expected": "lando-wp", "profile": "sage-theme", "text": "I changed the php version in .lando.yml. Do I need lando restart or lando rebuild?"},
+    {"id": "lando-2", "expected": "lando-wp", "profile": null, "text": "mysite.lndo.site doesn't resolve on WSL2 and Chrome says the certificate is untrusted."},
+    {"id": "lando-3", "expected": "lando-wp", "profile": "acorn-mu-plugin", "text": "Import this production dump into my local Lando database and turn on Xdebug so I can step through the save flow."},
+
+    {"id": "dbg-1", "expected": "roots-debugging", "profile": "acorn-mu-plugin", "text": "Since yesterday's deploy, Livewire forms on staging throw 419 and a RangeError in the console. Locally everything works."},
+    {"id": "dbg-2", "expected": "roots-debugging", "profile": "sage-theme", "text": "I edited a Blade partial and pushed it but production still shows the old markup. Is it OPcache, compiled views or Cloudflare?"},
+    {"id": "dbg-3", "expected": "roots-debugging", "profile": "radicle-app", "text": "The homepage is a white screen with a 500, nothing obvious in the code I changed. Where are the logs on this setup?"},
+
+    {"id": "onb-1", "expected": "roots-onboarding", "profile": "acorn-mu-plugin", "text": "I just joined this project. Give me a map of what exists: providers, blocks, post types, routes and Livewire components."},
+    {"id": "onb-2", "expected": "roots-onboarding", "profile": "sage-theme", "text": "Me orienta nesse repositório: o que esse projeto faz e como está montado? Nunca mexi nele."},
+    {"id": "onb-3", "expected": "roots-onboarding", "profile": "radicle-app", "text": "Before we scope the new pricing calculator, I want an inventory of the architecture so we know where it would fit."},
+
+    {"id": "rev-1", "expected": "roots-reviewing", "profile": "sage-theme", "text": "Review my diff before I open the MR: new block, a provider and a couple of hooks."},
+    {"id": "rev-2", "expected": "roots-reviewing", "profile": "acorn-mu-plugin", "text": "Run a convention audit on app/Blocks and app/Providers and give me a report with file:line findings."},
+    {"id": "rev-3", "expected": "roots-reviewing", "profile": "radicle-app", "text": "Can you do a pre-merge check of this branch? I want to know if anything breaks our conventions."},
+
+    {"id": "router-1", "expected": "roots-router", "profile": "sage-theme", "text": "Which kivo-wise skill should I open for this task? I'm not sure if it's a scaffolding thing or a stack thing."},
+    {"id": "router-2", "expected": "roots-router", "profile": "acorn-mu-plugin", "text": "Two of the skills seem to apply to what I want to do. Where do I start, and in what order?"},
+    {"id": "router-3", "expected": "roots-router", "profile": "radicle-app", "text": "Qual skill é o ponto de entrada para trabalhar nesse projeto Radicle? Quero saber o mapa de perfil x intenção."},
+
+    {"id": "triage-1", "expected": "roots-triage", "profile": null, "text": "What kind of project is this directory: a Sage theme, an Acorn mu-plugin or Radicle? There's no .roots-stack.json."},
+    {"id": "triage-2", "expected": "roots-triage", "profile": null, "text": "The session start says sage-theme but this repo clearly has the app in wp-content/mu-plugins. Re-detect and write .roots-stack.json."},
+    {"id": "triage-3", "expected": "roots-triage", "profile": "acorn-mu-plugin", "text": "The detector warns about a misplaced env_file and ACORN_BASEPATH drift. What do those warnings mean?"},
+
+    {"id": "tw-1", "expected": "tailwind-vite-assets", "profile": "acorn-mu-plugin", "text": "The mu-plugin enqueues Vite::asset('resources/css/app.css') but the URL points to the theme folder and returns 404 in production."},
+    {"id": "tw-2", "expected": "tailwind-vite-assets", "profile": "sage-theme", "text": "Add brand colors and a font scale as Tailwind 4 design tokens and make them available in the block editor styles."},
+    {"id": "tw-3", "expected": "tailwind-vite-assets", "profile": "radicle-app", "text": "HMR doesn't work through Lando, the browser tries to load from localhost:5173 and public/hot points to the wrong host."},
+
+    {"id": "test-1", "expected": "testing-wp", "profile": "acorn-mu-plugin", "text": "Write Pest tests for the PriceCalculator service. They fail with \"Call to undefined function get_option()\"."},
+    {"id": "test-2", "expected": "testing-wp", "profile": "sage-theme", "text": "Add a Playwright spec that checks the demo form submits and shows the thank-you message."},
+    {"id": "test-3", "expected": "testing-wp", "profile": "radicle-app", "text": "Roda os testes e me diz se essa feature está pronta. Qual comando no Lando?"},
+
+    {"id": "ab-1", "expected": "wp-abilities-mcp", "profile": "radicle-app", "text": "Expose 'list upcoming webinars' as a WordPress ability so Claude can call it through the MCP adapter."},
+    {"id": "ab-2", "expected": "wp-abilities-mcp", "profile": "acorn-mu-plugin", "text": "My ability is registered with wp_register_ability but it's not showing in discover-abilities."},
+    {"id": "ab-3", "expected": "wp-abilities-mcp", "profile": "sage-theme", "text": "How do I connect an agent to the local site with .mcp.json so it can read ACF fields through abilities?"},
+
+    {"id": "comp-1", "expected": "wp-composer-plugins", "profile": "sage-theme", "text": "Install Yoast SEO through Composer. Is it wpackagist or wp-packages.org now?"},
+    {"id": "comp-2", "expected": "wp-composer-plugins", "profile": "acorn-mu-plugin", "text": "We bought a premium plugin that only ships as a zip. How do we add it to composer.json as a private package?"},
+    {"id": "comp-3", "expected": "wp-composer-plugins", "profile": "radicle-app", "text": "There's a bug in a third-party plugin; I want to patch it via Composer instead of editing vendor files."},
+
+    {"id": "hooks-1", "expected": "wp-hooks-lifecycle", "profile": "acorn-mu-plugin", "text": "My template_redirect callback never runs on the Acorn route pages. Why, and where should it go instead?"},
+    {"id": "hooks-2", "expected": "wp-hooks-lifecycle", "profile": "sage-theme", "text": "save_post runs twice when I update a post in the block editor and my callback sends two emails."},
+    {"id": "hooks-3", "expected": "wp-hooks-lifecycle", "profile": "radicle-app", "text": "Em que ordem carregam mu-plugins, plugins_loaded e after_setup_theme? Meu add_filter no functions.php chega tarde demais."},
+
+    {"id": "perf-1", "expected": "wp-performance", "profile": "sage-theme", "text": "The blog archive takes 4 seconds TTFB. Help me profile it and find the slow queries."},
+    {"id": "perf-2", "expected": "wp-performance", "profile": "acorn-mu-plugin", "text": "wp_options autoload is 3 MB and the Redis object cache hit rate looks low. What should I check?"},
+    {"id": "perf-3", "expected": "wp-performance", "profile": "radicle-app", "text": "Query Monitor shows 300 queries on the resources page, looks like an N+1 in the card loop."},
+
+    {"id": "stan-1", "expected": "wp-phpstan", "profile": "acorn-mu-plugin", "text": "Set up PHPStan for the mu-plugin app/ folder with WordPress stubs and a baseline."},
+    {"id": "stan-2", "expected": "wp-phpstan", "profile": "sage-theme", "text": "PHPStan level 6 complains 'Cannot access property on mixed' on every get_field() call. How do I type these?"},
+    {"id": "stan-3", "expected": "wp-phpstan", "profile": "radicle-app", "text": "Vale a pena colocar Larastan aqui ou só o phpstan-wordpress? Quero subir o nível da análise estática aos poucos."},
+
+    {"id": "sec-1", "expected": "wp-security-escaping", "profile": "sage-theme", "text": "Is {!! $content !!} safe for a WYSIWYG ACF field in Blade? And the link URL shows &#038; instead of &."},
+    {"id": "sec-2", "expected": "wp-security-escaping", "profile": "acorn-mu-plugin", "text": "This admin-ajax handler updates user meta. Add the nonce and capability checks it's missing."},
+    {"id": "sec-3", "expected": "wp-security-escaping", "profile": "radicle-app", "text": "Our search uses whereRaw with the query string. Is that SQL injectable and how should it be prepared?"},
+
+    {"id": "none-1", "expected": "none", "profile": null, "text": "How do I sort a multidimensional array by two keys in PHP 8.3?"},
+    {"id": "none-2", "expected": "none", "profile": null, "text": "Write a bash one-liner that renames all .jpeg files in a folder to .jpg."},
+    {"id": "none-3", "expected": "none", "profile": null, "text": "Explain the difference between git rebase and git merge for a feature branch."},
+    {"id": "none-4", "expected": "none", "profile": null, "text": "Our Kubernetes ingress returns 502 for the Node API service after scaling to three replicas."},
+    {"id": "none-5", "expected": "none", "profile": null, "text": "Me ajuda a escrever um e-mail pro cliente explicando o atraso da entrega."},
+    {"id": "none-6", "expected": "none", "profile": null, "text": "In a plain Symfony 7 app, how do I write a Doctrine migration that adds a nullable column?"}
+  ]
+}

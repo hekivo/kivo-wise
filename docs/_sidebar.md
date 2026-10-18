@@ -6,8 +6,5 @@
   * [Commands](guide/commands.md)
   * [Hooks](guide/hooks.md)
   * [Token Efficiency](guide/token-efficiency.md)
-
-* **Practical Guides**
-  * [First Session](guide/workflows/first-session.md)
-  * [Implement a Feature](guide/workflows/implement-feature.md)
-  * [Block Workflows](guide/workflows/scaffold-block.md)
+  * [Troubleshooting](guide/troubleshooting.md)
+  * [Provenance](provenance.md)
