@@ -1,192 +1,76 @@
-Deep reference for Livewire file uploads in Sage/Acorn/WordPress with Lando. Loaded on demand from `skills/acorn-livewire/SKILL.md`.
+# File uploads with Livewire 4 under Acorn
 
-# File Uploads with Livewire
+Deep reference for `WithFileUploads`, temporary storage and moving files into the WordPress media library. Loaded on demand from SKILL.md.
 
-## WithFileUploads Trait
+The upload routes exist as soon as Livewire is installed: `POST /livewire-<hash>/upload-file` and `GET /livewire-<hash>/preview-file/{filename}` (check with `{{runner.acorn}} route:list --path=livewire`). Settle the decisions below with the user before the first upload component.
 
-Add `use WithFileUploads` to any component that needs to handle file uploads:
+## Decide first
+
+1. **Temporary disk.** `config/livewire.php` → `temporary_file_upload.disk` defaults to `null`, which means the default filesystem disk. Under Acorn without a project `config/filesystems.php` that is Acorn's default `local` disk under the app's `storage/app`. Check with `{{runner.wp}} eval 'echo config("filesystems.default");'`.
+2. **More than one web instance?** The upload request and the save request can land on different instances, so a local temporary file is not safe. Use a shared disk (S3-compatible) for temporary uploads, or keep uploads out of Livewire.
+3. **Final destination.** For the media library, sideload into WordPress (below). If an offload plugin is active, attachments go through it; never write into the uploads folder directly.
+4. **Edge rules.** Upload endpoints may sit behind a WAF or rate limits. Ask whoever owns them before adding a large or high-volume flow.
+
+## Pattern
 
 ```php
-<?php
-
-namespace App\Livewire;
+namespace App\Livewire;   // your class_namespace
 
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-class AvatarUpload extends Component
+class LogoUpload extends Component
 {
     use WithFileUploads;
 
-    #[Validate('image|max:2048')] // 2 MB max
-    public $photo;
+    #[Validate('image|max:2048')]   // kilobytes
+    public $logo;
 
-    public ?string $uploadedUrl = null;
+    public ?int $attachmentId = null;
 
     public function save(): void
     {
+        abort_unless(current_user_can('upload_files'), 403);
+
         $this->validate();
 
-        // Option A: Store using Laravel filesystem (maps to WordPress uploads)
-        $path = $this->photo->store('avatars', 'public');
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/media.php';
+        require_once ABSPATH . 'wp-admin/includes/image.php';
 
-        // Option B: Sideload into WordPress media library
-        $attachmentId = media_handle_sideload([
-            'name'     => $this->photo->getClientOriginalName(),
-            'tmp_name' => $this->photo->getRealPath(),
+        $id = media_handle_sideload([
+            'name' => $this->logo->getClientOriginalName(),
+            'tmp_name' => $this->logo->getRealPath(),
         ], 0);
 
-        if (! is_wp_error($attachmentId)) {
-            $this->uploadedUrl = wp_get_attachment_url($attachmentId);
-            update_user_meta(get_current_user_id(), 'custom_avatar', $attachmentId);
+        if (! is_wp_error($id)) {
+            $this->attachmentId = $id;
         }
 
-        $this->reset('photo');
+        $this->reset('logo');   // never keep the temporary file in state
     }
 
-    public function render(): \Illuminate\View\View
+    public function render()
     {
-        return view('livewire.avatar-upload');
+        return view('livewire.logo-upload');
     }
 }
 ```
-
-## Blade Upload View
 
 ```blade
 <div>
-    <form wire:submit="save">
-        <input type="file" wire:model="photo" />
-
-        @error('photo')
-            <p class="text-red-600 text-sm">{{ $message }}</p>
-        @enderror
-
-        {{-- Preview before upload --}}
-        @if ($photo)
-            <img
-                src="{{ $photo->temporaryUrl() }}"
-                alt="Preview"
-                class="mt-2 h-24 w-24 rounded-full object-cover"
-            />
-        @endif
-
-        <button type="submit" wire:loading.attr="disabled" wire:target="photo">
-            Upload
-        </button>
-    </form>
+  <input type="file" wire:model="logo" accept="image/*">
+  @error('logo') <p>{{ $message }}</p> @enderror
+  <button type="button" wire:click="save" wire:loading.attr="disabled" wire:target="logo,save">Upload</button>
 </div>
 ```
 
-## Lando Storage Paths
+- `wire:model` on a file input uploads immediately to the temporary endpoint; the other v4 modifier rules do not apply to file inputs.
+- `media_handle_sideload()` needs the three `wp-admin/includes` files outside wp-admin. Update requests are front-end requests.
+- Check permissions explicitly. Update requests run as the WordPress user from the auth cookie, and anonymous visitors can call any public action.
+- Vendor defaults for temporary uploads: rules `required|file|max:12288` (12 MB), middleware `throttle:60,1`, directory `livewire-tmp`, `max_upload_time` 5 minutes, cleanup of files older than 24 hours.
 
-Livewire stores temporary uploads before the component saves them. In Lando, the filesystem driver needs to point to the correct path.
+## Verify
 
-In `.env`:
-
-```env
-FILESYSTEM_DISK=public
-```
-
-In `config/filesystems.php`:
-
-```php
-'disks' => [
-    'public' => [
-        'driver'     => 'local',
-        'root'       => get_template_directory() . '/public/storage',
-        'url'        => get_template_directory_uri() . '/public/storage',
-        'visibility' => 'public',
-    ],
-],
-```
-
-Create the storage symlink (inside Lando):
-
-```bash
-lando acorn storage:link
-```
-
-**Temporary file cleanup:** Livewire automatically cleans up temporary files older than 24 hours via a scheduled job. If using the database queue driver, ensure the queue worker is running.
-
-## Multiple File Uploads
-
-```php
-use Livewire\Attributes\Validate;
-
-class GalleryUpload extends Component
-{
-    use WithFileUploads;
-
-    /** @var \Livewire\Features\SupportFileUploads\TemporaryUploadedFile[] */
-    #[Validate(['photos.*' => 'image|max:2048'])]
-    public array $photos = [];
-
-    public function save(): void
-    {
-        $this->validate();
-
-        foreach ($this->photos as $photo) {
-            media_handle_sideload([
-                'name'     => $photo->getClientOriginalName(),
-                'tmp_name' => $photo->getRealPath(),
-            ], 0);
-        }
-
-        $this->reset('photos');
-    }
-}
-```
-
-Blade:
-
-```blade
-<input type="file" wire:model="photos" multiple />
-```
-
-## S3 Driver
-
-To store uploaded files on S3 instead of the local filesystem:
-
-```env
-FILESYSTEM_DISK=s3
-AWS_ACCESS_KEY_ID=...
-AWS_SECRET_ACCESS_KEY=...
-AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=my-bucket
-AWS_URL=https://my-bucket.s3.amazonaws.com
-```
-
-In `config/filesystems.php`, ensure the `s3` disk is configured. Livewire will automatically use it for temporary file storage when `FILESYSTEM_DISK=s3`.
-
-**Lando + S3:** Use a local MinIO service in `.lando.yml` to simulate S3 during development:
-
-```yaml
-services:
-  minio:
-    type: minio
-    portforward: 9000
-    access_key: minioadmin
-    secret_key: minioadmin
-```
-
-Set `AWS_ENDPOINT=http://minio:9000` in `.env` for the Lando MinIO service.
-
-## Validation Reference
-
-| Rule | Effect |
-|---|---|
-| `image` | Must be a valid image file (jpg, png, gif, bmp, svg, webp) |
-| `max:2048` | Max 2 MB (in kilobytes) |
-| `mimes:pdf,docx` | Restrict to specific MIME types |
-| `dimensions:min_width=100,min_height=100` | Minimum pixel dimensions |
-
-## Common Mistakes
-
-| Mistake | Fix |
-|---|---|
-| Storing file objects in public properties between requests | Always `$this->reset('photo')` after saving; files are not serializable |
-| Using `wp_handle_upload()` instead of `media_handle_sideload()` for Livewire files | Use `media_handle_sideload()` — Livewire files are already in a temp path |
-| Forgetting `storage:link` | Run `lando acorn storage:link` after first deploy |
-| No loading state on the upload button | Add `wire:loading.attr="disabled" wire:target="photo"` to prevent double-submit |
+A unit test for the save logic with a faked uploaded file through `{{runner.test}}`, then a manual upload with the Network tab open, on every language or site variant the page has.

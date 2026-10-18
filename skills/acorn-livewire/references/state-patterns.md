@@ -1,232 +1,100 @@
-Deep reference for Livewire state management patterns. Loaded on demand from `skills/acorn-livewire/SKILL.md`.
+# State patterns in Livewire 4
 
-# State Patterns — wire:model, Computed Properties, Lifecycle Hooks
+Deep reference for `wire:model`, attributes, lifecycle hooks, events and loading states. Loaded on demand from SKILL.md.
 
-## wire:model Variants
+Facts were checked against Livewire 4.3.5 (`vendor/livewire/livewire/dist/livewire.js`, `src/Features/*`). After a Livewire upgrade, check them again in the app's own `vendor/`.
 
-| Directive | Behavior | When to use |
+## `wire:model`: v4 modifier layering (breaking change from v3)
+
+In v4, modifiers **before** `.live` control when the client-side value syncs. Modifiers **after** `.live` control when the network request fires. Without `.live` (or the legacy `.lazy`), nothing is sent until another action commits.
+
+| Directive | Client value syncs | Request sent |
 |---|---|---|
-| `wire:model="name"` | Syncs on form submission (deferred) | Default for form fields |
-| `wire:model.live="name"` | Syncs on every input event | Real-time search, instant feedback |
-| `wire:model.blur="name"` | Syncs when input loses focus | Field-level validation |
-| `wire:model.live.debounce.300ms="name"` | Syncs after 300ms of inactivity | Search inputs (avoids per-keystroke requests) |
+| `wire:model="x"` | on every input | no (travels with the next action) |
+| `wire:model.blur="x"` | on blur | **no** |
+| `wire:model.change="x"` | on change | no |
+| `wire:model.enter="x"` | on Enter | no |
+| `wire:model.live="x"` | on every input | yes; debounced 150 ms for text inputs and textareas, immediate for checkboxes, radios and selects |
+| `wire:model.live.debounce.400ms="x"` | on every input | 400 ms after the last input |
+| `wire:model.live.throttle.500ms="x"` | on every input | at most every 500 ms |
+| `wire:model.live.blur="x"` | on every input | on blur, only if the component is dirty (this is what v3 `.blur` did) |
+| `wire:model.blur.live="x"` | on blur | shortly after blur |
+| `wire:model.lazy="x"` (legacy) | on every input | on change |
 
-**Performance rule:** Default to `wire:model` (deferred). Use `.live` only when the UX genuinely requires real-time server feedback. Each `.live` event triggers an HTTP request.
+Other details from the same directive:
 
-## Real-Time Search Example
+- v4 adds `.self` by default, so `wire:model` on a wrapper ignores input events bubbling from children. Add `.deep` to opt out.
+- `.defer` is a v2 modifier and is ignored: `wire:model.defer` behaves like plain `wire:model`.
+- File inputs are handled separately: `wire:model` on `type="file"` uploads immediately (see `file-uploads.md`).
+- Binding to a property that does not exist logs `Livewire: [wire:model="x"] property does not exist on component`.
 
-```blade
-{{-- resources/views/livewire/post-search.blade.php --}}
-<div>
-    <input
-        type="text"
-        wire:model.live.debounce.300ms="query"
-        placeholder="Search posts..."
-    />
+Default to plain `wire:model`. Every `.live` event is an HTTP request against an uncached endpoint.
 
-    <ul>
-        @forelse ($posts as $post)
-            <li><a href="{{ get_permalink($post) }}">{{ $post->post_title }}</a></li>
-        @empty
-            <li>No posts found.</li>
-        @endforelse
-    </ul>
-</div>
-```
+## Attributes
 
-```php
-class PostSearch extends Component
-{
-    public string $query = '';
-    public string $postType = 'post';
-
-    public function mount(string $postType = 'post'): void
-    {
-        $this->postType = $postType;
-    }
-
-    public function render(): \Illuminate\View\View
-    {
-        $posts = get_posts([
-            'post_type'      => $this->postType,
-            's'              => $this->query,
-            'posts_per_page' => 10,
-        ]);
-
-        return view('livewire.post-search', compact('posts'));
-    }
-}
-```
-
-## Computed Properties
-
-Computed properties are not serialized between requests — they are re-evaluated on each render. Use them for derived data that would bloat the component payload if stored as a public property.
-
-```php
-use Livewire\Attributes\Computed;
-
-class CategoryFilter extends Component
-{
-    public int $categoryId = 0;
-
-    #[Computed]
-    public function posts(): array
-    {
-        return get_posts([
-            'category'       => $this->categoryId,
-            'posts_per_page' => 12,
-        ]);
-    }
-
-    public function render(): \Illuminate\View\View
-    {
-        return view('livewire.category-filter');
-    }
-}
-```
-
-Access in Blade with `$this->posts`:
-
-```blade
-@foreach ($this->posts as $post)
-    <article>{{ $post->post_title }}</article>
-@endforeach
-```
-
-**Rule:** Never store large arrays (e.g. all posts) in public properties. Livewire serializes all public properties on every request. Use `#[Computed]` instead.
-
-## Lifecycle Hooks
-
-| Hook | When it runs |
+| Attribute | Use |
 |---|---|
-| `mount(...$params)` | Once, when component is first rendered. Receives attributes from Blade tag. |
-| `hydrate()` | Every subsequent request, after component is rehydrated from state |
-| `dehydrate()` | Every request, before response is sent back |
-| `updated($property)` | After any property is updated |
-| `updating($property)` | Before a property is updated |
-| `updatedPropertyName()` | After a specific named property changes (camelCase) |
+| `#[Locked]` | Values set at mount that the client must not change. A client update throws (419 in production). |
+| `#[Computed]` | Derived data, not serialized, memoized for the request. Read it in Blade as `$this->name`. |
+| `#[Validate([...])]` | Rules next to the property; `$this->validate()` / `validateOnly()`. Alternatively `rules()` (+ `messages()`). Pick one style per class. |
+| `#[On('event')]` | Listen to events dispatched from PHP or JS. |
+| `#[Url]` | Mirror a property in the query string. On cached pages this multiplies cache keys; decide deliberately. |
+| `#[Renderless]` | Action that does not re-render. |
+| `#[Reactive]`, `#[Modelable]` | Parent to child data flow. |
+| `#[Lazy]`, `#[Defer]` | Render after page load (placeholder first). |
 
-### Per-Property Validation on Blur
+Also present in 4.3.5 `src/Attributes`: `Authorize`, `Async`, `Isolate`, `Js`, `Json`, `Session`, `Title`, `Layout`, `Transition`.
+
+## Lifecycle hooks (`SupportLifecycleHooks`)
+
+First render: `boot` → `mount(...$params)` → `booted` → `rendering` / `rendered` → `dehydrate`.
+
+Each update request: `boot` → `hydrate` (+ `hydrate{Prop}`) → `booted` → for each changed property `updating` / `updating{Prop}` → set → `updated` / `updated{Prop}` → actions → render → `dehydrate`.
+
+Errors: `exception($e, $stopPropagation)`.
+
+- `updating($property, $value)` / `updated($property, $value)` receive the full dotted path. `updated{Prop}($value, $key)` uses the StudlyCase name (`updatedWorkArea`).
+- Trait hooks are suffixed with the trait basename: `mountHasFilters()`, `bootHasFilters()`, `bootedHasFilters()`, and the same for hydrate, dehydrate, updating and updated.
+- `mount()` arguments resolve by name from the embed array. Class-typed arguments are injected from the Acorn container; action methods get the same injection.
+- Use `booted()` for per-request context needed before any action: a multilingual plugin's current language, a switched blog, a feature flag.
+
+## What persists between requests
+
+- **Public properties only.** They form the snapshot, which is in the DOM and is sent on every request. Keep them scalar or arrays of scalars. Store IDs, not `WP_Post` / `WP_Term`, and resolve objects in a `#[Computed]` method or in `render()`.
+- **Private and protected properties reset every request.** Useful for one-shot guards inside one request.
+- **Snapshot shape matters for cached HTML.** Adding, removing or reordering public properties (moving them into a trait reorders them) breaks pages still served with the old snapshot. See `common-errors.md`.
+- **Payload limits** (vendor defaults, `config/livewire.php` → `payload`): `max_size` 1 MB, `max_nesting_depth` 10, `max_calls` 50, `max_components` 200. Send flat data.
+
+## Rendering control
+
+- `$this->skipRender()` sends no HTML morph for this request. Unit tests call hooks outside a Livewire request, so guard it (for example check that the Livewire data store is bound in the container before calling it).
+- `wire:key` on loop items and on subtrees that must be replaced instead of morphed (wizard steps). Pass `key()` as the third argument of `@livewire()` when the same component can be mounted with different inputs.
+
+## Events
 
 ```php
-// Validates only the email field when it loses focus
-public function updatedFormEmail(): void
-{
-    $this->form->validateOnly('email');
-}
+$this->dispatch('lead-submitted', email: $this->email);   // browser and listeners
+
+#[On('scheduler-booked')]
+public function onSchedulerBooked(): void { /* ... */ }
 ```
 
-## Actions
+From JS: `window.Livewire.dispatch('origin-updated', { origin })`. In a component's `@script` block: `$wire.on('step-completed', (e) => …)`. Globally: `Livewire.on(...)`. `emit()` is v2 and does not exist.
+
+## Loading states
+
+Always scope with `wire:target`; without it every request on the page toggles the state.
 
 ```blade
-<button wire:click="addToCart({{ $product->ID }})">Add to Cart</button>
-<button wire:click="$toggle('showFilters')">Toggle Filters</button>
+<button type="button" wire:click="nextStep" wire:loading.attr="disabled" wire:target="nextStep">Next</button>
+<div wire:loading.class="opacity-50" wire:target="search,category">…</div>
 ```
 
-| Directive | Triggers on |
-|---|---|
-| `wire:click="method"` | Click event |
-| `wire:submit="method"` | Form submission |
-| `wire:keydown.enter="method"` | Enter key press |
-| `wire:change="method"` | Input change |
-| `wire:click.prevent="method"` | Click with `preventDefault()` |
+## Tests
 
-## Loading States
+Two patterns work under Acorn:
 
-```blade
-{{-- Show spinner while loading --}}
-<button wire:click="search">
-    Search
-    <span wire:loading wire:target="search">Searching...</span>
-</button>
+- Instantiate the component class directly in a plain PHPUnit test, bind fakes in the container, call methods and hooks (`$c->updated('email')`), assert state. No WordPress boot needed if the class keeps WordPress calls behind injectable services.
+- `Livewire::test(Component::class)` when the project's test bootstrap boots Acorn with Livewire registered.
 
-{{-- Fade content while model updates --}}
-<div wire:loading.class="opacity-50" wire:target="query">
-    <!-- results -->
-</div>
-```
-
-| Modifier | Effect |
-|---|---|
-| `wire:loading` | Show element while loading |
-| `wire:loading.remove` | Hide element while loading |
-| `wire:loading.class="opacity-50"` | Add CSS class while loading |
-| `wire:loading.attr="disabled"` | Add attribute while loading |
-| `wire:target="methodName"` | Scope loading state to a specific action |
-
-Always add `wire:target` — without it, loading states activate on every Livewire request on the page.
-
-## Livewire Form Objects (v3)
-
-Form objects extract validation and state from the component class:
-
-```php
-use Livewire\Attributes\Validate;
-use Livewire\Form;
-
-class ContactFormData extends Form
-{
-    #[Validate('required|string|max:255')]
-    public string $name = '';
-
-    #[Validate('required|email')]
-    public string $email = '';
-
-    #[Validate('required|string|min:10|max:2000')]
-    public string $message = '';
-}
-```
-
-```php
-class ContactForm extends Component
-{
-    public ContactFormData $form;
-    public bool $submitted = false;
-
-    public function submit(): void
-    {
-        $this->form->validate();
-
-        wp_insert_post([
-            'post_type'    => 'contact_submission',
-            'post_title'   => $this->form->name,
-            'post_content' => $this->form->message,
-            'post_status'  => 'private',
-            'meta_input'   => ['contact_email' => $this->form->email],
-        ]);
-
-        $this->form->reset();
-        $this->submitted = true;
-    }
-
-    public function render(): \Illuminate\View\View
-    {
-        return view('livewire.contact-form');
-    }
-}
-```
-
-## Events Between Components
-
-```php
-// Dispatch from PHP
-$this->dispatch('post-updated', postId: $post->ID);
-
-// Dispatch to a specific component
-$this->dispatch('item-added', productId: $id)->to(MiniCart::class);
-```
-
-```php
-use Livewire\Attributes\On;
-
-class CartCounter extends Component
-{
-    public int $count = 0;
-
-    #[On('item-added')]
-    public function incrementCount(int $productId): void
-    {
-        $this->count++;
-    }
-}
-```
+Run either through `{{runner.test}}`.

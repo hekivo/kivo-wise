@@ -1,273 +1,73 @@
 ---
-name: superpowers-sage:wp-performance
-description: >
-  WordPress performance optimization: performance, slow query, N+1 query, Query Monitor,
-  autoload audit, autoload options, object cache, Redis, wp_cache, transient, cache invalidation,
-  Core Web Vitals, LCP, CLS, INP, FID, profiling, Xdebug, microtime, pre_get_posts,
-  database query optimization, TTFB, page load, Vite bundle, lazy loading, critical CSS —
-  benchmark before/after, never optimize blind.
-  Invoke for: slow page load, N+1 query problem, caching strategy, transient API,
-  dequeue unused scripts, performance profiling, Core Web Vitals improvement.
-user-invocable: false
+name: wp-performance
+description: Use when a WordPress page, query or request is slow or needs profiling - TTFB, slow or N+1 queries, Query Monitor, Server-Timing, wp profile and wp doctor, autoloaded options, Redis object cache hit rate, transients, WP_CACHE_KEY_SALT. Adds the runner and Redis notes on top of the official procedure. For Eloquent query design use acorn-data; for PHP type errors use wp-phpstan.
 ---
 
-# WordPress Performance Optimization
+# WordPress performance (wrapper)
 
-## When to Use
+Full procedure: `third-party/wp-performance/SKILL.upstream.md` (official WordPress skill, GPL-2.0-or-later, see `third-party/UPSTREAM.md`). Read it first; this file only adds what is specific to Roots projects run through a container runner. Paths starting with `third-party/` are relative to the kivo-wise plugin root, two levels above this skill's folder (`<skill dir>/../../third-party/...`), not inside the skill folder. In your answer, point the user to that full procedure by its resolved absolute path, and use the same resolution for any other `third-party/` path you name.
 
-- Page load times are slow or degrading
-- Core Web Vitals scores are poor (LCP > 2.5s, INP > 200ms, CLS > 0.1)
-- Database queries are excessive or slow (QM shows > 50 queries or queries > 50ms)
-- Object cache hit rates are low (< 90%)
-- Autoloaded options table is bloated (> 500KB total)
-- N+1 query patterns detected in Eloquent models
-- Hook execution is slow or excessive
-- REST API responses are slow
+## When to use
 
-## Scripts
+- A page, REST route or admin screen is slow, or the query count looks high.
+- You need a backend-only baseline before changing anything: autoloaded options size, object-cache drop-in, `wp doctor`, `wp profile`.
+- The Redis object cache is suspected (stale data, low hit rate, flush behaviour).
+- You are about to add a transient, a cache layer or an index and want evidence first.
 
-```bash
-# Dump Query Monitor data (pass optional URL, defaults to <dirname>.lndo.site)
-bash skills/wp-performance/scripts/query-monitor-dump.sh
-bash skills/wp-performance/scripts/query-monitor-dump.sh https://mysite.lndo.site
+## Inputs required
 
-# Audit autoloaded options (sorted by size, top 20)
-bash skills/wp-performance/scripts/autoload-audit.sh
-```
-
-Scripts: [`scripts/query-monitor-dump.sh`](scripts/query-monitor-dump.sh) · [`scripts/autoload-audit.sh`](scripts/autoload-audit.sh)
-
----
+- Active profile and runner from the session context (`{{runner.wp}}`, `{{runner.acorn}}`, `{{runner.cache}}`). Lando default: `lando wp`, `lando wp acorn`, the project's cache-clear tooling command.
+- The URL to measure and the WordPress path as seen **inside the container** (not the host path).
+- Whether the object cache is enabled in this environment (a project may disable Redis through an environment constant).
 
 ## Procedure
 
-### Step 1 — Install Query Monitor
+Commands: write every command with the runner value from the session context filled in (for example `lando wp acorn optimize:clear`), never a bare `wp`/`composer`/`php`/`npm`, never the placeholder, never "prefix with lando if you use it". Commands that run in CI or a deploy script go in a separate block labelled with where they run.
 
-**Always profile before optimizing. Never optimize blind.**
+1. **Measure before touching code.** Never optimize blind. Record a baseline twice for the same URL: **cold** (right after `{{runner.cache}}` and, locally, `{{runner.wp}} cache flush`) and **warm** (the next request), each with time, query count and cache state, and keep both for the comparison. Point the user to the official procedure file (resolved path of `third-party/wp-performance/SKILL.upstream.md`) for the full checklist.
+2. **Run the deterministic report through the runner.** The official script reads the runner from `WP_RUNNER` (a local patch, listed in `third-party/UPSTREAM.md`):
 
-```bash
-lando wp plugin install query-monitor --activate
-```
+   ```
+   WP_RUNNER="{{runner.wp}}" node third-party/wp-performance/scripts/perf_inspect.mjs --path=<container path> [--url=<url>]
+   ```
 
-If the `db.php` symlink fails (permissions):
+   On Lando `{{runner.wp}}` is `lando wp`, so the value is `WP_RUNNER="lando wp"`. Without it the script calls a bare `wp` on the host and fails.
+3. **Check the object cache** before suggesting any cache code. WordPress loads a `wp-content/object-cache.php` drop-in when present, and `wp_using_ext_object_cache()` reports it; with no drop-in the cache lives only for one request. Confirm with `{{runner.wp}} cache type` and, for a Redis plugin, its status subcommand. Name the native API that a fix would use (`wp_cache_get()`/`wp_cache_set()` with a group, `get_transient()`/`set_transient()`); a persistent drop-in makes those calls survive across requests without new code. If the project sets a key salt or prefix constant, a flush from one environment must not touch another.
+4. **Profile with WP-CLI.** `{{runner.wp}} doctor check --all`, then `{{runner.wp}} profile stage --all` and `profile hook`. Pass `--url` so the right site is loaded (see the profile table for multisite and language-per-domain setups).
+5. **Pick the fix from the official references** (`third-party/wp-performance/references/`: `database.md`, `object-cache.md`, `autoload-options.md`, `http-api.md`, `cron.md`, `server-timing.md`). Native first: use `wp_cache_get/set` with a group, `get_transient`, `WP_Query` arguments (`no_found_rows`, `fields => 'ids'`, `update_post_term_cache`) before a custom cache class.
+6. **Acorn specifics.** `config:cache`, `view:cache` and `optimize` speed up the Laravel side only; they do not change WordPress queries. After a PHP change run `{{runner.cache}}` so a stale compiled view or manifest does not distort the measurement.
+7. **Re-measure** with the same URL and cache state (cold and warm) and report the delta.
 
-```bash
-lando ssh -c "ln -sf /app/wp/wp-content/plugins/query-monitor/wp-content/db.php /app/wp/wp-content/db.php"
-```
+### Profile differences
 
-Key constants (Bedrock `config/application.php`):
-
-```php
-Config::define('QM_DB_EXPENSIVE', 0.05);   // seconds threshold for slow queries
-Config::define('QM_ENABLE_CAPS_PANEL', true);
-```
-
-See [`references/query-monitor.md`](references/query-monitor.md) for all panels,
-QM timers, custom logging, and how to export data as JSON.
-
----
-
-### Step 2 — Identify the Bottleneck
-
-Follow this isolation sequence:
-
-1. **Bootstrap** — plugins_loaded, Acorn boot, autoloaded options
-2. **Main query** — WP_Query execution time, parameter validation
-3. **Template rendering** — Blade, view composers, ACF block `with()` queries
-4. **Frontend** — Vite bundle size, image loading, paint timing
-
-QM toolbar shows: page generation time, peak memory, SQL duration, query count.
-
----
-
-### Step 3 — Fix the Top Issues
-
-#### N+1 Queries (most common)
-
-Enable lazy loading prevention in development:
-
-```php
-// app/Providers/AppServiceProvider.php
-Model::preventLazyLoading(! app()->isProduction());
-```
-
-Fix with eager loading:
-
-```php
-// Bad (N+1)
-$posts = Post::all();
-foreach ($posts as $post) { echo $post->author->name; }
-
-// Good (2 queries total)
-$posts = Post::with('author')->get();
-```
-
-For native WP meta loops:
-
-```php
-update_post_meta_cache($postIds);  // batch-load all meta in one query
-foreach ($postIds as $id) {
-    $price = get_post_meta($id, 'price', true);  // served from cache
-}
-```
-
-See [`references/n-plus-one.md`](references/n-plus-one.md) for IN query batching,
-ACF block patterns, and full detection workflow.
-
-#### Autoloaded Options Bloat
-
-```bash
-bash skills/wp-performance/scripts/autoload-audit.sh
-```
-
-Fix oversized options:
-
-```bash
-lando wp option update <option_name> --autoload=no
-```
-
-Target: total autoloaded size < 500KB.
-
-See [`references/autoload.md`](references/autoload.md) for audit workflow, common plugin culprits, and when to set `autoload=no`.
-
-#### Object Cache / Redis
-
-```bash
-lando redis-cli ping   # → PONG
-```
-
-Monitor hit rates in QM's Object Cache panel. Target: > 90%.
-
-```php
-$posts = wp_cache_get("category-posts-{$id}", 'my-plugin');
-if (false === $posts) {
-    $posts = get_posts(['category' => $id, 'posts_per_page' => 10]);
-    wp_cache_set("category-posts-{$id}", $posts, 'my-plugin', HOUR_IN_SECONDS);
-}
-```
-
-**Every cache write requires a documented invalidation strategy.** Bust on `save_post`,
-`edited_term`, or the relevant update hook.
-
-See [`references/caching.md`](references/caching.md) for transients, `Cache::remember()`,
-full-page caching, and group invalidation.
-
-#### Database Query Optimization
-
-- Add indexes for columns in `WHERE`, `ORDER BY`, `JOIN`
-- Always use `$wpdb->prepare()` for raw queries
-- Avoid `SELECT *` — specify columns
-- Use Eloquent query scopes to encapsulate reusable logic
-- `$wpdb->show_errors()` in development only — never in production
-
-#### Vite Bundle Size
-
-```bash
-lando theme-build -- --analyze   # open bundle analyser
-```
-
-- Dynamic imports: `const m = await import('./heavy-module.js')`
-- Split large vendor libraries via `manualChunks` in `vite.config.js`
-- Target: no single chunk > 200KB gzipped
-
-#### Core Web Vitals
-
-| Metric | Target | Common Sage causes |
-|---|---|---|
-| **LCP** | < 2.5s | Large hero image, render-blocking CSS, slow TTFB |
-| **INP** | < 200ms | Heavy JS bundle, long main-thread tasks, Livewire hydration |
-| **CLS** | < 0.1 | Images without dimensions, dynamically injected content |
-
-Always declare `width` and `height` on images. Preload the LCP image:
-
-```html
-<link rel="preload" as="image" href="{{ $heroImageUrl }}" fetchpriority="high">
-```
-
-See [`references/core-web-vitals.md`](references/core-web-vitals.md) for full LCP/INP/CLS
-remediation, critical CSS with Vite, and third-party script strategies.
-
----
-
-### Step 4 — Deep Profiling (if bottleneck unclear)
-
-Use QM timers for targeted code sections:
-
-```php
-do_action('qm/start', 'my-operation');
-$result = $this->expensiveComputation();
-do_action('qm/stop', 'my-operation');
-```
-
-For call-graph analysis, use Xdebug profiler in Lando:
-
-```yaml
-# .lando.yml
-services:
-  appserver:
-    xdebug: profile
-```
-
-Trigger: append `?XDEBUG_PROFILE=1` to the URL.
-
-See [`references/profiling.md`](references/profiling.md) for Xdebug setup,
-`microtime()` patterns, and WP hook profiling (`pre_get_posts`, `save_post`).
-
----
-
-## Cron: Action Scheduler vs wp-cron
-
-- **wp-cron**: triggered by page visits, unreliable under low traffic
-- **Action Scheduler**: queue-based, retries, logging, concurrent processing
-- Development: `lando wp cron event run --due-now`
-- Production: disable wp-cron (`DISABLE_WP_CRON=true`) and use real system cron
-
----
-
-## Critical Rules
-
-1. **Check Query Monitor before optimizing.** Profile first — never optimize blind.
-2. **Benchmark before and after every change.** Record QM query count, page time,
-   and memory before the fix; verify improvement after.
-3. **`$wpdb->show_errors()` only in development.** Never leave error display enabled
-   in staging or production — it leaks sensitive schema information.
-4. **Every cache write requires an invalidation strategy.** Document the hook and
-   timing for every `wp_cache_set`, `set_transient`, or `Cache::remember()`.
-5. **Do not use `$wpdb->show_errors()` in production.** Use QM logging instead.
-
----
+| Topic | `sage-theme` | `acorn-mu-plugin` | `radicle-app` |
+| --- | --- | --- | --- |
+| Where to look for slow code | theme `app/`, composers on every view | plugin `app/`, providers booted on `after_setup_theme` | root `app/`, providers from `composer.json` `extra.acorn.providers` |
+| `--path` for the runner | the WordPress core dir inside the container | same | the Bedrock-style core dir (often `public/wp`) |
+| Object cache | project-chosen drop-in | project-chosen drop-in; global cache groups matter on multisite | Redis service in the landofile when present |
+| Livewire cost | not present | present: each component adds a request and a hydration | absent by default |
 
 ## Verification
 
-- [ ] QM shows no duplicate queries and no queries > 50ms
-- [ ] Autoloaded options total size < 500KB
-- [ ] No N+1 patterns (`Model::preventLazyLoading()` throws no exceptions)
-- [ ] Redis object cache hit rate > 90%
-- [ ] Core Web Vitals pass: LCP < 2.5s, INP < 200ms, CLS < 0.1
-- [ ] Page load time improved from baseline measurement
-- [ ] Vite bundle sizes reasonable (no single chunk > 200KB gzipped)
-- [ ] QM PHP Errors panel clean — no warnings or deprecations from theme
-- [ ] QM HTTP API Calls panel shows no timeouts or errors
+- `perf_inspect.mjs` prints JSON with `wpCli.available: true` (otherwise the runner value is wrong or the containers are down).
+- The same URL measured twice with the same cache state gives a comparable baseline and a smaller number after the change.
+- `{{runner.wp}} cache type` names the expected backend; a persistent backend survives two consecutive CLI calls.
 
 ## Failure modes
 
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| TTFB > 1s | No object cache or slow queries | Enable Redis; audit autoloaded options |
-| Query count > 50 per page | N+1 or missing eager loading | `->with()`, `update_post_meta_cache()` |
-| LCP > 4s | Large unoptimized hero image | Compress, WebP, preload hint |
-| CLS > 0.25 | Images without explicit dimensions | Add `width`/`height` |
-| Redis connection refused | Redis not running in Lando | Check `.lando.yml`, `lando rebuild` |
-| Object cache not working | Drop-in not installed | Cross-ref acorn-redis skill |
-| Stale cached data | No invalidation on update | Add `wp_cache_delete` to save hooks |
-| QM toolbar not visible | Not logged in as admin | Set QM auth cookie via Settings |
-| QM db.php symlink missing | Permissions issue | Manually symlink (see Step 1) |
-| QM panels empty | `QM_DISABLED` is true | Check `config/application.php` constants |
-| Slow hooks detected | Expensive callbacks on frequent hooks | Queue async; use QM timers to measure |
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `perf_inspect.mjs` reports `wpCli.available: false` or ENOENT | Script ran a bare `wp` on the host | Set `WP_RUNNER="{{runner.wp}}"`; start the containers |
+| `WordPress not detected at the given --path` | Host path passed to a containerised WP-CLI | Use the path as the container sees it |
+| Numbers differ wildly between runs | Cold vs warm object cache, or compiled views rebuilt | Run `{{runner.cache}}` once, then measure warm twice |
+| Data stays stale after a fix | Persistent cache kept the old value, or an edge cache answers | `{{runner.wp}} cache flush`; check response headers for an edge cache age |
+| Speed-up disappears in another environment | Object cache disabled there by a constant or env value | Compare the cache type in both environments before concluding |
+| `wp profile` shows nothing | Package missing in the container | Install the package through the runner, or fall back to Query Monitor headless (official `query-monitor-headless.md`) |
 
-### Escalation
+## Escalation
 
-- Performance issues persist after all fixes → profile with Xdebug or Blackfire
-- Database bottlenecks beyond query optimization → DBA for schema/read replica
-- CWV blocked by third-party scripts → document constraint, escalate to project lead
-- Infrastructure-level issues (server response time, CDN) → hosting/DevOps
+- Cloud or APM-level evidence (traces, edge cache behaviour) is outside this skill: ask for the APM export or the response headers instead of guessing.
+- A slow query that needs a new index or schema change: stop and ask for approval; write the proposal, not the migration.
+- If a project-level guideline contradicts an official reference, follow the project and say so.
+
+<!-- verified: wp/wp-includes/load.php:810 — wp_using_ext_object_cache(); load.php:860 — object-cache.php drop-in is required from WP_CONTENT_DIR; third-party/wp-performance/scripts/perf_inspect.mjs:32-34 — WP_RUNNER split on spaces, default wp; third-party/wp-performance/SKILL.upstream.md:45 — script path and flags; WP-CLI subcommands (cache type, doctor, profile) taken from the official skill references, not run here -->

@@ -1,81 +1,55 @@
-Deep reference for filter-gotchas. Loaded on demand from `skills/wp-hooks-lifecycle/SKILL.md`.
+# Filter gotchas
 
-# WordPress Filter Gotchas
+Deep reference for core content filters and common filter mistakes. Loaded on demand from SKILL.md.
 
-Filters that commonly cause unexpected behavior in Sage/Tailwind v4 themes — `the_content`, `oembed_result`, and Gutenberg block output filters.
+## `the_content` order (WordPress 7.1.3 defaults)
 
-## `wptexturize` Corrupts Tailwind Arbitrary Variants
+From `wp-includes/default-filters.php` and `wp-includes/class-wp-embed.php`:
 
-WordPress applies "smart quote" transformations to block content via `wptexturize` on `the_content`. The filter is aggressive and rewrites sequences like `0"` into `0″` (U+2033 PRIME), treating them as inch/arc-second notation — **inside HTML attributes it has no business touching**.
+| Priority | Callback |
+|---|---|
+| 8 | `apply_block_hooks_to_content_from_post_object`, `WP_Embed::run_shortcode`, `WP_Embed::autoembed` |
+| 9 | `do_blocks` |
+| 10 | `wptexturize`, `wpautop`, `shortcode_unautop`, `prepend_attachment`, `wp_replace_insecure_home_url` |
+| 11 | `capital_P_dangit`, `do_shortcode` |
+| 12 | `wp_filter_content_tags` (lazy loading, `srcset`) |
+| 20 | `convert_smilies` |
 
-**Observed failure:** a Blade view with the Tailwind v4 arbitrary variant `<div class="[&>p:last-child]:mb-0">` rendered as `<div class="[&>p:last-child]:mb-0″>`. The unterminated attribute consumed the rest of the page markup as a giant `class` value, collapsing all siblings into a single malformed element.
+- Below 9 you see raw block markup; at 12 or higher you see final HTML. Inject post-render content at ≥ 12.
+- `the_content` never runs on Acorn routes, REST responses or Livewire updates; those render Blade directly.
+- Block output (including ACF Composer and native blocks rendered with Blade) is produced at `do_blocks` (9), so it still passes through `wptexturize` and `wpautop` at 10.
 
-**Symptoms:**
-- Block rendering DOM collapses — Playwright shows block siblings absorbed as children
-- DevTools shows class attribute containing page HTML up to the next quote
-- Only affects content fields processed through `the_content`
+## `wptexturize` and Tailwind arbitrary values
 
-**Fix: disable `wptexturize` globally in `ThemeServiceProvider::boot()`:**
+`wptexturize` turns straight quotes after digits into primes (`″`, `′`) and skips HTML tags, but a `>` inside an attribute value ends its tag detection early. A class such as `[&>p:last-child]:mb-0` makes it treat the rest of the attribute as text; the closing quote becomes `″`, the attribute never closes and swallows the following markup.
 
-```php
-public function boot(): void
-{
-    parent::boot();
+Order of preference:
 
-    // wptexturize rewrites [&>p:last-child]:mb-0" into mb-0″ (U+2033),
-    // corrupting Tailwind v4 arbitrary variants inside class attributes.
-    add_filter('run_wptexturize', '__return_false');
-}
-```
+1. Avoid `>` inside class attributes of markup that goes through `the_content` (use a named class or a child selector in CSS).
+2. Scope a fix to the affected block or template.
+3. Only then consider `add_filter('run_wptexturize', '__return_false')`, which changes editorial typography site-wide: agree on it first.
 
-**Detect preemptively:** search the theme for arbitrary variants ending in a digit inside an attribute:
+## `wpautop`
 
-```bash
-grep -rE '\[[^]]*[0-9]"' resources/views/
-```
+`wpautop` (10) wraps loose lines in `<p>`, which can produce `<p><div>…</div></p>` around non-block HTML. ACF text fields choose their own behaviour with the `new_lines` setting; that is a field option, not this filter. Do not remove the global filter to fix one field.
 
-Any match is a candidate for `wptexturize` corruption.
+## kses
 
-## `wpautop` Inserts `<p>` Around Block Content
+Content saved by users without `unfiltered_html` passes through `wp_kses_post`, which strips tags and attributes outside `$allowedposttags` (custom elements, `x-*` and `wire:*` attributes, many `data-*` patterns). Extend it narrowly with `wp_kses_allowed_html`, checking `$context`, and only for markup you control.
 
-`wpautop` wraps non-paragraph content in `<p>` tags. For ACF blocks rendered via `the_content`, this produces invalid nesting like `<p><div>...</div></p>` (browsers auto-close the `<p>` before the `<div>`, orphaning the closing `</p>`).
+## `pre_get_posts`
 
-**Fix:** strip `wpautop` from ACF block output:
+Runs for every query: admin lists, REST, feeds, secondary queries. Guard with `! is_admin() && $query->is_main_query()` plus the specific conditional.
 
-```php
-add_filter('the_content', function ($content) {
-    if (has_block('acf/')) {
-        remove_filter('the_content', 'wpautop');
-    }
-    return $content;
-}, 9);
-```
+## URLs with language plugins
 
-## `wp_kses_post` Strips Unexpected Tags
+Language plugins often filter `home_url()` to add a language directory (`/de`). Laravel's `url()` helper builds on Acorn's root URL, which Acorn forces to `home_url()` at boot, so the directory can appear twice (`/de/de/...`). For the site root use `get_option('home')`, or switch language explicitly before building URLs.
 
-WYSIWYG content saved via ACF text areas runs through `wp_kses_post` on save, which strips tags not in `$allowedposttags`. Custom elements like `<block-hero>` will be stripped if an editor pastes them into a text field.
+## Generic mistakes
 
-**Fix:** this is usually desirable for editor-entered content. If you need to allow custom elements, extend `$allowedposttags` via `wp_kses_allowed_html` filter, scoped to the specific context.
-
-## `the_content` Filter Order — Priority Reference
-
-Default priority order on `the_content`:
-
-| Priority | Filter | Effect |
-|---|---|---|
-| 6 | `run_shortcode` | Parses shortcodes |
-| 8 | `autoembed` | Replaces URLs with oEmbed |
-| 9 | `do_blocks` | Renders Gutenberg blocks |
-| 10 | `wpautop` | Wraps in `<p>` |
-| 10 | `shortcode_unautop` | Removes `<p>` wrapping shortcodes |
-| 10 | `prepend_attachment` | Adds attachment markup |
-| 11 | `capital_P_dangit` | Capitalizes "WordPress" |
-| 20 | `convert_smilies` | Replaces text smilies with images |
-
-**Guideline:** Add your filter at priority >= 11 to see post-block output; priority < 9 to see raw block markup.
-
-## Common Filter Anti-Patterns
-
-- **Returning nothing from a filter:** Filters MUST return a value. Forgetting the return statement silently nullifies the data.
-- **Hooks inside hooks:** Adding `add_action('init', ...)` inside another `add_action('init', ...)` callback means the inner hook never fires (init already happened).
-- **Infinite loop:** Filter modifies data that triggers the same filter (e.g., calling `wp_update_post` inside `save_post`). Use `remove_action` before the triggering call, then re-add.
+- **No `return` in a filter**: the value becomes `null` for every later callback.
+- **Adding a callback to the hook that is running, at the same or a lower priority**: it does not run for this request (the running priority's list is copied).
+- **Saving inside a save hook**: `wp_update_post()` inside `save_post` / `wp_insert_post_data` loops. Unhook, update, re-hook; better, modify `$data` in `wp_insert_post_data`.
+- **Heavy work on every request**: `plugins_loaded` and `init` run on front, admin, REST, AJAX, cron and CLI. Check the context first and cache results (see `wp-performance`).
+- **Closures you will need to remove**: use a named method.
+- **Hooking by field name in shared ACF code**: another plugin or theme may target the same name; prefer `key=` variants of ACF filters (see `acf-native`).
