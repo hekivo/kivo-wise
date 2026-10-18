@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap><loc>{{BASE}}/sitemap.xml</loc><lastmod>2026-10-02T10:00:00+00:00</lastmod></sitemap>
+  <sitemap><loc>{{BASE}}/other-sitemap.xml</loc></sitemap>
+</sitemapindex>

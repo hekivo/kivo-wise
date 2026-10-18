@@ -1,0 +1,11 @@
+{
+  "_readme": ["fixture"],
+  "packages": [
+    { "name": "roots/wordpress", "version": "7.1.3" },
+    { "name": "wpengine/advanced-custom-fields-pro", "version": "6.8.10" }
+  ],
+  "packages-dev": [
+    { "name": "phpunit/phpunit", "version": "9.6.35" },
+    { "name": "phpstan/phpstan", "version": "2.2.5" }
+  ]
+}

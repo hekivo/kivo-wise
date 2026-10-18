@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>{{BASE}}/docs/page-a/</loc><lastmod>2026-10-01T10:00:00+00:00</lastmod></url>
+  <url><loc>{{BASE}}/docs/page-b/</loc><lastmod>2026-10-02T10:00:00+00:00</lastmod></url>
+  <url><loc>{{BASE}}/fr/docs/page-a/</loc><lastmod>2026-10-02T10:00:00+00:00</lastmod></url>
+  <url><loc>{{BASE}}/blog/news/</loc><lastmod>2026-10-02T10:00:00+00:00</lastmod></url>
+</urlset>

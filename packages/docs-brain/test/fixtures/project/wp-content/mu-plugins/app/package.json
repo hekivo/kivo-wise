@@ -1,0 +1,9 @@
+{
+  "name": "app",
+  "private": true,
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "tailwindcss": "^4.1.17",
+    "vite": "6.2.0"
+  }
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "id": 101,
+    "slug": "get_field",
+    "link": "{{BASE}}/resources/get_field/",
+    "modified": "2026-10-01T09:00:00",
+    "title": { "rendered": "get_field() &#8211; ACF" },
+    "content": { "rendered": "<h2>Description</h2><p>Returns the value of a specific field.</p><div class=\"pro-cta\">Buy PRO</div><pre><code class=\"language-php\">$value = get_field('text_field');</code></pre>" }
+  },
+  {
+    "id": 102,
+    "slug": "have_rows",
+    "link": "{{BASE}}/resources/have_rows/",
+    "modified": "2026-10-03T09:00:00",
+    "title": { "rendered": "have_rows()" },
+    "content": { "rendered": "<p>Loops over repeater rows.</p>" }
+  }
+]

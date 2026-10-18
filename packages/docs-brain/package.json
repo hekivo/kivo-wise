@@ -1,0 +1,27 @@
+{
+  "name": "@hekivo/docs-brain",
+  "version": "0.1.0",
+  "description": "Versioned documentation corpus builder for kivo-wise: resolves doc versions from a project's lock files, fetches sources (git, REST, sitemap, llms.txt, content negotiation) and writes a grep-friendly markdown corpus.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "docs-brain": "bin/docs-brain.mjs"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "dependencies": {
+    "linkedom": "0.18.13",
+    "defuddle": "0.19.5",
+    "fast-xml-parser": "5.11.2",
+    "turndown": "7.2.4",
+    "yaml": "2.9.1"
+  }
+}
