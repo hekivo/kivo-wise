@@ -1,5 +1,148 @@
 # Changelog
 
+## [4.0.0](https://github.com/hekivo/kivo-wise/compare/kivo-wise-v3.0.0...kivo-wise-v4.0.0) (2026-10-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* the plugin is now installed as kivo-wise.
+* **blocks:** block architecture shifts from class-scoped (.b-{slug}) to tag-scoped custom elements (<block-{slug}>). All existing v1 blocks must be migrated via /block-refactoring.
+
+### Features
+
+* **acorn-migration:** add Phase 4 — ACF two-level key migration + second pass + positional args ([30bc024](https://github.com/hekivo/kivo-wise/commit/30bc02460098ad81132445fd87637e69e2b9ab7c))
+* add live Pencil screenshot with CACHED fallback to visual-verifier ([6144f17](https://github.com/hekivo/kivo-wise/commit/6144f17809ff96e06be00f324cda6e09f1924ee1))
+* add paper.design MCP support as preferred design source ([8a9c071](https://github.com/hekivo/kivo-wise/commit/8a9c071282dfc60c14833ac3077f9d9762b4f6e3))
+* add Pencil .pen path routing and workflow to designing skill ([f5533ec](https://github.com/hekivo/kivo-wise/commit/f5533ecdf37ab8317709ec939666870303abfef9))
+* add Pencil as step 4 in design-extractor detection order ([e41c8a1](https://github.com/hekivo/kivo-wise/commit/e41c8a1ab61cba07f4d6ab18eb6adf9235f350d3))
+* add Pencil MCP check and component-map.md reading to sage-architect ([dc24f15](https://github.com/hekivo/kivo-wise/commit/dc24f157692fac3ccfef2b566599ada4980fa93c))
+* add pencil-extractor agent (PANORAMIC/SURGICAL/COMPONENT_MAP) ([c931977](https://github.com/hekivo/kivo-wise/commit/c931977376cb7e3be6cce72781e3c20ce1e947ac))
+* **agents,skills:** Wave 4 architecture features ([#24](https://github.com/hekivo/kivo-wise/issues/24)) ([8de9dac](https://github.com/hekivo/kivo-wise/commit/8de9dacc3d077a6949b4643d808bed9475f0bf30))
+* **agents:** add forms specialist agent ([62356ba](https://github.com/hekivo/kivo-wise/commit/62356ba262280b5f06a8c0850339d365c2420148))
+* **agents:** add paper.design source to design-extractor ([77c051c](https://github.com/hekivo/kivo-wise/commit/77c051c86c7f8ae48015a16a2db0fc048857cc31))
+* **agents:** add paper.design to sage-architect design tool list ([6ef9d9e](https://github.com/hekivo/kivo-wise/commit/6ef9d9ebb4408b41b2d3867862bbe7967f56b33d))
+* **agents:** Wave 4 specialized subagents ([#32](https://github.com/hekivo/kivo-wise/issues/32)) ([f7046fd](https://github.com/hekivo/kivo-wise/commit/f7046fddf65ae3aaf2561ff7bd6e2935c7ba1006))
+* **architecture-discovery:** track paper in visual companion session ([8704f42](https://github.com/hekivo/kivo-wise/commit/8704f42dff1c21b3bba33f0d766dc147a60d6280))
+* **block-refactoring:** add Phase 0b shared component inventory before gap checks ([18a9723](https://github.com/hekivo/kivo-wise/commit/18a972328fe4cf7ee7d2e929e701eb6a4ea8a84b))
+* **block-refactoring:** extend G8 to cover slug/filenames, add G9/G10/G11 definitions ([e88518e](https://github.com/hekivo/kivo-wise/commit/e88518eef8404c17427684636f121f831d798923))
+* **block-refactoring:** G7 -&gt; CRITICAL, add Decision Log to report, add localization reference ([945cf55](https://github.com/hekivo/kivo-wise/commit/945cf55554a7d8faab1a6b9a6adc1c6c3986b27a))
+* **blocks:** adopt custom element pattern for all ACF blocks ([#20](https://github.com/hekivo/kivo-wise/issues/20)) ([e124ac3](https://github.com/hekivo/kivo-wise/commit/e124ac381b7a85c43eecce13ede9e83699603d11))
+* **codex:** generate plugins/ + .agents/ layout for Codex CLI &gt;= 0.137 ([db2f631](https://github.com/hekivo/kivo-wise/commit/db2f631cc060bdc912acaed57f909ae156a20a8b))
+* **designing:** add paper.design branch with URL-based routing ([5c3f7de](https://github.com/hekivo/kivo-wise/commit/5c3f7dea2ed7735f6d4285219f4bbfb98e248b3c))
+* detect Pencil MCP and design/ folder in detect-design-tools ([21c47c0](https://github.com/hekivo/kivo-wise/commit/21c47c085fd2cd7079d3c737d8070c145f1498b1))
+* **detect:** add paper.design MCP detection with fixture tests ([53a5d3d](https://github.com/hekivo/kivo-wise/commit/53a5d3dff1a6029b08d46a6458e68b59621fecbe))
+* **detector:** classify Roots layouts, Acorn apps and the Lando runtime ([3523122](https://github.com/hekivo/kivo-wise/commit/35231224270d94b70190a2a11f76170c17d531aa))
+* **docs-brain:** add the docs-brain CLI ([43a1245](https://github.com/hekivo/kivo-wise/commit/43a12456b876c4215e5243143f47843978248fd1))
+* **hooks,commands:** Wave 3 deterministic capabilities ([#30](https://github.com/hekivo/kivo-wise/issues/30)) ([d3155cd](https://github.com/hekivo/kivo-wise/commit/d3155cd8282d4dc9539bbbf22face7e1095f8bc9))
+* **hooks:** expand skill-router keyword map with workflow skills ([a070f05](https://github.com/hekivo/kivo-wise/commit/a070f05f7b6ffd2e9c2441d5a46b087ea407c092))
+* **hooks:** replace the bash hooks with profile-aware node hooks ([ffed949](https://github.com/hekivo/kivo-wise/commit/ffed949c873856b60d1185026f81271e2ba5eaf3))
+* **lang:** enforce mandatory en-US for all artifacts and code ([#14](https://github.com/hekivo/kivo-wise/issues/14)) ([610ccaa](https://github.com/hekivo/kivo-wise/commit/610ccaa7f6a173997127ab0182d241c71180ceab))
+* **onboarding:** detect and list paper.design MCP ([4acdb5d](https://github.com/hekivo/kivo-wise/commit/4acdb5da97c99b5d4d6e67dd9c1d5874c7046e63))
+* **onda-1:** foundation layer — CLAUDE.md + 7 skill progressive-disclosure refactors + validator ([#26](https://github.com/hekivo/kivo-wise/issues/26)) ([d8ea4c5](https://github.com/hekivo/kivo-wise/commit/d8ea4c547e9d082ad574739899e4f718c5ea17bf))
+* **paper-design:** implement MCP support for paper.design with URL-based routing, extraction, and verification enhancements ([e04bad4](https://github.com/hekivo/kivo-wise/commit/e04bad41f865781c487cb1ca8e255297172d9aec))
+* **paper.design:** add support for paper.design as a first-class design source ([08e8c03](https://github.com/hekivo/kivo-wise/commit/08e8c033a73619366dbfb7f9475a30e866b6d3dc))
+* **plugin:** add OpenAI Codex plugin support ([#43](https://github.com/hekivo/kivo-wise/issues/43)) ([8817c2b](https://github.com/hekivo/kivo-wise/commit/8817c2bc78b03c0ea23e724d353ffadc2c8a95e5))
+* **plugin:** surface paper.design MCP in hook summary and manifests ([010242e](https://github.com/hekivo/kivo-wise/commit/010242e7f3517211c124f8e0cced70ec4a9c7dd7))
+* **sage-lando:** add load_textdomain gotcha and ACF getName/getDescription/getStyles i18n pattern ([9591430](https://github.com/hekivo/kivo-wise/commit/95914305586bfbe42c21dd61e6d2b2c86c6d00b1))
+* **sage-reviewer:** add R-css-vars, R-component-reuse, R-nl2br convention checks ([ff63de6](https://github.com/hekivo/kivo-wise/commit/ff63de66ac4a0f8d9092e31af15007ce4d71b731))
+* **skills,ci,hooks:** Wave 3 automation helpers ([#23](https://github.com/hekivo/kivo-wise/issues/23)) ([6a2930c](https://github.com/hekivo/kivo-wise/commit/6a2930cc639709bef273707c84da2b8137c5a4ac))
+* **skills,scripts:** Wave 5 AI-native integration ([#34](https://github.com/hekivo/kivo-wise/issues/34)) ([d406c03](https://github.com/hekivo/kivo-wise/commit/d406c0318d90adee04c916b02a593181626757a0))
+* **skills:** add acf-block-refactor skill ([#17](https://github.com/hekivo/kivo-wise/issues/17)) ([905feb7](https://github.com/hekivo/kivo-wise/commit/905feb7d62dc48f4a9355bd7eb7547bd05a77a61))
+* **skills:** add Lando runner detection to onboarding ([d61a3a1](https://github.com/hekivo/kivo-wise/commit/d61a3a13f6550df84f61b81ae7e30d442ca18a8f))
+* **skills:** add Phase 0c form detection to block-scaffolding ([5810a60](https://github.com/hekivo/kivo-wise/commit/5810a60c8f38b45c25b60af50eb1719c74caad20))
+* **skills:** add sage-forms Blade form views reference ([83ff947](https://github.com/hekivo/kivo-wise/commit/83ff947f3e2085c89327cf8bc055089e0fb47835))
+* **skills:** add sage-forms hf-validation JS module reference ([0ae855e](https://github.com/hekivo/kivo-wise/commit/0ae855eb200e1db440e8737f918855245ecb2f7e))
+* **skills:** add sage-forms installation reference ([f166d56](https://github.com/hekivo/kivo-wise/commit/f166d56d7a5b400e5b48f7abae8e0596778e5389))
+* **skills:** add sage-forms SKILL.md entry point ([c0b1f91](https://github.com/hekivo/kivo-wise/commit/c0b1f910955158023cf8715c85b62c6195eb177d))
+* **skills:** add sage-forms traps catalogue ([8633286](https://github.com/hekivo/kivo-wise/commit/863328604dd6e18bb15cd96bbf70693428120721))
+* **skills:** Cluster A — Lando runner detection + CSS cascade specialist ([5731526](https://github.com/hekivo/kivo-wise/commit/57315268baa12e301f7a99ca54f03f35ad860ce8))
+* **skills:** consolidate profile-aware skills for kivo-wise 3.0 ([f8be4ee](https://github.com/hekivo/kivo-wise/commit/f8be4eeb2dcd6d4606c8bc5fb5bd48bf5efff8aa))
+* **skills:** G10 CSS specialist + Phase 7 single approval gate in block-refactoring ([283cda5](https://github.com/hekivo/kivo-wise/commit/283cda5888df6253a888ee9d101f7f5b9c60e7e9))
+* **skills:** Onda 2 — progressive-disclosure for 26 skills + validator enforcement ([#28](https://github.com/hekivo/kivo-wise/issues/28)) ([e623326](https://github.com/hekivo/kivo-wise/commit/e6233261775025bb5d13aff4e7000ae04fcf5457))
+* **skills:** sage-forms integration — skill + forms agent + block-scaffolding Phase 0c ([b2b400f](https://github.com/hekivo/kivo-wise/commit/b2b400f63fd911a43de8921158e012eabcf959cc))
+* **skills:** spec-driven CSS cascade in block-scaffolding Phase 0b + S1 ([2f54c33](https://github.com/hekivo/kivo-wise/commit/2f54c3335e80507d0210663ff1d27ddd81659a34))
+* **verifying:** add paper-only style spot-check vs computed_styles ([585d3b2](https://github.com/hekivo/kivo-wise/commit/585d3b20274b15969d30b1f3582c62553028c71a))
+
+
+### Bug Fixes
+
+* **acorn-migration:** remove redundant NOT LIKE clause in Phase 4 PASS 1 query ([d377a48](https://github.com/hekivo/kivo-wise/commit/d377a48e259c3fc85efb2d9f6430cb3daefe3597))
+* address quality review issues in pencil-extractor agent ([dca13ec](https://github.com/hekivo/kivo-wise/commit/dca13ecb33f1aa8e38a164a6128f6acb100bc6bd))
+* **agents:** address code review findings in forms agent (rollback, grep precision, A5 scoping) ([89c5835](https://github.com/hekivo/kivo-wise/commit/89c5835585c6b03277d99a4bd2e29862077da25a))
+* **ai-setup:** separate composer commands by layer + Bedrock autoloader stub gotcha ([c249ede](https://github.com/hekivo/kivo-wise/commit/c249ede08abbface263e3de7ecb14696820b0029))
+* **codex:** generate plugins/ + .agents/ layout for Codex CLI ≥ 0.137 ([61dd59b](https://github.com/hekivo/kivo-wise/commit/61dd59b838ba967b50ef919e12cda52e20920099))
+* correct claude plugin install command (marketplace suffix) ([f76c1a9](https://github.com/hekivo/kivo-wise/commit/f76c1a9fa3ef850abb1c0aa929ef69bf77464915))
+* deliver house conventions cross-harness via AGENTS.md + fix dropped session-start context ([db58c9d](https://github.com/hekivo/kivo-wise/commit/db58c9d568c176824f85ce538c65fb6eeee90e70))
+* deliver house conventions cross-harness via AGENTS.md + fix dropped session-start context ([dc7712c](https://github.com/hekivo/kivo-wise/commit/dc7712cab5a9ec5fd19d3d6cbfc3161d0c877855))
+* **hooks:** add .gitattributes to force LF on shell scripts ([#9](https://github.com/hekivo/kivo-wise/issues/9)) ([4fe481b](https://github.com/hekivo/kivo-wise/commit/4fe481b7ea39650dcbde85ff796f4d8cb319404b))
+* **hooks:** quote paths and wrap with bash for Windows/VS Code ([#12](https://github.com/hekivo/kivo-wise/issues/12)) ([4ef95d4](https://github.com/hekivo/kivo-wise/commit/4ef95d41c94e5bcb6ef77e2fd1f73a8c9a69f020))
+* **lang:** explicitly enforce en-US for file names and branch names ([#15](https://github.com/hekivo/kivo-wise/issues/15)) ([f4b7f60](https://github.com/hekivo/kivo-wise/commit/f4b7f60f8e95f014ff7cd7f41097f7698c4068f9))
+* **manifest:** add trailing slash to skills and agents paths ([70c355e](https://github.com/hekivo/kivo-wise/commit/70c355ef11b57a1eb75a60346a20df99b921f1c0))
+* **manifest:** add trailing slash to skills and agents paths ([3718d40](https://github.com/hekivo/kivo-wise/commit/3718d403d84d9a9beb8b0097694b4fcf534d2043))
+* **manifest:** remove skills/agents/hooks path fields for auto-discovery ([#7](https://github.com/hekivo/kivo-wise/issues/7)) ([bd1b2ca](https://github.com/hekivo/kivo-wise/commit/bd1b2ca3b591c5174227e671d9553f5e8a4d7221))
+* **marketplace:** use explicit github source for plugin resolution ([81f8b7f](https://github.com/hekivo/kivo-wise/commit/81f8b7f6188be183e72c59513b5617629d1e7ab9))
+* **plugin:** improve marketplace and manifest compatibility ([26be50c](https://github.com/hekivo/kivo-wise/commit/26be50c23ef6ec5fc206c1af61a6138c85365ebb))
+* **release:** sync version across 5 manifests and track in release-please ([#21](https://github.com/hekivo/kivo-wise/issues/21)) ([0d389c9](https://github.com/hekivo/kivo-wise/commit/0d389c926c0adddbad57ef55f11195303f10dcd0))
+* **skills:** add G9/G10/G11 gap checks to block-refactoring, block-scaffolding, sage-reviewer ([0c2d520](https://github.com/hekivo/kivo-wise/commit/0c2d52038d9c2b9ab472994bf93eca2e2b20d605))
+* **skills:** add observable symptoms to sage-forms Traps bullets ([fe4d8d3](https://github.com/hekivo/kivo-wise/commit/fe4d8d36674fda2bf9e9071a3b5745faaecc5c7d))
+* **skills:** address code review findings in block-scaffolding S1 ([73bb3ba](https://github.com/hekivo/kivo-wise/commit/73bb3bada8dc9518a602e617bfa23266fa71f06c))
+* **skills:** align G10 decision table phrasing and clarify report template ([4666ae7](https://github.com/hekivo/kivo-wise/commit/4666ae729375adebfa65cd84a2615a57d45da831))
+* **skills:** align G10 light row CSS action with block-scaffolding ([61cb131](https://github.com/hekivo/kivo-wise/commit/61cb131f849e8a0d684adf06b47fa43062cfcc0e))
+* **skills:** clarify lando.yml read failure fallback in runner detection ([bf85029](https://github.com/hekivo/kivo-wise/commit/bf85029a7a629db7b0a5e512fe420c4cf30cc586))
+
+
+### Performance
+
+* **hooks:** replace full sageing injection with compact routing summary ([5b318b4](https://github.com/hekivo/kivo-wise/commit/5b318b4c361be546ccce075ae0dcd241acd67150))
+
+
+### Documentation
+
+* add Docsify site for GitHub Pages ([af0b4a9](https://github.com/hekivo/kivo-wise/commit/af0b4a9644fa76703e375db0dd2fa4fd145f1923))
+* add GitHub Pages link to README ([858406f](https://github.com/hekivo/kivo-wise/commit/858406ff672847bf26f8cff8e855e6638f3d2532))
+* add Pencil MCP support design spec ([f7636db](https://github.com/hekivo/kivo-wise/commit/f7636db94933fc5f60179dba23b4999993fbae10))
+* add Pencil MCP support implementation plan ([89e2d8e](https://github.com/hekivo/kivo-wise/commit/89e2d8e3c2d6864b9c7219f46e619c62f953ee56))
+* add Pencil MCP to README — routing, conventions, install ([f649ccd](https://github.com/hekivo/kivo-wise/commit/f649ccd257a33ae44f0faa9c89c0f481199ef758))
+* add practical how-to + troubleshooting + tier/fidelity guidance ([a02c454](https://github.com/hekivo/kivo-wise/commit/a02c45420a00149f2e881a76bc0f2b1ebc897e14))
+* add token optimization changelog entry for upcoming release ([d175c7f](https://github.com/hekivo/kivo-wise/commit/d175c7f8d4aa46618b63f649eda7f77305c21da3))
+* add usage guide design spec ([b1b99d6](https://github.com/hekivo/kivo-wise/commit/b1b99d61e5eca38d90216a2068ab50ae67a1399a))
+* add usage guide implementation plan (10 tasks) ([ed868f9](https://github.com/hekivo/kivo-wise/commit/ed868f9a27348e78f8760cff6d464ca430be1efe))
+* **designing:** update purpose line to reflect paper + URL routing ([2154812](https://github.com/hekivo/kivo-wise/commit/2154812d3669ad5104d22fbf9df0d659fa974ce3))
+* **guide:** add agents.md — all 11 agents including 5 previously undocumented ([47dd392](https://github.com/hekivo/kivo-wise/commit/47dd392318276d85d8ef046ad013dab4830528e3))
+* **guide:** add commands.md — acf-register, livewire-new, sage-status ([8e92dc3](https://github.com/hekivo/kivo-wise/commit/8e92dc30371e7f6352beb6ca6d24ebe6334b57f5))
+* **guide:** add hooks.md — session-start, keyword router (32 entries), diagnostics ([52e072c](https://github.com/hekivo/kivo-wise/commit/52e072cd404d314b3b612ebfa4624ef555409ac4))
+* **guide:** add INDEX.md navigation hub ([dc94e59](https://github.com/hekivo/kivo-wise/commit/dc94e59686ffdfa75c2d800c3bd82d6775e16047))
+* **guide:** add skills.md — all 19 workflow + 17 reference skills ([23227eb](https://github.com/hekivo/kivo-wise/commit/23227eb6ca289830d0f70ede15472e10ba205f09))
+* **guide:** add token-efficiency.md — mechanism, before/after, contributor guide ([9866d93](https://github.com/hekivo/kivo-wise/commit/9866d93842a9182579fe3354f28f0c7dd6a4b825))
+* **guide:** add workflows/first-session.md ([7324b5f](https://github.com/hekivo/kivo-wise/commit/7324b5fdeaf33d9f5fe727364fcb489cfed80c84))
+* **guide:** add workflows/implement-feature.md — full plan-driven loop ([6da2de0](https://github.com/hekivo/kivo-wise/commit/6da2de0f329d3c36e26cc0b21dd9638460cdafd4))
+* **guide:** add workflows/scaffold-block.md — scaffold, form integration, refactoring ([00b023e](https://github.com/hekivo/kivo-wise/commit/00b023e4a3fb43201d10c6c9b53fa0ad64ab1e40))
+* **plans:** add Cluster A implementation plan — worktrees detection & CSS cascade ([f9c786d](https://github.com/hekivo/kivo-wise/commit/f9c786d845622449c639d8e3224fd2dda22200a7))
+* **plans:** add plugin expansion wave plans (index + onda 1 full + 2-6 scoped) ([4d2a736](https://github.com/hekivo/kivo-wise/commit/4d2a7365a3b155ab203ae8e3d6e4fe893dbdff67))
+* **plans:** add sage-forms integration implementation plan ([9ce7c6e](https://github.com/hekivo/kivo-wise/commit/9ce7c6e531597784a3cf26c048bb01a692372993))
+* **plans:** mark Onda 6 Done in index ([3bdff96](https://github.com/hekivo/kivo-wise/commit/3bdff96482bc616597e88d358599d492a02403b2))
+* **plans:** Onda 6 — hardening from field feedback; replace introspect with A/B groups ([dfa5c16](https://github.com/hekivo/kivo-wise/commit/dfa5c16d5f64767a27392857d9af8cf29aaea659))
+* practical how-to + troubleshooting + tier/fidelity guidance ([8104f22](https://github.com/hekivo/kivo-wise/commit/8104f22b4ade54ddca583924dff69fb0ef260416))
+* **readme:** add agnostic installation guide for Claude, VS Code, Cursor ([3e86691](https://github.com/hekivo/kivo-wise/commit/3e86691e77501fe88e5f2208af1425203a1e5699))
+* **readme:** document paper.design MCP as preferred design source ([23b4643](https://github.com/hekivo/kivo-wise/commit/23b46432072921373dd22d2f9f843177bbcdd157))
+* **readme:** update Cursor installation for modern versions + note on Claude CLI superiority ([7d69e2b](https://github.com/hekivo/kivo-wise/commit/7d69e2bc513809eaa7ef4dbf8f8a4ff42113c35e))
+* revise sage-design-system spec and plan ([26095ae](https://github.com/hekivo/kivo-wise/commit/26095ae0f1a7793ff4d9f471aa7af801eb550017))
+* rewrite the README, guide and provenance for 3.0 and add evals ([48dc5c2](https://github.com/hekivo/kivo-wise/commit/48dc5c222d05a83d05aff2408d40073221af9dc5))
+* **sageing:** document paper.design as preferred design source ([23beee3](https://github.com/hekivo/kivo-wise/commit/23beee31a2bbb6b378d0dc631c05295918090a06))
+* **skills:** add Invoke-for triggers to domain reference skills ([f1a6e91](https://github.com/hekivo/kivo-wise/commit/f1a6e9110b809c0e08e1da46e77dfbc9ab2b19cd))
+* **skills:** add Invoke/Skip triggers to workflow skill descriptions ([8e39f37](https://github.com/hekivo/kivo-wise/commit/8e39f379f665378080165913b8234003f292d3fe))
+* **skills:** expand knowledge base with validated traps and gotchas ([#22](https://github.com/hekivo/kivo-wise/issues/22)) ([1bc88d1](https://github.com/hekivo/kivo-wise/commit/1bc88d19ac2fb959a1ed36d25c6078eb1fa600da))
+* **skills:** tighten sageing description — remove always-on trigger ([e761efe](https://github.com/hekivo/kivo-wise/commit/e761efe77d7e079ac5a1e5b855f7a1a2ae88a5cd))
+* slim README to intro+install+links, move detail to docs/guide/ ([a770346](https://github.com/hekivo/kivo-wise/commit/a770346db3823ba04010f4b1c9e356ee049cd22c))
+* **specs:** add Cluster A spec — worktrees detection & CSS cascade generation ([c750f87](https://github.com/hekivo/kivo-wise/commit/c750f8715cf640c17dac4098d0af56484be08112))
+* **specs:** add sage-forms integration design ([e955a62](https://github.com/hekivo/kivo-wise/commit/e955a6202e273ec26a0f4833b4b5c74f58f1b042))
+* **specs:** fix lando prefix and typo in plugin expansion design ([4cdc08b](https://github.com/hekivo/kivo-wise/commit/4cdc08b585bc97fc02d50cb4c061029bbc3d5be5))
+
+
+### Chores
+
+* rename plugin to kivo-wise and start 3.0.0 ([75dbf6f](https://github.com/hekivo/kivo-wise/commit/75dbf6f72c332a90df0a6edd07b294d24f0e6ae5))
+
 ## [3.0.0](https://github.com/hekivo/kivo-wise/compare/superpowers-sage-v2.11.1...kivo-wise-v3.0.0) (2026-10-18)
 
 ### ⚠ BREAKING CHANGES
