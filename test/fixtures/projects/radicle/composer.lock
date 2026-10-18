@@ -1,0 +1,10 @@
+{
+  "_readme": ["fixture lock: only the packages the detector reads"],
+  "packages": [
+    { "name": "johnbillion/extended-cpts", "version": "5.1.0" },
+    { "name": "roots/acorn", "version": "v6.3.0" },
+    { "name": "roots/acorn-post-types", "version": "v1.0.0" },
+    { "name": "roots/wordpress", "version": "6.9.4" }
+  ],
+  "packages-dev": []
+}

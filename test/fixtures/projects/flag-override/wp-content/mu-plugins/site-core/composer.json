@@ -1,0 +1,1 @@
+{ "name": "flag/core", "require": { "roots/acorn": "^6.0" }, "autoload": { "psr-4": { "SiteCore\\": "app/" } } }

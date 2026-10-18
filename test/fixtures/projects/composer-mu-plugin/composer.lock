@@ -1,0 +1,8 @@
+{
+  "_readme": ["fixture lock: only the packages the detector reads"],
+  "packages": [
+    { "name": "roots/wordpress", "version": "7.1.3" },
+    { "name": "wpengine/advanced-custom-fields-pro", "version": "6.8.10" }
+  ],
+  "packages-dev": []
+}

@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "paper": {
-      "command": "npx",
-      "args": ["-y", "@paper-design/mcp"]
-    }
-  }
-}

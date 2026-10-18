@@ -1,0 +1,10 @@
+{
+  "_readme": ["fixture lock: only the packages the detector reads"],
+  "packages": [
+    { "name": "roots/acorn", "version": "v6.2.0" },
+    { "name": "livewire/livewire", "version": "v4.3.5" },
+    { "name": "log1x/acf-composer", "version": "v3.4.6" },
+    { "name": "log1x/poet", "version": "v2.1.0" }
+  ],
+  "packages-dev": []
+}

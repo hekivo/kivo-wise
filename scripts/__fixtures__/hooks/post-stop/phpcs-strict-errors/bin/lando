@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-echo "FOUND 3 ERRORS affecting 1 file"
-exit 1

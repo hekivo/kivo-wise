@@ -1,0 +1,3 @@
+<?php
+
+// Fixture: Acorn routes.

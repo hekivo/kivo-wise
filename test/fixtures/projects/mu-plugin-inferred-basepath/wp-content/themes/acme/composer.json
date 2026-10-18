@@ -1,0 +1,1 @@
+{ "name": "acme/theme", "type": "wordpress-theme", "require": { "php": ">=8.2" } }

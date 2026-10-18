@@ -1,0 +1,6 @@
+{
+  "profile": "sage-theme",
+  "app": "wp-content/themes/site-theme",
+  "runner": "none",
+  "corpus": ["~/hekivo/kivo-wisdom/corpus"]
+}

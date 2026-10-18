@@ -1,0 +1,48 @@
+name: demo
+recipe: wordpress
+config:
+  via: nginx
+  php: '8.4'
+  xdebug: true
+  database: mysql
+  config:
+    php: ./server/php/php.ini
+  env_file:
+    - .env
+    # a misplaced env_file: Lando only reads the top-level key
+    - .env.local
+services:
+  appserver:
+    build:
+      - ln -sf /app/.env /app/wp-content/mu-plugins/acme-core/.env
+  redis:
+    type: redis:6
+events:
+  pre-start:
+    - appserver: composer install --no-interaction
+  post-start:
+    - appserver: bash scripts/clear-cache.sh
+tooling:
+  yarn:
+    service: appserver
+  pint-check:
+    service: appserver
+    description: Check code style without fixing
+    cmd:
+      - pint --test wp-content/mu-plugins/acme-core
+  cache-clear:
+    service: appserver
+    dir: /app
+    cmd:
+      - bash scripts/clear-cache.sh
+  phpunit:
+    service: appserver
+    cmd: php /app/vendor/bin/phpunit --configuration /app/wp-content/mu-plugins/acme-core/phpunit.xml.dist
+  build:fast:
+    service: appserver
+    cmd: bash scripts/build-all.sh --skip-install
+  login:
+    service: appserver
+    cmd: >-
+      wp plugin is-active wp-cli-login-server || wp login install --activate --yes;
+      wp login as admin
