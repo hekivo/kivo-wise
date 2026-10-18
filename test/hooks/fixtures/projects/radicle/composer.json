@@ -1,0 +1,1 @@
+{ "name": "fixture/radicle-site", "require": { "roots/acorn": "^6.3" } }

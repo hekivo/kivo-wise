@@ -1,44 +1,29 @@
 {
   "hooks": {
-    "userPromptSubmit": [
-      {
-        "command": "bash \"./hooks/user-prompt-activate.sh\""
-      }
-    ],
     "sessionStart": [
       {
-        "command": "bash \"./hooks/session-start.sh\""
+        "command": "node \"./hooks/session-start.mjs\""
       }
     ],
-    "afterFileEdit": [
+    "userPromptSubmit": [
       {
-        "command": "bash \"./hooks/post-edit.sh\""
-      }
-    ],
-    "preCompact": [
-      {
-        "command": "bash \"./hooks/post-compact.sh\""
-      }
-    ],
-    "beforeShellExecution": [
-      {
-        "command": "bash \"./hooks/pre-commit.sh\"",
-        "matcher": "git commit"
+        "command": "node \"./hooks/user-prompt-router.mjs\""
       }
     ],
     "beforeFileEdit": [
       {
-        "command": "bash \"./hooks/pre-write-protected.sh\""
+        "command": "node \"./hooks/protect-files.mjs\""
       }
     ],
-    "subagentStop": [
+    "beforeShellExecution": [
       {
-        "command": "bash \"./hooks/post-subagent.sh\""
+        "command": "node \"./hooks/pre-commit-attribution.mjs\"",
+        "matcher": "git commit"
       }
     ],
-    "stop": [
+    "afterFileEdit": [
       {
-        "command": "bash \"./hooks/post-stop.sh\""
+        "command": "node \"./hooks/post-edit-reminder.mjs\""
       }
     ]
   }

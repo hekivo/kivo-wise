@@ -1,0 +1,1 @@
+{"session_id":"s","cwd":"{{FIXTURES}}/projects/radicle","hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"{{FIXTURES}}/projects/radicle/public/content/mu-plugins/00-acorn-boot.php"},"tool_use_id":"tu1"}

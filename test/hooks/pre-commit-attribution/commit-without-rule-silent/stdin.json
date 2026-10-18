@@ -1,0 +1,1 @@
+{"session_id":"s","cwd":"{{FIXTURES}}/projects/plain","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"git commit -m \"chore: z\"","description":"x"},"tool_use_id":"tu2"}

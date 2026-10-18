@@ -1,0 +1,7 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "kivo-wise: wp-content/uploads/2026/10/hero.jpg is under uploads/, which holds user media, not code."
+  }
+}

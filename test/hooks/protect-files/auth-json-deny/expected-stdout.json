@@ -1,0 +1,7 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "kivo-wise: auth.json holds Composer credentials; use the COMPOSER_AUTH environment variable instead."
+  }
+}

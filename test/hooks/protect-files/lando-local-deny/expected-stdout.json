@@ -1,0 +1,7 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "kivo-wise: .lando.local.yml is the developer's unversioned Lando override; change .lando.yml instead."
+  }
+}

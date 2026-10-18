@@ -1,0 +1,7 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "kivo-wise: public/wp/wp-settings.php is WordPress core (public/wp/) installed by Composer; the change is lost on the next install."
+  }
+}

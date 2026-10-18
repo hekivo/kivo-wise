@@ -1,0 +1,1 @@
+{"session_id":"s","cwd":"{{FIXTURES}}/projects/mu-plugin","hook_event_name":"PreToolUse","tool_name":"Write","tool_input":{"file_path":"{{FIXTURES}}/projects/mu-plugin/.env","content":"X=1"},"tool_use_id":"tu1"}

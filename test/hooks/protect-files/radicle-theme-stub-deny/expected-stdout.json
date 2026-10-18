@@ -1,0 +1,7 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "kivo-wise: public/content/themes/radicle/functions.php is scaffolding managed by Radicle; the upstream update overwrites it."
+  }
+}

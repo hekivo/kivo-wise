@@ -1,0 +1,6 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "kivo-wise · profile sage-theme @ web/app/themes/sage · ns App\\ · Acorn 5.0.4 · WordPress 6.9.1 · blocks none · post types none\nrunner: none detected (no .lando.yml or .ddev); use the commands the project documents\nrules: project AGENTS.md first, corpus second (none configured), web last; verify native source before custom code\nskills: start with roots-router (profile x intent); available: roots-triage, acorn-stack, acorn-scaffolding, acf-native, acorn-livewire, acorn-routes-api, acorn-data, acorn-background, wp-hooks-lifecycle, wp-security-escaping, lando-wp, wp-composer-plugins, roots-debugging, tailwind-vite-assets, testing-wp, wp-performance, wp-phpstan, wp-abilities-mcp, docs-brain, roots-onboarding, roots-reviewing"
+  }
+}

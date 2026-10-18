@@ -1,0 +1,6 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolUse",
+    "additionalContext": "PHP changed under wp-content/mu-plugins/acme-core: run `lando cache-clear` before testing. ACF Composer rebuilds its manifest on the next request; a stale manifest hides new fields and blocks."
+  }
+}

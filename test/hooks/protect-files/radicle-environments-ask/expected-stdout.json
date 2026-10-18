@@ -1,0 +1,7 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "ask",
+    "permissionDecisionReason": "kivo-wise: bedrock/environments/production.php is the real wp-config for the production environment in Radicle; confirm the change is intended."
+  }
+}

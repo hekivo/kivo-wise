@@ -1,0 +1,1 @@
+{"session_id":"s","cwd":"{{FIXTURES}}/projects/mu-plugin/wp-content/mu-plugins/acme-core","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"cd /x && git add -A && git commit -am \"fix: y\"","description":"x"},"tool_use_id":"tu2"}

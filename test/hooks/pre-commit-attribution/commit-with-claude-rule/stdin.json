@@ -1,0 +1,1 @@
+{"session_id":"s","cwd":"{{FIXTURES}}/projects/claude-rule","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"git commit --amend --no-edit","description":"x"},"tool_use_id":"tu2"}

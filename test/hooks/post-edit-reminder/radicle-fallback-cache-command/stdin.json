@@ -1,0 +1,1 @@
+{"session_id":"s","cwd":"{{FIXTURES}}/projects/radicle","hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":"{{FIXTURES}}/projects/radicle/app/View/Composers/Hero.php"},"tool_response":{"filePath":"{{FIXTURES}}/projects/radicle/app/View/Composers/Hero.php","success":true},"tool_use_id":"tu1"}
