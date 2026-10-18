@@ -1,0 +1,7 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "kivo-wise: wp-content/mu-plugins/acme-core/public/build/manifest.json is build output (public/build/); edit the source under resources/ and rebuild."
+  }
+}

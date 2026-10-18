@@ -1,0 +1,6 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "additionalContext": "This repository forbids AI attribution in commits (CLAUDE.md). Do not add Co-Authored-By or Generated-with lines."
+  }
+}

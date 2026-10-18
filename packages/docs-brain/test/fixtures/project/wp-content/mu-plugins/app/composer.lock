@@ -1,0 +1,8 @@
+{
+  "packages": [
+    { "name": "roots/acorn", "version": "v6.2.0" },
+    { "name": "illuminate/support", "version": "v13.26.1" },
+    { "name": "livewire/livewire", "version": "v4.3.5" }
+  ],
+  "packages-dev": []
+}

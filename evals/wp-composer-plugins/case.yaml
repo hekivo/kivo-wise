@@ -1,0 +1,4 @@
+schema_version: '1.1'
+name: wp-composer-plugins
+context:
+  scaffold_script: scaffold.sh

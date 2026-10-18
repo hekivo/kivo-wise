@@ -1,133 +1,89 @@
-Deep reference for acorn-hook-patterns. Loaded on demand from `skills/wp-hooks-lifecycle/SKILL.md`.
+# Where to register hooks in an Acorn project
 
-# Acorn Hook Patterns
+Deep reference for the hook locations per profile, dependency injection in callbacks, and testable callbacks. Loaded on demand from SKILL.md.
 
-The three correct places to hook in Acorn — `register()`, `boot()`, and dedicated provider classes — and which hook category belongs where.
+## The four places
 
-## The Three Hook Locations
+### 1. Plain bootstrap files (hooks without dependencies)
 
-### 1. `boot()` Method in a ServiceProvider — Primary Pattern
+| Profile | Files | Loaded |
+|---|---|---|
+| `sage-theme` | `app/setup.php` (theme supports, menus, editor settings), `app/filters.php` | By `functions.php` with `locate_template()`, right after Acorn booted |
+| `acorn-mu-plugin` | Whatever the main plugin file requires (commonly `bootstrap/setup.php`, `filters.php`, `actions.php`, `helpers.php`) | At mu-plugin include time, before `muplugins_loaded` and long before Acorn boots |
+| `radicle-app` | Usually none; theme setup comes from `config/theme.php` through a theme provider, other hooks live in providers | n/a |
 
-The `boot()` method is the correct place for all WordPress hook registrations in Sage:
+Keep only the `add_action` / `add_filter` line in these files and delegate to a class:
 
 ```php
-namespace App\Providers;
-
-use Illuminate\Support\ServiceProvider;
-
-class ProjectServiceProvider extends ServiceProvider
-{
-    public function boot(): void
-    {
-        // Actions
-        add_action('init', [$this, 'registerPostTypes']);
-        add_action('wp_enqueue_scripts', [$this, 'enqueueAssets']);
-        add_action('save_post_project', [$this, 'handleProjectSave'], 10, 3);
-
-        // Filters
-        add_filter('the_content', [$this, 'appendProjectMeta']);
-        add_filter('pre_get_posts', [$this, 'modifyProjectQuery']);
-    }
-
-    public function registerPostTypes(): void
-    {
-        // register_post_type() calls here
-    }
-}
+add_filter('wp_insert_post_data', [\App\Support\MenuOrder::class, 'enforceDefault'], 10, 4);
 ```
 
-### 2. `register()` Method — Container Bindings Only
+In mu-plugin bootstrap files, `app()`, `config()`, `view()` and facades are not available at file scope. Inside callbacks they are, as long as the hook fires after Acorn's boot.
 
-The `register()` method runs during the container build phase. WordPress is not yet fully initialized. Use it only for service container bindings, never for WordPress hooks:
+These files are the only option for `muplugins_loaded`, `plugins_loaded` and `setup_theme` callbacks in a mu-plugin.
+
+### 2. A provider's `boot()` (feature hooks with dependencies)
 
 ```php
 public function register(): void
 {
-    // ✅ Correct — container binding
-    $this->app->singleton(ProjectService::class, function ($app) {
-        return new ProjectService($app->make(CacheService::class));
-    });
-
-    // ❌ Wrong — WordPress not ready yet
-    // add_action('init', [$this, 'registerPostTypes']);
+    $this->app->singleton(AuditSubscriber::class, fn ($app) => new AuditSubscriber(
+        $app->make(AuditLog::class),
+    ));
 }
-```
 
-### 3. Dedicated Provider Classes
-
-For complex feature areas, create dedicated providers rather than cramming everything into one:
-
-```php
-// config/app.php
-'providers' => [
-    App\Providers\ThemeServiceProvider::class,
-    App\Providers\PostTypeServiceProvider::class,
-    App\Providers\RestApiServiceProvider::class,
-    App\Providers\BlockServiceProvider::class,
-],
-```
-
-## What Goes Where
-
-| Hook category | Correct location |
-|---|---|
-| CPT and taxonomy registration | `boot()` via `add_action('init', ...)` |
-| Theme supports, nav menus | `boot()` via `add_action('after_setup_theme', ...)` |
-| Asset enqueue | `boot()` via `add_action('wp_enqueue_scripts', ...)` |
-| REST route registration | `boot()` via `add_action('rest_api_init', ...)` |
-| Content filters | `boot()` via `add_filter('the_content', ...)` |
-| Service bindings | `register()` |
-| Early plugin compat hooks | `boot()` via `add_action('plugins_loaded', ..., 20)` |
-
-## Dependency Injection in Hook Callbacks
-
-Use the Acorn container to resolve dependencies inside hook callbacks:
-
-```php
 public function boot(): void
 {
-    add_action('save_post', function (int $post_id) {
-        $service = $this->app->make(\App\Services\ProjectService::class);
-        $service->onSave($post_id);
-    });
+    $subscriber = $this->app->make(AuditSubscriber::class);
+
+    add_action('transition_post_status', [$subscriber, 'onStatusChange'], 10, 3);
+    add_action('save_post', [$subscriber, 'onSave'], 10, 3);
 }
 ```
 
-Or use a typed method directly (the provider instance is already resolved):
+Checklist:
+
+- The provider is registered where the profile reads providers (`acorn-stack`).
+- `boot()` runs on every request type. Resolving a heavy service eagerly costs every request; resolve inside the callback when the hook is rare:
 
 ```php
-public function handleProjectSave(int $post_id, \WP_Post $post, bool $update): void
-{
-    if (wp_is_post_autosave($post_id) || wp_is_post_revision($post_id)) {
+add_action('save_post_product', function (int $postId, \WP_Post $post, bool $update): void {
+    if (wp_is_post_autosave($postId) || wp_is_post_revision($postId)) {
         return;
     }
 
-    $cache = $this->app->make(\App\Services\CacheService::class);
-    $cache->invalidate("project:{$post_id}");
-}
+    $this->app->make(ProductSync::class)->handle($postId);
+}, 20, 3);
 ```
 
-## Acceptable: `setup.php` for Theme Setup
+- Hooks that already fired before the boot are lost (see the profile table in SKILL.md).
 
-For simple theme-level hooks that don't need dependency injection, `app/setup.php` is acceptable:
+### 3. A provider's `register()`: container only
 
-```php
-// app/setup.php — theme supports, nav menus, image sizes
-add_action('after_setup_theme', function () {
-    add_theme_support('post-thumbnails');
-    register_nav_menus(['primary_navigation' => __('Primary Navigation')]);
-    add_image_size('hero', 1920, 800, true);
-});
+Bindings and singletons. No `add_action`, no calls that depend on plugins, the theme or other providers.
+
+### 4. A separate mu-plugin
+
+When a hook must run earlier than the profile's boot and there is no bootstrap file (Sage theme, Radicle root), put it in a small mu-plugin file. Keep it free of Acorn calls at file scope.
+
+## Laravel events vs WordPress hooks
+
+Inside Acorn you can listen to framework events (`Event::listen(RequestHandled::class, …)`). Use them for Laravel-side concerns (HTTP kernel, queue, Livewire lifecycle). Use WordPress hooks for WordPress data and rendering. Do not wrap a WordPress hook in a Laravel event for style.
+
+## Removability and testability
+
+- Named callables (`[Class::class, 'staticMethod']`, `[$service, 'method']`) can be removed and unit tested; closures cannot be removed.
+- Keep the decision in a method that takes plain values and returns a value; the hook callback only adapts arguments. That method is testable without booting WordPress.
+- Guard the context at the top of the callback: post type, autosave/revision, `is_admin()`, `wp_doing_ajax()`, `wp_doing_cron()`, `defined('WP_CLI')`.
+
+## Anti-patterns
+
+- Registering `plugins_loaded`, `muplugins_loaded` or `setup_theme` callbacks from a provider: they already fired.
+- `add_action('after_setup_theme', …)` from a mu-plugin or Radicle provider at a priority not greater than the boot priority.
+- Hooks in a provider constructor or `register()`.
+- Assuming `wp_enqueue_scripts`, `wp_head` or `template_redirect` run on Acorn routes, REST or Livewire updates.
+- The same hook registered in a bootstrap file and in a provider. Pick one place per feature and search before adding:
+
+```bash
+grep -rn "add_action('save_post" app/ bootstrap/ 2>/dev/null
 ```
-
-## Avoid: `actions.php` / `filters.php`
-
-These are legacy Sage patterns. Consolidate hooks into ServiceProviders for better organization and testability.
-
-## Anti-Patterns
-
-- **Hooks in constructors:** ServiceProvider constructors run during `register()` phase. Place hooks in `boot()`.
-- **Wrong priority for removal:** Trying to `remove_action()` before the target hook was added. Always use a later priority.
-- **Forgetting `$accepted_args`:** If your callback needs 3 parameters but you only declared `$accepted_args` as 1 (default), you get nulls.
-- **Heavy processing in early hooks:** Avoid expensive operations in `plugins_loaded` or `init` that run on every request. Defer to later hooks or use conditional checks.
-- **Provider not registered:** Hooks added in a ServiceProvider will not fire if the provider is not listed in `config/app.php` under `providers`.

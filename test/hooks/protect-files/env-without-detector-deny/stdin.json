@@ -1,0 +1,1 @@
+{"session_id":"s","cwd":"{{FIXTURES}}/projects/plain","hook_event_name":"PreToolUse","tool_name":"Write","tool_input":{"file_path":"{{FIXTURES}}/projects/plain/.env"},"tool_use_id":"tu1"}

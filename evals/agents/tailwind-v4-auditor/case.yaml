@@ -1,0 +1,4 @@
+schema_version: '1.1'
+name: agent-tailwind-v4-auditor
+context:
+  scaffold_script: scaffold.sh

@@ -1,0 +1,1 @@
+{"session_id":"s","cwd":"{{FIXTURES}}/projects/mu-plugin","hook_event_name":"UserPromptSubmit","prompt":"run lando wp to list the ACF field group options"}

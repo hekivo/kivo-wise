@@ -1,0 +1,19 @@
+{
+  "name": "demo/composer-wordpress-site",
+  "type": "project",
+  "require": {
+    "php": ">=8.4",
+    "roots/wordpress": "7.1.3",
+    "roots/bedrock-autoloader": "^1.0",
+    "wpengine/advanced-custom-fields-pro": "6.8.10",
+    "wpackagist-plugin/wordpress-seo": "^26.0"
+  },
+  "extra": {
+    "wordpress-install-dir": "wp",
+    "installer-paths": {
+      "wp-content/plugins/{$name}/": ["type:wordpress-plugin"],
+      "wp-content/themes/{$name}/": ["type:wordpress-theme"],
+      "wp-content/mu-plugins/{$name}/": ["type:wordpress-muplugin"]
+    }
+  }
+}

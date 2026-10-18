@@ -1,253 +1,67 @@
 ---
-name: superpowers-sage:wp-phpstan
-description: >
-  PHPStan static analysis in Sage/Acorn projects — lando composer phpstan,
-  phpstan.neon configuration, PHPStan level 0-9, WordPress PHP stubs,
-  szepeviktor/phpstan-wordpress, baseline generation, CI phpstan,
-  suppress errors, type errors, return type mismatch, nullable types,
-  WordPress function stubs, WP_Post WP_Query WP_User types
-user-invocable: false
+name: wp-phpstan
+description: Use when configuring, running or fixing PHPStan in a WordPress project that uses Acorn - phpstan.neon, baseline, szepeviktor/phpstan-wordpress stubs, larastan, level raising, "Cannot access property on mixed", get_field() types, paths for app/. For Pint or Mago formatting use testing-wp; for runtime errors use roots-debugging.
 ---
 
-# Static Analysis for Sage/Acorn with PHPStan
+# PHPStan for WordPress + Acorn (wrapper)
+
+Full procedure: `third-party/wp-phpstan/SKILL.upstream.md` (official WordPress skill, GPL-2.0-or-later, see `third-party/UPSTREAM.md`). Read it and its `references/` (`configuration.md`, `wordpress-annotations.md`, `third-party-classes.md`) first. This file adds the Roots specifics: where to point the analysis, how Acorn code differs, and how to run everything through the runner. Paths starting with `third-party/` are relative to the kivo-wise plugin root, two levels above this skill's folder (`<skill dir>/../../third-party/...`), not inside the skill folder. In your answer, point the user to that full procedure by its resolved absolute path, and use the same resolution for any other `third-party/` path you name.
 
 ## When to use
 
-- Setting up static analysis on a Sage theme for the first time
-- Adding PHPStan to an existing project and managing the baseline
-- Fixing type errors reported by PHPStan in Sage/Acorn code
-- Configuring CI pipelines to enforce static analysis
-- Incrementally raising the PHPStan analysis level
+- A project has no `phpstan.neon` yet, or the configuration scans the wrong folders.
+- PHPStan reports errors on Blade composers, service providers, facades, Eloquent models or ACF Composer classes.
+- You want to raise the level, generate a baseline or wire PHPStan into CI.
 
 ## Inputs required
 
-- Current PHPStan level (if already configured), or confirmation this is a fresh setup
-- Whether Larastan and WordPress stubs are already installed
-- Target analysis level (or follow the recommended progression)
-- CI platform in use (GitHub Actions, GitLab CI, etc.) if configuring CI integration
+- Profile and app path from the session context (`{{runner.composer}}`, `{{runner.test}}`, the detected app path).
+- Current level and baseline file, if any; Composer constraints for `phpstan/phpstan` (PHPStan 2 needs matching extension versions).
+- Which ACF and plugin classes the code touches (they need stubs or targeted ignores).
 
 ## Procedure
 
-### 1. Install dependencies
+Commands: write every command with the runner value from the session context filled in (for example `lando wp acorn optimize:clear`), never a bare `wp`/`composer`/`php`/`npm`, never the placeholder, never "prefix with lando if you use it". Commands that run in CI or a deploy script go in a separate block labelled with where they run.
 
-```bash
-lando theme-composer require --dev phpstan/phpstan larastan/larastan szepeviktor/phpstan-wordpress
-```
+1. **Inspect first.** Run the official script from the plugin root, with the project as working directory: `node third-party/wp-phpstan/scripts/phpstan_inspect.mjs`. It reports the config, the baseline and whether WordPress stubs are installed. It reads files only; it does not run PHPStan.
+2. **Install through the runner** (dev dependencies, in the Composer root that owns the app):
+   `{{runner.composer}} require --dev phpstan/phpstan szepeviktor/phpstan-wordpress phpstan/extension-installer`.
+   The extension installer loads the WordPress extension automatically; do not also include it by hand.
+3. **Point `paths` at the app code, not at the whole site.** Never analyse `wp/`, `vendor/`, `node_modules/` or uploads.
 
-This installs:
+   | Profile | `paths:` in `phpstan.neon` |
+   | --- | --- |
+   | `sage-theme` | `app/` of the theme (config lives in the theme, or in the repo root with `<theme>/app`) |
+   | `acorn-mu-plugin` | `app/` of the plugin (for example `wp-content/mu-plugins/<plugin>/app`); put `phpstan.neon` at the repo root when the plugin has no own `composer.json` runner |
+   | `radicle-app` | `app/` at the project root, plus `config/` if you want it checked |
 
-- **phpstan/phpstan** — the core static analysis engine
-- **larastan/larastan** — Laravel-specific extensions (facades, models, service container, Eloquent)
-- **szepeviktor/phpstan-wordpress** — WordPress function stubs and type definitions
-
-### 2. Configure `phpstan.neon`
-
-Create or update `phpstan.neon` in the theme root:
-
-```neon
-includes:
-    - vendor/larastan/larastan/extension.neon
-    - vendor/szepeviktor/phpstan-wordpress/extension.neon
-
-parameters:
-    paths:
-        - app/
-
-    level: 0
-
-    # WordPress dynamic functions that PHPStan cannot resolve
-    ignoreErrors:
-        - '#Function apply_filters invoked with#'
-        - '#Function do_action invoked with#'
-        - '#Function add_filter expects#'
-        - '#Function add_action expects#'
-
-    # Scan files for WordPress global function definitions
-    scanDirectories:
-        - vendor/szepeviktor/phpstan-wordpress/bootstrap.php
-
-    # Treat Acorn facades correctly via Larastan
-    checkGenericClassInNonGenericObjectType: false
-```
-
-### 3. Run the initial analysis
-
-```bash
-lando theme-composer exec phpstan -- analyse
-```
-
-At level 0, this should produce few or no errors. If errors exist, fix them or generate a baseline.
-
-### 4. Generate a baseline
-
-A baseline captures all existing errors so they can be addressed incrementally without blocking development.
-
-```bash
-lando theme-composer exec phpstan -- analyse --generate-baseline
-```
-
-This creates `phpstan-baseline.neon`. Include it in the main config:
-
-```neon
-includes:
-    - vendor/larastan/larastan/extension.neon
-    - vendor/szepeviktor/phpstan-wordpress/extension.neon
-    - phpstan-baseline.neon
-```
-
-New code must pass analysis; baseline errors are addressed over time.
-
-### 5. Common fixes for Sage/Acorn/WordPress patterns
-
-#### WordPress hook callbacks
-
-```php
-// PHPStan complains about callable types
-// Fix: use explicit Closure or typed callable
-add_filter('the_content', function (string $content): string {
-    return $content . '<p>Appended</p>';
-});
-```
-
-#### ACF field return types
-
-```php
-// get_field() returns mixed — PHPStan cannot infer the type
-// Fix: assert or cast the return value
-/** @var string|null $subtitle */
-$subtitle = get_field('subtitle');
-
-// Or use a wrapper with PHPDoc
-/**
- * @return array<string, mixed>
- */
-function get_hero_fields(): array
-{
-    return (array) get_field('hero_section') ?: [];
-}
-```
-
-#### Mixed return from `get_field`
-
-```php
-// Bad — PHPStan reports "Cannot access property on mixed"
-$image = get_field('image');
-echo $image['url']; // Error
-
-// Good — type-narrow first
-$image = get_field('image');
-if (is_array($image) && isset($image['url'])) {
-    echo $image['url'];
-}
-```
-
-#### Eloquent model properties
-
-Larastan handles most Eloquent patterns automatically. For custom model attributes, add PHPDoc:
-
-```php
-/**
- * @property int $id
- * @property string $title
- * @property \Carbon\Carbon $created_at
- */
-class Event extends Model
-{
-    // ...
-}
-```
-
-### 6. Level progression strategy
-
-| Level | Catches | Effort | Recommendation |
-|---|---|---|---|
-| **0** | Basic errors, unknown classes | Minimal | Start here |
-| **1** | Possibly undefined variables | Low | Move to quickly |
-| **2** | Unknown methods on mixed | Low | Move to quickly |
-| **3** | Return types checked | Moderate | First real milestone |
-| **4** | Basic dead code detection | Moderate | Good target for most projects |
-| **5** | Argument types checked | High | Requires disciplined typing |
-| **6+** | Strict union/intersection types | Very high | For projects committed to strict typing |
-
-**Recommended progression:**
-
-- **0 to 3**: Move quickly. These levels catch real bugs with minimal effort. Fix issues as you go.
-- **3 to 5**: Requires adding return types and parameter types. Use the baseline to manage existing code while enforcing types on new code.
-- **5+**: Only pursue if the team commits to strict typing throughout the codebase.
-
-After raising the level, regenerate the baseline:
-
-```bash
-lando theme-composer exec phpstan -- analyse --generate-baseline
-```
-
-### 7. CI integration
-
-Run PHPStan in CI without progress output:
-
-```bash
-lando theme-composer exec phpstan -- analyse --no-progress --error-format=github
-```
-
-#### GitHub Actions example
-
-```yaml
-- name: Run PHPStan
-  run: |
-    cd web/app/themes/<theme-name>
-    composer exec phpstan -- analyse --no-progress --error-format=github
-```
-
-The `--error-format=github` flag produces annotations that appear inline on pull requests.
-
-#### Preventing baseline growth
-
-In CI, verify the baseline has not grown:
-
-```bash
-# Regenerate baseline and check for changes
-lando theme-composer exec phpstan -- analyse --generate-baseline
-git diff --exit-code phpstan-baseline.neon
-```
-
-If the diff is non-empty, the PR introduces new errors that must be fixed.
-
-### 8. Integration with Acorn
-
-Larastan provides analysis support for Laravel patterns used in Acorn:
-
-- **Facades**: Larastan resolves facade accessors to their underlying classes
-- **Service container**: `app()->make()` and dependency injection are type-aware
-- **Eloquent models**: relationships, scopes, and attributes are analyzed
-- **Collections**: return types through collection chains are tracked
-- **Config/View**: `config()` and `view()` calls are understood
-
-No additional configuration is needed beyond including `larastan/extension.neon`.
+   Start at level 1 and raise one level per MR; commit a baseline only for existing errors.
+4. **Larastan is optional on Acorn.** It teaches PHPStan about facades, the container and Eloquent. Add `larastan/larastan` only when facade or model errors dominate the report, include its `extension.neon` from `vendor/`, and check its bootstrap requirement against the installed version first: it expects a bootable Laravel application, which Acorn only provides after WordPress has loaded. If it cannot boot, keep plain PHPStan and add PHPDoc on the few models or facades involved.
+5. **Run through the runner:** `{{runner.composer}} exec phpstan -- analyse --memory-limit=1G` (Lando: `lando composer exec phpstan -- analyse`). Generate or update the baseline with `--generate-baseline`.
+6. **Fix by cause**, in this order: missing stubs or autoload, wrong PHPDoc, real bug, then targeted `ignoreErrors` with a comment. `get_field()` returns `mixed`: narrow it with a type check or a typed wrapper instead of ignoring the whole file.
+7. **CI:** run with `--no-progress --error-format=github` (or the format your CI reads) and fail on a baseline that grew.
 
 ## Verification
 
-- [ ] `lando theme-composer exec phpstan -- analyse` runs without errors (or only baseline errors)
-- [ ] `phpstan.neon` includes both Larastan and WordPress stubs extensions
-- [ ] Baseline file exists and is included in the config
-- [ ] Analysis level matches the project's target level
-- [ ] CI pipeline runs PHPStan and fails on new errors
-- [ ] No new errors added to the baseline without justification
+- `{{runner.composer}} exec phpstan -- analyse` exits 0 at the chosen level with the baseline applied.
+- The baseline file only shrinks between MRs; a new entry needs a reason in the MR.
+- The command was run through the runner (container PHP), not host PHP, so the PHP version matches production.
 
 ## Failure modes
 
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| "Class not found" for WordPress functions | WordPress stubs not installed or not included | Verify `szepeviktor/phpstan-wordpress` is installed and included in `phpstan.neon` |
-| "Class not found" for Acorn facades | Larastan not included | Verify `larastan/larastan` is installed and `extension.neon` is included |
-| Hundreds of errors on first run | Level set too high for current codebase | Start at level 0, generate baseline, increment gradually |
-| Baseline keeps growing | New code introducing type errors | Enforce CI check that baseline does not grow |
-| Memory exhaustion during analysis | Large codebase or too many paths scanned | Limit `paths` to `app/`, increase PHP memory limit in `phpstan.neon`: `parameters.memoryLimit: 512M` |
-| False positives on WordPress hooks | Dynamic invocation patterns | Add specific patterns to `ignoreErrors` in `phpstan.neon` |
-| Larastan conflicts with PHPStan version | Version mismatch | Check Larastan compatibility matrix, pin compatible versions in `composer.json` |
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `Function get_option not found` | WordPress stubs not loaded | Install `szepeviktor/phpstan-wordpress` and the extension installer; remove duplicate manual includes |
+| Thousands of errors from `vendor/` or `wp/` | `paths` too wide | Narrow `paths` to the app folder; use `excludePaths` for generated code |
+| `Class Illuminate\... not found` in a composer or provider | Analysing the app from a Composer root that lacks the app's vendor | Run from the Composer root that installs Acorn, or add `scanDirectories` for that vendor |
+| Facade or model property errors | No Larastan and no PHPDoc | Add PHPDoc on the model or enable Larastan when it can boot |
+| Out of memory | Default memory limit | Pass `--memory-limit=1G` or raise it in the neon |
+| Works locally, fails in CI | Different PHP version or missing dev install | Match the container PHP version in CI |
 
 ## Escalation
 
-- If PHPStan reports errors that appear to be false positives in WordPress or Acorn code, check the GitHub issues for `szepeviktor/phpstan-wordpress` and `larastan/larastan` before suppressing
-- For complex type issues involving WordPress hooks or ACF, consider writing custom PHPStan extensions or type stubs
-- If the baseline grows uncontrollably, schedule a dedicated refactoring session to reduce it rather than ignoring it
-- For questions about level progression strategy, discuss with the team lead to set a realistic target level
+- Raising the level above what the team agreed, or deleting a baseline: ask first.
+- A fix that needs a behaviour change (not just a type) belongs in its own change with a test; hand it to `testing-wp`.
+- If Larastan cannot be made to boot against the installed Acorn, stop and report the exact error rather than suppressing it.
+
+<!-- verified: the reference acorn-mu-plugin project's phpstan.neon — level 1, paths: the mu-plugin folder; its composer.json — phpstan/phpstan ^2.1, extension-installer ^1.4, szepeviktor/phpstan-wordpress ^2.0; third-party/wp-phpstan/scripts/phpstan_inspect.mjs — read-only inspect; UNVERIFIED locally: larastan boot requirement on Acorn (package not installed in any local project) -->

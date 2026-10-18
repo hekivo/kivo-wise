@@ -1,15 +1,15 @@
 {
-  "name": "superpowers-sage-marketplace",
+  "name": "kivo-wise-marketplace",
   "interface": {
-    "displayName": "Superpowers Sage"
+    "displayName": "Kivo Wise"
   },
   "plugins": [
     {
-      "name": "superpowers-sage",
-      "version": "2.11.1",
+      "name": "kivo-wise",
+      "version": "3.0.0",
       "source": {
         "source": "local",
-        "path": "./plugins/superpowers-sage"
+        "path": "./plugins/kivo-wise"
       },
       "policy": {
         "installation": "AVAILABLE"

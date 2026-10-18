@@ -1,0 +1,13 @@
+version: 1
+sources:
+  - id: dup
+    type: git
+    repo: https://example.invalid/a
+    ref: main
+  - id: dup
+    type: git
+    repo: https://example.invalid/b
+    ref: main
+  - id: weird
+    type: ftp
+    url: ftp://example.invalid

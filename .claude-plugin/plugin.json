@@ -1,32 +1,31 @@
 {
-  "name": "superpowers-sage",
-  "description": "Modern WordPress development with Sage, Acorn & Lando. Workflow skills: /architecture-discovery, /plan-generator, /building, /designing, /verifying (+ /architecting compatibility alias), with design tool integration, content modeling, visual verification, and comprehensive hooks.",
-  "version": "2.11.1",
+  "name": "kivo-wise",
+  "description": "WordPress on the Roots stack for AI assistants: detects Sage theme, Acorn mu-plugin or Radicle, routes to profile-aware skills, runs everything through Lando, reads official docs from a versioned corpus",
+  "version": "3.0.0",
   "author": {
-    "name": "codigodoleo",
-    "url": "https://github.com/codigodoleo"
+    "name": "hekivo",
+    "url": "https://github.com/hekivo"
   },
-  "homepage": "https://github.com/codigodoleo/superpowers-sage",
-  "repository": "https://github.com/codigodoleo/superpowers-sage",
+  "homepage": "https://github.com/hekivo/kivo-wise",
+  "repository": "https://github.com/hekivo/kivo-wise",
   "license": "MIT",
   "keywords": [
     "wordpress",
     "sage",
     "acorn",
+    "radicle",
+    "mu-plugin",
+    "bedrock",
     "lando",
     "roots",
     "livewire",
     "acf",
     "tailwind",
     "blade",
-    "paper",
-    "paper-design",
-    "stitch",
-    "figma",
-    "pencil",
-    "design-tools",
-    "visual-verification",
-    "architecture",
-    "content-modeling"
+    "docs-brain",
+    "architecture"
+  ],
+  "skills": [
+    "./third-party/"
   ]
 }

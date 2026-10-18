@@ -1,0 +1,7 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "kivo-wise: wp-content/themes/acme-2020/functions.php belongs to the Composer-installed theme acme-2020; the change is lost on the next install. Hook or filter it from the active app instead."
+  }
+}

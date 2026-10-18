@@ -1,24 +1,25 @@
 {
-  "name": "superpowers-sage-marketplace",
+  "name": "kivo-wise",
   "owner": {
-    "name": "codigodoleo"
+    "name": "hekivo",
+    "url": "https://github.com/hekivo"
   },
   "metadata": {
-    "description": "Marketplace for Superpowers Sage plugin (Codex)."
+    "description": "Marketplace for the kivo-wise plugin (Codex)."
   },
   "plugins": [
     {
-      "name": "superpowers-sage",
-      "description": "Sage + Acorn + Lando skills for AI-assisted WordPress development.",
-      "version": "2.11.1",
+      "name": "kivo-wise",
+      "description": "Roots stack (Sage, Acorn, Radicle) skills for AI-assisted WordPress development through Lando.",
+      "version": "3.0.0",
       "source": {
         "source": "github",
-        "repo": "codigodoleo/superpowers-sage",
+        "repo": "hekivo/kivo-wise",
         "ref": "main"
       },
       "author": {
-        "name": "codigodoleo",
-        "url": "https://github.com/codigodoleo"
+        "name": "hekivo",
+        "url": "https://github.com/hekivo"
       }
     }
   ]

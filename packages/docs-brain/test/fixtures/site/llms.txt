@@ -1,0 +1,10 @@
+# Example Code Docs
+
+> Documentation index for agents.
+
+## Docs
+
+- [Skills](/docs/en/skills.md): how skills work
+- [Hooks reference](https://example.invalid/never-fetched/en/hooks.md): absolute link outside the include list
+- [Plugins](/docs/en/plugins-reference.md): plugin reference
+- [Changelog](/docs/en/changelog.md): excluded by include

@@ -1,0 +1,8 @@
+{
+  "roots": ["./corpus-a", "./corpus-b"],
+  "locks": [
+    "composer.lock",
+    "wp-content/mu-plugins/app/composer.lock",
+    "wp-content/mu-plugins/app/package.json"
+  ]
+}

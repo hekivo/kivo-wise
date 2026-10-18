@@ -1,0 +1,6 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolUse",
+    "additionalContext": "PHP changed under the project root: run `lando wp acorn optimize:clear` before testing. Acorn caches config, views and providers until the cache is cleared."
+  }
+}

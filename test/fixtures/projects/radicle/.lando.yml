@@ -1,0 +1,59 @@
+name: radicle-demo
+recipe: wordpress
+env_file:
+  - .env
+  - .env.lando
+excludes:
+  - vendor
+  - node_modules
+config:
+  webroot: public
+  php: "8.4"
+  via: nginx
+  database: mariadb
+  xdebug: true
+  # skip the recipe's Composer; the appserver build installs its own copy
+  composer_version: false
+services:
+  appserver:
+    overrides:
+      environment:
+        XDEBUG_MODE: debug
+    build_as_root:
+      - bash /app/bin/get-composer.sh
+    build:
+      - composer install --no-interaction
+  assets:
+    type: node:22
+    overrides:
+      image: node:24-bookworm
+      ports:
+        - 5180:5180
+  database:
+    type: mariadb:11.4
+  redis:
+    type: redis:7
+tooling:
+  npm:
+    service: assets
+  vite:
+    service: assets
+    description: Start Vite with hot reload
+    cmd: npm run dev
+  acorn:
+    service: appserver
+    cmd: wp acorn
+  flush:
+    service: appserver
+    description: Clear WordPress, Acorn and Redis caches
+    dir: /app
+    cmd:
+      - appserver: wp cache flush
+      - appserver: wp acorn optimize:clear
+      - appserver: wp rewrite flush
+      - redis: redis-cli FLUSHALL
+  pest:
+    service: appserver
+    description: Run tests with Pest
+    dir: /app
+    cmd: vendor/bin/pest

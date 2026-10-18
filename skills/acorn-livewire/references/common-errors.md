@@ -1,127 +1,80 @@
-Deep reference for common Livewire errors in Sage/Acorn/WordPress. Loaded on demand from `skills/acorn-livewire/SKILL.md`.
+# Common Livewire 4 errors under Acorn
 
-# Common Livewire Errors
+Deep reference: symptom, cause and fix for Livewire failures in Acorn apps. Loaded on demand from SKILL.md.
 
-## "Unable to find component" / Component not found
+Start with the cache check: many "new bugs" right after a deploy are stale HTML.
 
-**Cause:** The component class namespace does not match the auto-discovery path, or the Blade tag does not match the class name (PascalCase → kebab-case conversion).
-
-**Fix:**
-- Verify the class exists in `app/Livewire/` with namespace `App\Livewire`.
-- Blade tag convention: `ContactForm` → `<livewire:contact-form />`, `Forms/ContactForm` → `<livewire:forms.contact-form />`.
-- Always generate components with `lando acorn make:livewire ComponentName` — never create files manually.
+## 0. Is the page stale?
 
 ```bash
-# Wrong tag for class ContactForm
-<livewire:contact-forms />   # plural — will fail
-
-# Correct
-<livewire:contact-form />
+curl -sI https://<site>/<path> | grep -iE 'cache|age|x-cache'
+curl -sI "https://<site>/<path>?nocache=$(date +%s)" | grep -iE 'cache|age|x-cache'
 ```
 
-## Hydration Errors (non-serializable properties)
+If the cached copy is old and the cache-busted URL works, the code is fine. Deploys do not purge every cache layer (page cache plugin, reverse proxy, CDN). Ask for a purge; do not change code to work around it.
 
-**Cause:** A public property holds a value Livewire cannot serialize between requests — closures, `WP_Post` objects, database connections, resource handles.
+## `RangeError: Maximum call stack size exceeded` in `dataSet`
 
-**Fix:**
-- Store only scalar values, arrays, or simple plain objects in public properties.
-- Use `#[Computed]` for derived data that should not be serialized.
-- Pass WordPress objects into `mount()` and extract only the needed scalar values.
+- **Cause:** cached HTML carries a snapshot whose public-property **order or set** no longer matches the deployed class. Livewire 4's client diff reports a root-level change and `dataSet('')` recurses. Moving properties into a trait reorders them.
+- **Fix:** purge the cached pages. When you change the property shape of a component on a cached page:
+  - Avoid reordering or moving public properties without a reason; adding is less risky than reordering but still changes the snapshot.
+  - Plan the purge as part of the release.
+  - Use a **release token**: a component can define `public static function releaseToken(): string { return 'v2'; }`, and `config('livewire.release_token')` works app-wide (vendor default `'a'`). A stale snapshot then fails with HTTP 419 and the client shows "This page has expired. Would you like to refresh the page?" instead of crashing. The reload still gets stale HTML until the purge. Source: `src/Features/SupportReleaseTokens/`.
 
-```php
-// Bad — WP_Post is not serializable by Livewire
-public \WP_Post $post;
+## 404 on the script or on `POST …/update`
 
-// Good — store the ID and fetch in computed property
-public int $postId;
+- **Testing with curl:** the update route carries `RequireLivewireHeaders`, which aborts with 404 when the `X-Livewire` header is missing. Test from the browser.
+- **Endpoint hash changed:** the `/livewire-<hash>` prefix is the first 8 hex characters of `sha256(app.key . 'livewire-endpoint')`. If `APP_KEY` differs between instances or changed in a deploy, cached pages and other instances point to another hash. Compare `{{runner.acorn}} route:list --path=livewire` with the rendered `data-update-uri` and script `src`.
+- **Path prefix:** Acorn calls `URL::forceRootUrl(home_url())` at boot. A multilingual plugin that adds a language segment to `home_url()` (or a subdirectory install) can produce `/xx/livewire-…` URLs that match no route. Pin the root URL to `get_option('home')` in a provider that runs after Livewire's, or re-register the routes with `Livewire::setUpdateRoute()` / `setScriptRoute()`, and never build Livewire URLs with `home_url()`.
+- **Stale assets:** a cached page referencing old hashed bundles gets 404s for the theme or plugin assets too (same root cause as section 0).
+- There is no literal `/livewire/update` path in v4.
 
-#[Computed]
-public function post(): ?\WP_Post
-{
-    return get_post($this->postId);
-}
-```
+## 419 "This page has expired"
 
-## 419 CSRF Token Expired
+Acorn's default `web` middleware group has `PreventRequestForgery` commented out, so no CSRF token is checked on the update route unless the project added it back. In Livewire 4.3.5 a 419 comes from:
 
-**Cause:** Livewire's AJAX requests require a valid Laravel CSRF token. If the session expires or the token is not present in the page, all Livewire requests return 419.
+- **Release-token mismatch** (stale snapshot after a token bump, or the class was renamed or removed while cached pages still reference it).
+- **Corrupt snapshot checksum** (`CorruptComponentPayloadException`): the snapshot was edited client-side, or the `app.key` that signed it differs from the one verifying it.
+- **Locked property write** (`CannotUpdateLockedPropertyException`).
+- **Type error** while setting a typed property (often scanners posting wrong types).
 
-**Fix:**
-- Ensure `@livewireScripts` is present in the layout. It injects the CSRF token into the Livewire configuration.
-- If the session timeout is too short, increase `SESSION_LIFETIME` in `.env`.
-- If using a caching layer (e.g. Nginx full-page cache), exclude Livewire endpoint routes (`/livewire/*`) from the cache.
+With `app.debug` on, the last three render a full error instead. Fix by reloading a fresh copy or aligning `APP_KEY`; do not touch session lifetime. If the project added `ValidateCsrfToken` to the `web` or `wordpress` group, a missing or expired token is a fifth cause.
 
-```env
-SESSION_LIFETIME=120   # minutes
-```
+## "Unable to find component"
 
-## Alpine.js Conflicts
+- The class must sit under `config('livewire.class_namespace')` in the matching folder. The name is the kebab-case class path: `SignupWizard` → `signup-wizard`, `Forms\Contact` → `forms.contact`.
+- A new class is not picked up: dump the autoloader in the Acorn base path (`{{runner.composer}} dump-autoload`), then `{{runner.cache}}`.
+- Created with `make:livewire` without `--class`: you got a single-file component in `resources/views/components/⚡…`. Delete it and regenerate with `--class`.
 
-**Cause:** A second version of Alpine.js is loaded separately (e.g. from a WordPress plugin or another script), causing conflicts with the Alpine instance bundled by Livewire.
+## Language or site context lost after the first interaction
 
-**Fix:**
-- Livewire bundles Alpine — do not import Alpine separately in `resources/js/app.js`.
-- If a plugin loads Alpine globally, dequeue it on pages that use Livewire:
+- **Cause:** the update request has no language prefix or query argument, so a multilingual plugin falls back to its default language.
+- **Fix:** capture the language at render (`#[Locked]` property or a `mount()` argument from the Blade view) and switch to it in `booted()` (or before any language-dependent query) with the plugin's own API.
 
-```php
-add_action('wp_enqueue_scripts', function (): void {
-    wp_dequeue_script('plugin-alpinejs');
-});
-```
+## A field change does not reach the server
 
-- Confirm only one Alpine instance is present by checking DevTools: `window.Alpine` should be defined exactly once.
+- In v4, `wire:model.blur` / `.change` / `.enter` only change when the **client** value syncs; no request is sent. Use `.live.blur` or call an action. See `state-patterns.md`.
+- The property must be `public` and exist on the component.
+- The property is `#[Locked]`: a client update throws. Use an action that validates the input.
 
-## Missing Root Element in Component View
+## Hydration and payload errors
 
-**Cause:** Livewire requires every component view to have exactly one root HTML element. Multiple root elements, comments at the root level, or missing wrappers cause hydration to break.
+- A public property holds a `WP_Post`, `WP_Term`, closure or service: store the ID and resolve the object in a `#[Computed]` method or `render()`.
+- `PayloadTooLargeException`, `MaxNestingDepthExceededException`, `TooManyCallsException`: the request exceeded `payload.max_size` (1 MB), `max_nesting_depth` (10), `max_calls` (50) or `max_components` (200). Send less data.
 
-**Fix:** Always wrap component view content in a single `<div>`:
+## Multiple root elements
 
-```blade
-{{-- Wrong — two root elements --}}
-<h1>Title</h1>
-<p>Content</p>
+With `app.debug` on, Livewire throws `MultipleRootElementsDetectedException` at mount. Without it, the component misbehaves silently. Wrap the view in one element.
 
-{{-- Correct --}}
-<div>
-    <h1>Title</h1>
-    <p>Content</p>
-</div>
-```
+## Two Alpine instances
 
-## Livewire Requests Return 404
+Symptoms: `x-data` initializes twice, `$wire` undefined in some components. Cause: a script imported and started `alpinejs` on a page that also loads Livewire. Use the `window.Alpine` guard (`alpine-interop.md`).
 
-**Cause:** WordPress permalink structure may not pass Livewire's internal endpoint (`/livewire/update`) through to the application.
+## A nested component's `wire:init` never runs
 
-**Fix:**
-- Verify `Pretty Permalinks` is enabled in WP Admin > Settings > Permalinks and saved after Livewire install.
-- Confirm Acorn routes are being processed. Run `lando acorn route:list` and verify Livewire's internal routes are registered.
+A child added by a parent morph may not fire `wire:init`. Load the data in `mount()`, or trigger it from the parent action.
 
-## Component Updates but Page Does Not Reflect Changes
+## Where to look
 
-**Cause:** Browser cache or full-page cache serving a stale HTML snapshot.
-
-**Fix:**
-- In development: hard refresh (Ctrl+Shift+R).
-- In production: exclude pages with Livewire components from full-page cache, or add cache-busting query parameters.
-
-## `wire:model` Not Syncing
-
-**Cause:** `wire:model` on a non-public property, or a typo in the property name.
-
-**Fix:** The bound property must be `public` on the component class. `protected` and `private` properties are not bindable.
-
-```php
-// Bad
-protected string $query = '';
-
-// Good
-public string $query = '';
-```
-
-## Escalation Paths
-
-- **Livewire AJAX payloads too large:** See `state-patterns.md` for computed properties and payload optimization.
-- **File upload issues:** See `file-uploads.md` for Lando storage paths and temporary file setup.
-- **Alpine interop issues:** See `alpine-interop.md` for `$wire.entangle` and conflict resolution.
-- **Performance / caching:** Consult the `wp-performance` skill for caching strategies on Livewire-rendered pages.
+- The Acorn log (`storage/logs/` in the base path, or `wp-content/cache/acorn/logs/` without a `storage/` folder) and the WordPress `debug.log` when `WP_DEBUG_LOG` is on. See `acorn-background` for logging channels.
+- Browser Network tab → the `update` request's response. With `app.debug` on, errors render in Livewire's modal.

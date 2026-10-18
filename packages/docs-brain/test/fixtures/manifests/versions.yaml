@@ -1,0 +1,97 @@
+version: 1
+corpus_dir: corpus
+defaults:
+  user_agent: "docs-brain-test/1.0"
+  politeness_ms: 0
+  redistribute: true
+sources:
+  - id: roots-docs
+    type: git
+    repo: https://example.invalid/roots/docs
+    ref: docs
+    include: ["acorn/**/*.md"]
+    version: { from: composer.lock, package: roots/acorn, strategy: record-sha }
+    license: unspecified
+    redistribute: false
+  - id: wordpress-reference
+    type: rest
+    base: https://example.invalid/wp-json/wp/v2
+    collections: [wp-parser-function]
+    version: { from: composer.lock, package: roots/wordpress, strategy: major.minor }
+    license: GPL-2.0-or-later
+  - id: acf
+    type: rest
+    base: https://example.invalid/wp-json/wp/v2
+    collections: [resource]
+    version: { from: composer.lock, package: wpengine/advanced-custom-fields-pro, strategy: major.minor }
+    license: proprietary
+    redistribute: false
+  - id: laravel
+    type: git
+    repo: https://example.invalid/laravel/docs
+    ref: { from: composer.lock, package: illuminate/support, map: "{major}.x" }
+    include: [blade.md]
+    license: MIT
+  - id: livewire
+    type: git
+    repo: https://example.invalid/livewire/livewire
+    ref: { from: composer.lock, package: livewire/livewire, map: "v{version}" }
+    include: ["docs/*.md"]
+    license: MIT
+  - id: phpunit
+    type: git
+    repo: https://example.invalid/phpunit-documentation-english
+    ref: { from: composer.lock, package: phpunit/phpunit, map: "{major}.{minor}" }
+    include: ["src/**/*.rst"]
+    convert: pandoc-rst
+    license: unspecified
+    redistribute: false
+  - id: tailwindcss
+    type: git
+    repo: https://example.invalid/tailwindcss.com
+    ref: main
+    include: ["src/docs/*.mdx"]
+    convert: mdx-strip
+    version: { from: package.json, package: tailwindcss, strategy: major }
+    license: proprietary
+    redistribute: false
+  - id: vite
+    type: git
+    repo: https://example.invalid/vitejs/vite
+    ref: { from: package.json, package: vite, map: "v{version}" }
+    include: ["docs/guide/**/*.md"]
+    license: MIT
+  - id: playwright
+    type: git
+    repo: https://example.invalid/microsoft/playwright
+    ref: { from: package.json, package: "@playwright/test", map: "v{version}" }
+    include: ["docs/src/*.md"]
+    license: Apache-2.0
+  - id: wordpress-handbooks
+    type: rest
+    base: https://example.invalid/wp-json/wp/v2
+    collections: [plugin-handbook]
+    version: { from: composer.lock, package: not/installed, strategy: major.minor }
+    license: GPL-2.0-or-later
+  - id: composer
+    type: git
+    repo: https://example.invalid/composer/composer
+    ref: main
+    include: ["doc/0*.md"]
+    license: MIT
+  - id: yoast-developer
+    type: git
+    repo: https://example.invalid/Yoast/developer
+    ref: main
+    include: ["docs/**/*.md"]
+    version: { fixed: main }
+    license: unspecified
+    redistribute: false
+  - id: lando-plugins
+    type: git
+    repos:
+      - { repo: https://example.invalid/lando/php,   root: docs, include: ["index.md", "config.md"] }
+      - { repo: https://example.invalid/lando/redis, root: docs, include: ["index.md"] }
+    convert: vitepress
+    url_map: "https://docs.lando.dev/plugins/{repo}/{name}.html"
+    license: MIT

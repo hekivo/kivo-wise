@@ -1,0 +1,16 @@
+{
+  "name": "acme/acme-core",
+  "type": "project",
+  "require": {
+    "php": ">=8.4",
+    "roots/acorn": "^6.0",
+    "livewire/livewire": "4.3.5",
+    "log1x/acf-composer": "3.4.6",
+    "log1x/poet": "2.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "AcmeCore\\": "app/"
+    }
+  }
+}

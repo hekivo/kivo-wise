@@ -1,0 +1,532 @@
+{
+  "$comment": "Profile x intent routing for the Roots stack. `profiles` describes what differs per profile; `intents` map user intent to one skill (`profiles: [\"*\"]` = every profile). `planned` lists skills named here whose folder does not ship yet; remove a name when its skill lands. `routes` is the compact list the session-start hook prints.",
+  "routes": [
+    {
+      "skill": "roots-triage",
+      "use": "detect profile, layout, runners; write .roots-stack.json"
+    },
+    {
+      "skill": "roots-router",
+      "use": "pick the skill by profile x intent"
+    },
+    {
+      "skill": "acorn-stack",
+      "use": "providers, composers, Blade, Application::configure, base path, optimize:clear"
+    },
+    {
+      "skill": "acorn-scaffolding",
+      "use": "make:* blocks, CPTs, providers, composers, components"
+    },
+    {
+      "skill": "acf-native",
+      "use": "ACF fields, validation, save flow, JS API (native first)"
+    },
+    {
+      "skill": "acorn-livewire",
+      "use": "Livewire 4 components, wire:model, 419, snapshots"
+    },
+    {
+      "skill": "acorn-routes-api",
+      "use": "Acorn routes vs register_rest_route, middleware, OpenAPI"
+    },
+    {
+      "skill": "acorn-data",
+      "use": "Eloquent, migrations, factories"
+    },
+    {
+      "skill": "acorn-background",
+      "use": "queues, WP-Cron, Action Scheduler, commands, logging, Redis"
+    },
+    {
+      "skill": "wp-hooks-lifecycle",
+      "use": "hook timing, mu-plugin load order"
+    },
+    {
+      "skill": "wp-security-escaping",
+      "use": "escaping, nonces, capabilities, prepared SQL"
+    },
+    {
+      "skill": "lando-wp",
+      "use": "run wp/composer/node/tests through Lando; rebuild vs restart; certs, DNS"
+    },
+    {
+      "skill": "wp-composer-plugins",
+      "use": "install or update plugins with Composer"
+    },
+    {
+      "skill": "roots-debugging",
+      "use": "500s, blank pages, Blade/ACF/Livewire/asset failures"
+    },
+    {
+      "skill": "tailwind-vite-assets",
+      "use": "Tailwind 4, Vite, Vite::asset, build base"
+    },
+    {
+      "skill": "testing-wp",
+      "use": "PHPUnit, Pest, Playwright"
+    },
+    {
+      "skill": "wp-performance",
+      "use": "profiling, slow queries, object cache"
+    },
+    {
+      "skill": "wp-phpstan",
+      "use": "PHPStan, larastan, baselines"
+    },
+    {
+      "skill": "wp-abilities-mcp",
+      "use": "Abilities API, MCP adapter, acorn-ai"
+    },
+    {
+      "skill": "docs-brain",
+      "use": "versioned official docs corpus lookup"
+    },
+    {
+      "skill": "roots-onboarding",
+      "use": "read-only project map"
+    },
+    {
+      "skill": "roots-reviewing",
+      "use": "convention audit per profile"
+    }
+  ],
+  "profiles": {
+    "sage-theme": {
+      "label": "Sage theme (Acorn booted from the theme)",
+      "appPath": "the theme directory (plain WordPress: wp-content/themes/<theme>; Bedrock: web/app/themes/<theme>)",
+      "boot": "functions.php at include time",
+      "basePath": "theme directory, inferred by Acorn",
+      "namespace": "App\\",
+      "blocks": "ACF Composer classes when log1x/acf-composer is installed, otherwise native register_block_type",
+      "postTypes": "Poet (config/poet.php) or app/PostTypes classes",
+      "views": "resources/views inside the theme",
+      "assets": "public/build in the theme, served through Vite::asset",
+      "protected": [
+        ".env*",
+        "wp-config.php",
+        "vendor/",
+        "node_modules/",
+        "public/build/"
+      ]
+    },
+    "acorn-mu-plugin": {
+      "label": "Acorn application in a must-use plugin",
+      "appPath": "wp-content/mu-plugins/<plugin> (read the exact path from the triage output)",
+      "boot": "the main plugin file, usually on after_setup_theme",
+      "basePath": "the plugin directory; it must be set explicitly (ACORN_BASEPATH or Application::configure(<path>)), otherwise Acorn may infer a theme that has a composer.json",
+      "namespace": "project-specific; read apps[].namespace from the triage output",
+      "blocks": "ACF Composer classes when log1x/acf-composer is installed, otherwise native register_block_type",
+      "postTypes": "Poet, or classes under the app's PostTypes folder, registered by a provider or configurator",
+      "views": "the plugin's resources/views, registered by its own providers (theme template filters do not apply)",
+      "assets": "the plugin's public/build; URLs come from the plugin URL, not the theme",
+      "protected": [
+        ".env*",
+        "wp-config.php",
+        "the core directory",
+        "vendor/",
+        "node_modules/",
+        "Composer-installed plugins/ and themes/",
+        "uploads/",
+        "public/build/"
+      ]
+    },
+    "radicle-app": {
+      "label": "Radicle (Acorn application at the repository root)",
+      "appPath": ". (repository root)",
+      "boot": "root bootstrap through the mu-plugin boot file under public/content/mu-plugins/",
+      "basePath": "repository root",
+      "namespace": "App\\",
+      "blocks": "native register_block_type with the project's own block generator",
+      "postTypes": "roots/acorn-post-types (config/post-types.php, Extended CPTs arguments)",
+      "views": "resources/views at the repository root",
+      "assets": "public/build at the webroot",
+      "protected": [
+        ".env*",
+        "bedrock/environments/*.php (ask before editing: it is the real configuration)",
+        "public/wp-config.php",
+        "public/index.php",
+        "public/content/mu-plugins/00-acorn-boot.php",
+        "vendor/",
+        "node_modules/"
+      ]
+    }
+  },
+  "intents": [
+    {
+      "match": [
+        "which profile is this",
+        "detect the project",
+        "triage",
+        ".roots-stack.json",
+        "what kind of project",
+        "no session context"
+      ],
+      "skill": "roots-triage",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "which skill",
+        "where do I start",
+        "how is this project organised",
+        "entry point"
+      ],
+      "skill": "roots-router",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "service provider",
+        "view composer",
+        "blade component",
+        "Application::configure",
+        "ACORN_BASEPATH",
+        "config/app.php",
+        "optimize:clear",
+        "boot order",
+        "cache layers",
+        "storage path"
+      ],
+      "skill": "acorn-stack",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "new block",
+        "acf:block",
+        "make:block",
+        "new post type",
+        "taxonomy",
+        "config/poet.php",
+        "config/post-types.php",
+        "make:provider",
+        "make:composer",
+        "make:component",
+        "scaffold"
+      ],
+      "skill": "acorn-scaffolding",
+      "profiles": [
+        "*"
+      ],
+      "note": "blocks: ACF Composer on sage-theme and acorn-mu-plugin when log1x/acf-composer is installed, native register_block_type on radicle-app; CPTs: Poet or classes vs acorn-post-types on radicle-app"
+    },
+    {
+      "match": [
+        "acf field",
+        "field group",
+        "acf validation",
+        "acf/validate_value",
+        "acf/save_post",
+        "acf JavaScript API",
+        "options page",
+        "save flow"
+      ],
+      "skill": "acf-native",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "livewire",
+        "wire:model",
+        "make:livewire",
+        "419",
+        "component does not update",
+        "snapshot"
+      ],
+      "skill": "acorn-livewire",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "REST endpoint",
+        "register_rest_route",
+        "routes/web.php",
+        "routes/api.php",
+        "middleware",
+        "permission_callback",
+        "OpenAPI",
+        "API contract"
+      ],
+      "skill": "acorn-routes-api",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "eloquent",
+        "model",
+        "migration",
+        "wp acorn migrate",
+        "factory",
+        "query builder"
+      ],
+      "skill": "acorn-data",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "queue",
+        "job",
+        "WP-Cron",
+        "Action Scheduler",
+        "console command",
+        "make:command",
+        "schedule",
+        "logging",
+        "log channel",
+        "redis",
+        "object cache"
+      ],
+      "skill": "acorn-background",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "hook timing",
+        "add_action",
+        "add_filter",
+        "after_setup_theme",
+        "plugins_loaded",
+        "mu-plugin load order",
+        "hook not firing",
+        "template_redirect"
+      ],
+      "skill": "wp-hooks-lifecycle",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "escape",
+        "esc_html",
+        "wp_kses",
+        "nonce",
+        "capability",
+        "current_user_can",
+        "sanitize",
+        "$wpdb->prepare",
+        "XSS",
+        "CSRF"
+      ],
+      "skill": "wp-security-escaping",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "lando",
+        ".lando.yml",
+        "lando rebuild",
+        "lando start",
+        "lando info",
+        "lndo.site",
+        "certificate",
+        "Xdebug",
+        "db-import",
+        "db-export",
+        "run wp-cli",
+        "run composer",
+        "run yarn",
+        "clear cache"
+      ],
+      "skill": "lando-wp",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "install plugin",
+        "composer require",
+        "WPackagist",
+        "wp-packages.org",
+        "wordpress-muplugin",
+        "private zip",
+        "update plugin",
+        "update WordPress"
+      ],
+      "skill": "wp-composer-plugins",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "500",
+        "blank page",
+        "white screen",
+        "view not found",
+        "class not found",
+        "debug.log",
+        "stack trace",
+        "stale after deploy",
+        "not rendering"
+      ],
+      "skill": "roots-debugging",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "tailwind",
+        "@theme",
+        "vite",
+        "vite.config",
+        "Vite::asset",
+        "@vite",
+        "public/build",
+        "css not applied",
+        "yarn build",
+        "yarn dev"
+      ],
+      "skill": "tailwind-vite-assets",
+      "profiles": [
+        "*"
+      ],
+      "note": "build base differs per profile: theme URL, plugin URL, or the webroot on radicle-app"
+    },
+    {
+      "match": [
+        "phpunit",
+        "pest",
+        "playwright",
+        "unit test",
+        "e2e",
+        "write a test",
+        "test suite",
+        "what does CI run"
+      ],
+      "skill": "testing-wp",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "performance",
+        "slow",
+        "slow query",
+        "profiling",
+        "N+1",
+        "transient",
+        "page speed",
+        "TTFB",
+        "APM"
+      ],
+      "skill": "wp-performance",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "phpstan",
+        "larastan",
+        "phpstan.neon",
+        "static analysis",
+        "baseline"
+      ],
+      "skill": "wp-phpstan",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "Abilities API",
+        "wp_register_ability",
+        "wp-abilities",
+        "MCP adapter",
+        "mcp-adapter",
+        "acorn-ai",
+        "expose to agents"
+      ],
+      "skill": "wp-abilities-mcp",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "official docs",
+        "documentation for",
+        "docs corpus",
+        "docs-brain",
+        ".docs-brain.json",
+        "which version of the docs",
+        "look up in the corpus"
+      ],
+      "skill": "docs-brain",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "onboarding",
+        "new to this project",
+        "project overview",
+        "project map",
+        "orient me",
+        "what does this project do"
+      ],
+      "skill": "roots-onboarding",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "review",
+        "code review",
+        "convention audit",
+        "review this change",
+        "audit the theme",
+        "audit the plugin"
+      ],
+      "skill": "roots-reviewing",
+      "profiles": [
+        "*"
+      ]
+    }
+  ],
+  "planned": [
+    "acorn-stack",
+    "acorn-scaffolding",
+    "acf-native",
+    "acorn-livewire",
+    "acorn-routes-api",
+    "acorn-data",
+    "acorn-background",
+    "wp-hooks-lifecycle",
+    "wp-security-escaping",
+    "wp-composer-plugins",
+    "roots-debugging",
+    "tailwind-vite-assets",
+    "testing-wp",
+    "wp-performance",
+    "wp-phpstan",
+    "wp-abilities-mcp",
+    "docs-brain",
+    "roots-onboarding",
+    "roots-reviewing"
+  ]
+}

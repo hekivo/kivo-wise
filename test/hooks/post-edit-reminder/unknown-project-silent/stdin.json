@@ -1,0 +1,1 @@
+{"session_id":"s","cwd":"{{FIXTURES}}/projects/plain","hook_event_name":"PostToolUse","tool_name":"Edit","tool_input":{"file_path":"{{FIXTURES}}/projects/plain/index.php"},"tool_response":{"filePath":"{{FIXTURES}}/projects/plain/index.php","success":true},"tool_use_id":"tu1"}

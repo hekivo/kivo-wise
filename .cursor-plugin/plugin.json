@@ -1,10 +1,10 @@
 {
-  "name": "superpowers-sage",
-  "description": "Sage + Acorn + Lando skills for AI-assisted WordPress development: architecture-discovery, plan-generator, building, ACF Composer, Livewire, Eloquent, routes, middleware, queues, performance, security, and modern patterns with Tailwind v4 and Vite.",
-  "version": "2.11.1",
+  "name": "kivo-wise",
+  "description": "WordPress on the Roots stack for AI assistants: detects Sage theme, Acorn mu-plugin or Radicle, routes to profile-aware skills, runs everything through Lando, reads official docs from a versioned corpus",
+  "version": "3.0.0",
   "hooks": "./hooks/cursor-hooks.json",
   "author": {
-    "name": "codigodoleo",
-    "url": "https://github.com/codigodoleo"
+    "name": "hekivo",
+    "url": "https://github.com/hekivo"
   }
 }

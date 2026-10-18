@@ -1,0 +1,7 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "kivo-wise: wp-config.php is generated for the environment (Lando, Bedrock or Radicle); configure through .env or config/ instead."
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "kivo-wise: public/content/mu-plugins/00-acorn-boot.php is scaffolding managed by Radicle; the upstream update overwrites it."
+  }
+}

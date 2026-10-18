@@ -1,0 +1,7 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "kivo-wise: wp-content/plugins/akismet/akismet.php belongs to the Composer-installed plugin akismet; the change is lost on the next install. Hook or filter it from the active app instead."
+  }
+}

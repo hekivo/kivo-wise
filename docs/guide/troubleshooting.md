@@ -1,6 +1,6 @@
 # Troubleshooting — environment gotchas
 
-Real failures you hit when standing up and running a Sage/Acorn/Lando project with
+Real failures you hit when standing up and running a Roots/Acorn/Lando project with
 this plugin, with the **symptom → cause → fix** for each. These are
 environment/setup issues, not skill bugs — but they silently sink a session if you
 don't recognise them.
@@ -40,17 +40,16 @@ Alternatives: use the wp-kit `.devcontainer`, or a host with a compatible Docker
 
 ---
 
-## 2. `/block-scaffolding` stops and asks about ACF
+## 2. ACF blocks do not register
 
-**Symptom.** The skill runs, then pauses asking *which* ACF to install (and in a
-non-interactive run it produces nothing).
+**Symptom.** An ACF Composer block or field group is missing, and `acf_register_block_type` is undefined.
 
-**Cause.** No ACF / Secure Custom Fields is installed, so the block can't register.
+**Cause.** No ACF or Secure Custom Fields is installed, so the block cannot register.
 
-**Fix.** Install the free, ACF-compatible fork, then sync `acf-composer`:
+**Fix.** Install it (ACF Pro through Composer, or the free fork), then sync `acf-composer`:
 ```bash
 lando wp plugin install secure-custom-fields --activate
-lando ssh -s appserver -c 'cd /app/<theme-path> && composer update log1x/acf-composer log1x/sage-directives'
+lando composer update log1x/acf-composer
 lando wp acorn optimize:clear
 ```
 Verify: `lando wp eval 'var_dump(function_exists("acf_register_block_type"));'`.
@@ -72,24 +71,7 @@ lando ssh -s appserver -c 'cd /app/<theme-path> && composer update log1x/acf-com
 
 ---
 
-## 4. Figma MCP: "this figma file could not be accessed"
-
-**Symptom.** `/designing` (or any Figma read tool) fails for a file you can open in
-the browser.
-
-**Cause.** Almost always the **seat**, not auth. `whoami` shows a **View** seat —
-View/Collab seats are capped at ~6 calls/month and **cannot use Dev-mode tools**
-(`get_metadata`, `get_design_context`, `get_variable_defs`). The file must also live
-in a **team you belong to**.
-
-**Fix.** Authenticate with an account that has a **Dev** or **Full** seat, and make
-sure the file is in that account's team. Re-authenticating the same View-seat
-account will *not* help. Confirm with the `whoami` tool (it lists your plans + seat
-types).
-
----
-
-## 5. Fonts don't load (Tailwind v4 + Vite drops `@import`)
+## 4. Fonts don't load (Tailwind v4 + Vite drops `@import`)
 
 **Symptom.** You add `@import url("https://fonts.googleapis.com/…")` to `app.css`,
 set `--font-display`, rebuild — and the page still renders the system font. The
@@ -110,7 +92,7 @@ Then point the tokens at it: `--font-display: "Montserrat", …;`. (Or put the
 
 ---
 
-## 6. A new Acorn route (e.g. `/kitchensink`) returns 404
+## 5. A new Acorn route (e.g. `/kitchensink`) returns 404
 
 **Symptom.** The route is in `routes/web.php` but the URL 404s.
 
@@ -125,7 +107,7 @@ lando flush          # clears wp/acorn/redis caches + rewrites
 
 ---
 
-## 7. Default WordPress content leaks below your blocks
+## 6. Default WordPress content leaks below your blocks
 
 **Symptom.** "Archives / Categories / Recent posts" widgets render under your
 custom homepage.
@@ -140,6 +122,6 @@ lando wp widget reset --all
 
 ---
 
-> **Meta-lesson.** Symptoms 1, 5 and 6 all *look* like a Vite/Acorn cache bug — they
+> **Meta-lesson.** Symptoms 1, 4 and 5 all *look* like a Vite/Acorn cache bug — they
 > aren't. When an edit "doesn't take", check the **mount** (symptom 1) and the
-> **load path** (symptoms 5–6) before blaming caches.
+> **load path** (symptoms 4-5) before blaming caches.

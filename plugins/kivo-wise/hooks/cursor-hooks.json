@@ -1,0 +1,30 @@
+{
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "node \"./hooks/session-start.mjs\""
+      }
+    ],
+    "userPromptSubmit": [
+      {
+        "command": "node \"./hooks/user-prompt-router.mjs\""
+      }
+    ],
+    "beforeFileEdit": [
+      {
+        "command": "node \"./hooks/protect-files.mjs\""
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "node \"./hooks/pre-commit-attribution.mjs\"",
+        "matcher": "git commit"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "node \"./hooks/post-edit-reminder.mjs\""
+      }
+    ]
+  }
+}

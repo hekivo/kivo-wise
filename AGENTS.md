@@ -1,7 +1,4 @@
-<!-- GENERATED de CLAUDE.md por scripts/build-codex-plugin.mjs — não edite à mão. -->
-<!-- Regras universais superpowers-sage para Codex e ferramentas que leem AGENTS.md. -->
-
-# Superpowers Sage — Universal Rules
+# Kivo Wise — Universal Rules
 
 Rules applied in every session where this plugin is active. These take
 precedence over skill-local guidance unless a skill explicitly overrides.
@@ -17,13 +14,13 @@ precedence over skill-local guidance unless a skill explicitly overrides.
   `scripts/sync-cursor-hooks.mjs`. Manifest versions across
   `.claude-plugin/`, `.cursor-plugin/`, and `.codex-plugin/` are aligned by
   `scripts/sync-codex-manifests.mjs` (also enforced in CI). The Codex CLI
-  (>= 0.137) layout — `.agents/plugins/marketplace.json`, the real-content
-  plugin under `plugins/superpowers-sage/`, and `AGENTS.md` (these universal
-  rules, mirrored for Codex/AGENTS-aware tools) — is **generated** from the root
-  source (`skills/`, `hooks/`, `.codex-plugin/plugin.json`, and this `CLAUDE.md`)
-  by `scripts/build-codex-plugin.mjs`; run it after changing those, never edit
-  the generated files (`AGENTS.md`, `plugins/`, `.agents/`) by hand (CI enforces
-  sync via `--check`). Codex does not load a plugin's `CLAUDE.md`; it reads
+  (>= 0.137) layout — `.agents/plugins/marketplace.json` and the real-content
+  plugin under `plugins/kivo-wise/` (which carries a copy of this file) — is
+  **generated** from the root source (`skills/`, `hooks/`,
+  `.codex-plugin/plugin.json`, and this `AGENTS.md`) by
+  `scripts/build-codex-plugin.mjs`; run it after changing those, never edit
+  the generated files (`plugins/`, `.agents/`) by hand (CI enforces sync via
+  `--check`). Codex does not load a plugin's own context file; it reads
   `AGENTS.md` from the project root — see README → OpenAI Codex.
 
 ## Protected files (never edit directly)
@@ -78,6 +75,6 @@ alternative path.
 
 - Query the WordPress MCP Adapter (if available) via `discover-abilities`
   and `execute-ability` before generating code that references post types,
-  routes, fields, or Livewire components. Consult the `sageing` skill for
-  MCP query patterns when available.
+  routes, fields, or Livewire components. Consult the `roots-router` skill for
+  the lookup order and the native-first gate.
 - If the AI stack is not installed, ask the user instead of guessing.

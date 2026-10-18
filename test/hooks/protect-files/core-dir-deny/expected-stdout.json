@@ -1,0 +1,7 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "kivo-wise: wp/wp-includes/plugin.php is WordPress core (wp/) installed by Composer; the change is lost on the next install."
+  }
+}

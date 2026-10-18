@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hekivo/kivo-wise/skills/roots-triage/references/triage.schema.json",
+  "title": "detect-roots-project output",
+  "description": "JSON document written to stdout by scripts/detect-roots-project.mjs (contract C1).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tool", "root", "layout", "coreDir", "apps", "active", "site", "runtime", "flag", "warnings", "notes", "truncated"],
+  "properties": {
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "const": "detect-roots-project" },
+        "version": { "type": "string" }
+      }
+    },
+    "root": { "type": "string" },
+    "layout": { "enum": ["radicle", "bedrock", "composer-wordpress", "plain-wordpress", "unknown"] },
+    "coreDir": { "type": ["string", "null"] },
+    "apps": { "type": "array", "items": { "$ref": "#/$defs/app" } },
+    "active": { "type": ["integer", "null"] },
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["versions", "wpCli"],
+      "properties": {
+        "versions": { "type": "object", "additionalProperties": { "type": "string" } },
+        "wpCli": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "docroot"],
+          "properties": {
+            "path": { "type": ["string", "null"] },
+            "docroot": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runner", "lando", "runners"],
+      "properties": {
+        "runner": { "enum": ["lando", "ddev", "none"] },
+        "lando": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/lando" }] },
+        "runners": { "type": "object", "additionalProperties": { "type": ["string", "null"] } }
+      }
+    },
+    "flag": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["file", "profile", "app", "runner"],
+          "properties": {
+            "file": { "type": "string" },
+            "profile": { "type": ["string", "null"] },
+            "app": { "type": ["string", "null"] },
+            "runner": { "type": ["string", "null"] },
+            "corpus": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      ]
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "notes": { "type": "array", "items": { "type": "string" } },
+    "truncated": { "type": "boolean" }
+  },
+  "$defs": {
+    "app": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "namespace", "basePathHint", "boot", "providers", "blocks", "postTypes", "versions"],
+      "properties": {
+        "kind": { "enum": ["sage-theme", "acorn-theme", "acorn-mu-plugin", "acorn-plugin", "radicle-app", "acorn-unknown"] },
+        "path": { "type": "string" },
+        "namespace": { "type": ["string", "null"] },
+        "basePathHint": { "enum": ["ACORN_BASEPATH", "configure-arg", "withPaths", "theme-inferred", "root", null] },
+        "boot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["file", "hook", "priority"],
+          "properties": {
+            "file": { "type": ["string", "null"] },
+            "hook": { "type": ["string", "null"] },
+            "priority": { "type": ["integer", "null"] }
+          }
+        },
+        "providers": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source", "file"],
+          "properties": {
+            "source": { "enum": ["configurator", "config/app.php", "composer-extra", "functions.php", null] },
+            "file": { "type": ["string", "null"] }
+          }
+        },
+        "blocks": { "enum": ["acf-composer", "native", "none"] },
+        "postTypes": { "enum": ["poet", "classes", "acorn-post-types", "none"] },
+        "versions": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "lando": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["files", "name", "recipe", "webroot", "php", "via", "database", "xdebug", "composerVersion", "webService", "envFile", "misplacedEnvFile", "excludes", "services", "tooling", "events", "parseErrors"],
+      "properties": {
+        "files": { "type": "array", "items": { "type": "string" } },
+        "name": { "type": ["string", "null"] },
+        "recipe": { "type": ["string", "null"] },
+        "webroot": { "type": "string" },
+        "php": { "type": ["string", "null"] },
+        "via": { "type": "string" },
+        "database": { "type": ["string", "null"] },
+        "xdebug": { "type": ["boolean", "string", "null"] },
+        "composerVersion": { "type": ["string", "boolean", "null"] },
+        "configFiles": { "type": "object", "additionalProperties": { "type": "string" } },
+        "webService": { "enum": ["appserver", "appserver_nginx"] },
+        "envFile": { "type": "array", "items": { "type": "string" } },
+        "misplacedEnvFile": { "type": "boolean" },
+        "excludes": { "type": "array", "items": { "type": "string" } },
+        "services": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": { "type": ["string", "null"] },
+              "image": { "type": ["string", "null"] },
+              "ports": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "tooling": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "service": { "type": ["string", "null"] },
+              "cmd": { "type": ["string", "null"] },
+              "dir": { "type": ["string", "null"] },
+              "description": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "events": { "type": "array", "items": { "type": "string" } },
+        "proxy": { "type": "object" },
+        "parseErrors": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
