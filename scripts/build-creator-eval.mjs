@@ -13,14 +13,15 @@
  *     evals/fixtures, staged here from test/fixtures/creator.
  *  4. Cases with mocks/figma/ get the recorded Figma responses in
  *     mocks/figma/fixtures. Design contexts are stored as
- *     design-context-<node id with a dash>.md (a colon is not a portable file
- *     name); a copy with the colon form is added where the platform allows it,
- *     so {input.nodeId} resolves whichever form the call uses.
+ *     design-context-<node id with a dash>.md: a colon is neither a portable
+ *     file name nor a segment the mock's {input.nodeId} accepts, so a call
+ *     with "1:10" gets a tool error and the model retries with "1-10" (both
+ *     forms are valid node ids for the real server).
  *
  * Usage: node scripts/build-creator-eval.mjs [--out=.creator-eval]
  * Then:  claude plugin eval .creator-eval/kivo-creator --scaffold --allow-tools Bash Write Edit
  */
-import { copyFileSync, cpSync, existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -41,13 +42,7 @@ export function stage(outBase) {
   for (const entry of readdirSync(join(out, 'evals'), { withFileTypes: true })) {
     const mocks = join(out, 'evals', entry.name, 'mocks', 'figma');
     if (!entry.isDirectory() || !existsSync(mocks)) continue;
-    const target = join(mocks, 'fixtures');
-    cpSync(figmaFixtures, target, { recursive: true });
-    if (process.platform === 'win32') continue;
-    for (const file of readdirSync(target)) {
-      const m = file.match(/^design-context-(\d+)-(\d+)\.md$/);
-      if (m) copyFileSync(join(target, file), join(target, `design-context-${m[1]}:${m[2]}.md`));
-    }
+    cpSync(figmaFixtures, join(mocks, 'fixtures'), { recursive: true });
   }
   return out;
 }

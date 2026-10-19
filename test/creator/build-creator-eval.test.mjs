@@ -21,7 +21,6 @@ test('cases with Figma mocks get the recorded responses in mocks/figma/fixtures'
   const out = stage(mkdtempSync(join(tmpdir(), 'stage-')));
   const fixtures = join(out, 'evals', 'figma-ingest-mocked', 'mocks', 'figma', 'fixtures');
   assert.ok(existsSync(join(fixtures, 'metadata.xml')));
-  assert.ok(existsSync(join(fixtures, 'design-context-1-10.md')), 'node ids written with a dash resolve');
-  if (process.platform !== 'win32') assert.ok(existsSync(join(fixtures, 'design-context-1:10.md')), 'node ids written with a colon resolve too');
+  assert.ok(existsSync(join(fixtures, 'design-context-1-10.md')), 'design contexts are stored with the dash form of the node id');
   assert.ok(!existsSync(join(out, 'evals', 'figma-stops-without-mcp', 'mocks')), 'the missing-MCP case has no mocks');
 });
