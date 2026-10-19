@@ -34,3 +34,17 @@ export function n(tag, rect, children = [], extra = {}) {
   };
 }
 export const r = (y, h, x = 0, w = 1440) => ({ x, y, w, h });
+
+export const validSpec = () => ({
+  id: '01-hero',
+  order: 0,
+  source: { kind: 'html', ref: 'body > main > section:nth-of-type(1)' },
+  kind: 'hero',
+  slots: [
+    { name: 'heading', type: 'heading', value: 'Acme ships faster', provenance: 'exact' },
+    { name: 'items', type: 'list', provenance: 'exact', items: [[{ name: 'text', type: 'text', value: 'One', provenance: 'exact' }]] },
+  ],
+  layout: { columns: 1, align: 'left', media: 'right', repeat: 0 },
+  tokens: [{ role: 'heading', prop: 'color', value: 'rgb(17, 24, 39)', token: '--color-ink', provenance: 'exact' }],
+  refs: { 1440: 'refs/01-hero-1440.png' },
+});
