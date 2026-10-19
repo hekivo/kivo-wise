@@ -107,3 +107,38 @@ export function encodePng({ width, height, data }) {
   header[9] = 6;
   return Buffer.concat([SIGNATURE, pngChunk('IHDR', header), pngChunk('IDAT', deflateSync(raw)), pngChunk('IEND', Buffer.alloc(0))]);
 }
+
+/**
+ * Pixel diff. A pixel differs when any RGBA channel differs by more than
+ * `tolerance`; pixels outside the overlap of two sizes always differ.
+ * Returns counts, the ratio and a diff image (red = different, faded gray = same).
+ */
+export function diffImages(a, b, { tolerance = 16 } = {}) {
+  const width = Math.max(a.width, b.width);
+  const height = Math.max(a.height, b.height);
+  const data = Buffer.alloc(width * height * 4);
+  let differing = 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const o = (y * width + x) * 4;
+      const inA = x < a.width && y < a.height;
+      const inB = x < b.width && y < b.height;
+      let different = !inA || !inB;
+      if (!different) {
+        const ia = (y * a.width + x) * 4;
+        const ib = (y * b.width + x) * 4;
+        for (let k = 0; k < 4 && !different; k++) different = Math.abs(a.data[ia + k] - b.data[ib + k]) > tolerance;
+      }
+      if (different) {
+        differing++;
+        data[o] = 255; data[o + 1] = 0; data[o + 2] = 0; data[o + 3] = 255;
+      } else {
+        const ia = (y * a.width + x) * 4;
+        const gray = Math.round((a.data[ia] * 0.299 + a.data[ia + 1] * 0.587 + a.data[ia + 2] * 0.114) * 0.3 + 255 * 0.7);
+        data[o] = data[o + 1] = data[o + 2] = gray; data[o + 3] = 255;
+      }
+    }
+  }
+  const total = width * height;
+  return { width, height, differing, total, ratio: total ? differing / total : 0, sizeMatch: a.width === b.width && a.height === b.height, image: { width, height, data } };
+}
