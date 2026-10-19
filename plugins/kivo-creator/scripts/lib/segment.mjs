@@ -154,3 +154,126 @@ export function classify(node) {
   if (has((n) => n.tag === 'img')) return 'media';
   return 'custom';
 }
+
+const TEXT_TAGS = new Set(['p', 'dd', 'blockquote', 'figcaption', 'cite']);
+const LOOSE_TEXT_TAGS = new Set(['span', 'div', 'strong', 'em', 'small', 'label', 'li']);
+
+/** Slots in document order; a repeated group becomes a trailing list slot "items". */
+export function extractSlots(node) {
+  const group = repeatedGroup(node);
+  // Skip the items, not the container: the container can be the section itself (faq).
+  const slots = collectSlots(node, new Set(group ? group.items : []));
+  if (group) slots.push({ name: 'items', type: 'list', provenance: 'exact', items: group.items.map((item) => collectSlots(item, new Set())) });
+  return slots;
+}
+
+function collectSlots(root, skip) {
+  const out = [];
+  const counters = {};
+  const add = (type, value) => {
+    counters[type] = (counters[type] ?? 0) + 1;
+    out.push({ name: counters[type] === 1 ? type : `${type}_${counters[type]}`, type, value, provenance: 'exact' });
+  };
+  const visit = (n) => {
+    if (skip.has(n)) return;
+    const t = n.tag;
+    if (HEADING.test(t) || t === 'summary' || t === 'dt') { const v = textOf(n); if (v) add('heading', v); return; }
+    if (TEXT_TAGS.has(t)) { const v = textOf(n); if (v) add('text', v); return; }
+    if (t === 'img') { if (n.attrs?.src) add('image', { src: n.attrs.src, alt: n.attrs.alt ?? '' }); return; }
+    if ((t === 'a' || t === 'button') && textOf(n)) { add('link', { href: n.attrs?.href ?? '', text: textOf(n) }); return; }
+    if (t === 'form') {
+      const fields = findAll(n, (x) => ['input', 'select', 'textarea'].includes(x.tag)).map((x) => x.attrs?.name).filter(Boolean);
+      add('form', { action: n.attrs?.action ?? '', fields });
+      return;
+    }
+    if (t === 'iframe' || t === 'video') { add('embed', { src: n.attrs?.src ?? '' }); return; }
+    if (LOOSE_TEXT_TAGS.has(t) && n.text && !(n.children ?? []).length) { add('text', n.text); return; }
+    for (const child of n.children ?? []) visit(child);
+  };
+  visit(root);
+  return out;
+}
+
+export function extractLayout(node) {
+  const group = repeatedGroup(node);
+  const heading = find(node, (n) => HEADING.test(n.tag));
+  const textAlign = heading?.style?.textAlign ?? 'left';
+  return {
+    columns: group ? Math.max(1, group.items.filter((i) => Math.abs(i.rect.y - group.items[0].rect.y) <= 4).length) : 1,
+    align: textAlign === 'center' ? 'center' : textAlign === 'right' || textAlign === 'end' ? 'right' : 'left',
+    media: mediaPosition(node, heading, group),
+    repeat: group ? group.items.length : 0,
+  };
+}
+
+function mediaPosition(node, heading, group) {
+  if (node.style?.backgroundImage && node.style.backgroundImage !== 'none') return 'background';
+  const inGroup = new Set();
+  if (group) for (const item of group.items) walk(item, (n) => inGroup.add(n));
+  const media = findAll(node, (n) => ['img', 'video', 'iframe'].includes(n.tag) && !inGroup.has(n) && n.rect?.w > 0);
+  if (!media.length) return 'none';
+  const biggest = media.sort((a, b) => b.rect.w * b.rect.h - a.rect.w * a.rect.h)[0];
+  if (biggest.rect.w * biggest.rect.h >= 0.8 * node.rect.w * node.rect.h) return 'background';
+  if (!heading) return 'top';
+  const mediaCenter = biggest.rect.x + biggest.rect.w / 2;
+  const headingCenter = heading.rect.x + heading.rect.w / 2;
+  if (mediaCenter > headingCenter + 40) return 'right';
+  if (mediaCenter < headingCenter - 40) return 'left';
+  return biggest.rect.y < heading.rect.y ? 'top' : 'bottom';
+}
+
+const isButton = (n) => n.tag === 'button' || (n.tag === 'a' && (n.cls ?? []).some((c) => /btn|button/i.test(c)));
+
+/** The element that represents a token role inside a section (shared with verify). */
+export function roleNode(node, role) {
+  switch (role) {
+    case 'section': return node;
+    case 'heading': return find(node, (n) => HEADING.test(n.tag));
+    case 'text': return find(node, (n) => n.tag === 'p');
+    case 'link': return find(node, (n) => n.tag === 'a' && !isButton(n));
+    case 'button': return find(node, isButton);
+    case 'media': return find(node, (n) => n.tag === 'img' || n.tag === 'video');
+    default: return null;
+  }
+}
+
+const ROLE_PROPS = {
+  section: ['backgroundColor', 'paddingTop', 'paddingBottom'],
+  heading: ['color', 'fontFamily', 'fontSize', 'fontWeight', 'lineHeight'],
+  text: ['color', 'fontFamily', 'fontSize', 'lineHeight'],
+  link: ['color'],
+  button: ['backgroundColor', 'color'],
+};
+const EMPTY_VALUES = new Set(['', 'none', 'normal', 'auto', 'transparent', 'rgba(0, 0, 0, 0)']);
+
+export function extractTokens(node) {
+  const out = [];
+  for (const [role, props] of Object.entries(ROLE_PROPS)) {
+    const target = roleNode(node, role);
+    if (!target) continue;
+    for (const prop of props) {
+      const value = target.style?.[prop];
+      if (value === undefined || EMPTY_VALUES.has(String(value).trim())) continue;
+      out.push({ role, prop, value: String(value), provenance: 'exact', node: target.path });
+    }
+  }
+  return out;
+}
+
+export function toSpec({ node, chrome }, { index, sourceRef }) {
+  const kind = chrome ? 'custom' : classify(node);
+  const spec = {
+    id: `${String(index + 1).padStart(2, '0')}-${chrome ? node.tag : kind}`,
+    order: index,
+    source: { kind: 'html', ref: node.path, url: sourceRef },
+    kind,
+    slots: extractSlots(node),
+    layout: extractLayout(node),
+    tokens: extractTokens(node),
+    refs: {},
+    notes: ['kind and layout are inferred by heuristics; slot values and tokens are exact (DOM text and computed styles)'],
+  };
+  if (chrome) spec.chrome = true;
+  if (node.merged) spec.notes.push(`merged short siblings: ${node.merged.join(', ')}`);
+  return spec;
+}
