@@ -7544,3 +7544,9 @@ Do not push and do not open the merge request unless asked. The first release of
 5. **Cursor marketplace relative source:** Cursor's marketplace is given the same relative string as Claude Code. Confirm Cursor resolves it, or switch its entry to a GitHub subdirectory source.
 6. **Radicle conventions:** the radicle adapter places new `block.json` files next to existing ones and leaves registration and the editor script as notes. Someone with access to the licensed Radicle documentation should confirm the default block folder and whether `make:block` is the expected generator.
 7. **`@textarea` directive:** the ACF view follows the kivo-wise `AGENTS.md` escaping rule (`@textarea($f)`), which assumes the project registers that directive. Keep it, or emit `{!! nl2br(e($f)) !!}`-style escaping when the directive is absent (kivo-wise currently forbids `nl2br(esc_html())`)?
+
+## Deviations
+
+Recorded while executing the plan; each one is the smallest change that made the task's own test pass or kept the repo checks green.
+
+- **Task 9 (segment):** the unwrapping loops descended into any single visible child with 2+ children, so `main > [hero, hidden cta]` was split into the hero's own children (the `invisible nodes are not sections` test got 2 sections). Unwrapping now only enters a generic wrapper: not a `section` or `article` element and without a heading of its own (`isWrapper`).
