@@ -11,11 +11,16 @@
  *     for it gets no server at all: that is the "Figma MCP missing" case.
  *  3. Runs cannot read the eval folder; scaffold scripts copy fixtures from
  *     evals/fixtures, staged here from test/fixtures/creator.
+ *  4. Cases with mocks/figma/ get the recorded Figma responses in
+ *     mocks/figma/fixtures. Design contexts are stored as
+ *     design-context-<node id with a dash>.md (a colon is not a portable file
+ *     name); a copy with the colon form is added where the platform allows it,
+ *     so {input.nodeId} resolves whichever form the call uses.
  *
  * Usage: node scripts/build-creator-eval.mjs [--out=.creator-eval]
  * Then:  claude plugin eval .creator-eval/kivo-creator --scaffold --allow-tools Bash Write Edit
  */
-import { cpSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, cpSync, existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -32,6 +37,18 @@ export function stage(outBase) {
   writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
   writeFileSync(join(out, '.mcp.json'), `${JSON.stringify({ mcpServers: { figma: { type: 'http', url: 'https://mcp.figma.com/mcp' } } }, null, 2)}\n`);
   cpSync(join(ROOT, 'test', 'fixtures', 'creator'), join(out, 'evals', 'fixtures'), { recursive: true });
+  const figmaFixtures = join(ROOT, 'test', 'fixtures', 'creator', 'figma');
+  for (const entry of readdirSync(join(out, 'evals'), { withFileTypes: true })) {
+    const mocks = join(out, 'evals', entry.name, 'mocks', 'figma');
+    if (!entry.isDirectory() || !existsSync(mocks)) continue;
+    const target = join(mocks, 'fixtures');
+    cpSync(figmaFixtures, target, { recursive: true });
+    if (process.platform === 'win32') continue;
+    for (const file of readdirSync(target)) {
+      const m = file.match(/^design-context-(\d+)-(\d+)\.md$/);
+      if (m) copyFileSync(join(target, file), join(target, `design-context-${m[1]}:${m[2]}.md`));
+    }
+  }
   return out;
 }
 
