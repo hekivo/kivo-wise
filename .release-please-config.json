@@ -5,6 +5,9 @@
       "release-type": "simple",
       "package-name": "kivo-wise",
       "include-v-in-tag": true,
+      "exclude-paths": [
+        "plugins/kivo-creator"
+      ],
       "extra-files": [
         {
           "type": "json",
@@ -45,6 +48,75 @@
           "type": "json",
           "path": "plugins/kivo-wise/.codex-plugin/plugin.json",
           "jsonpath": "$.version"
+        }
+      ],
+      "changelog-sections": [
+        {
+          "type": "feat",
+          "section": "Features"
+        },
+        {
+          "type": "fix",
+          "section": "Bug Fixes"
+        },
+        {
+          "type": "perf",
+          "section": "Performance"
+        },
+        {
+          "type": "docs",
+          "section": "Documentation"
+        },
+        {
+          "type": "chore",
+          "section": "Chores",
+          "hidden": true
+        }
+      ]
+    },
+    "plugins/kivo-creator": {
+      "release-type": "simple",
+      "package-name": "kivo-creator",
+      "component": "kivo-creator",
+      "include-component-in-tag": true,
+      "include-v-in-tag": true,
+      "initial-version": "0.1.0",
+      "bump-minor-pre-major": true,
+      "extra-files": [
+        {
+          "type": "json",
+          "path": ".claude-plugin/plugin.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": ".cursor-plugin/plugin.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": ".codex-plugin/plugin.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "/.claude-plugin/marketplace.json",
+          "jsonpath": "$.plugins[1].version"
+        },
+        {
+          "type": "json",
+          "path": "/.cursor-plugin/marketplace.json",
+          "jsonpath": "$.plugins[1].version"
+        },
+        {
+          "type": "json",
+          "path": "/.codex-plugin/marketplace.json",
+          "jsonpath": "$.plugins[1].version"
+        },
+        {
+          "type": "json",
+          "path": "/.agents/plugins/marketplace.json",
+          "jsonpath": "$.plugins[1].version"
         }
       ],
       "changelog-sections": [

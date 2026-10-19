@@ -50,3 +50,32 @@ test('every marketplace lists kivo-creator second, with the plugin version and a
 test('kivo-wise stays the first entry of every marketplace', () => {
   for (const [file] of MARKETPLACES) assert.equal(readJson(join(ROOT, file)).plugins[0].name, 'kivo-wise', file);
 });
+
+import { existsSync } from 'node:fs';
+
+/** Resolves the two jsonpath shapes used in our config: $.a.b and $.a[1].b */
+function jsonpath(data, path) {
+  return path.replace(/^\$\.?/, '').split('.').reduce((acc, part) => {
+    const m = part.match(/^([^[\]]+)(?:\[(\d+)\])?$/);
+    const value = acc?.[m[1]];
+    return m[2] === undefined ? value : value?.[Number(m[2])];
+  }, data);
+}
+
+test('release-please releases kivo-creator as its own package with a kivo-creator-vX.Y.Z tag', () => {
+  const config = readJson(join(ROOT, '.release-please-config.json'));
+  const pkg = config.packages['plugins/kivo-creator'];
+  assert.ok(pkg, 'package plugins/kivo-creator');
+  assert.equal(pkg['package-name'], 'kivo-creator');
+  assert.equal(pkg.component, 'kivo-creator');
+  assert.equal(pkg['include-component-in-tag'], true);
+  assert.equal(pkg['initial-version'], '0.1.0');
+  assert.deepEqual(config.packages['.']['exclude-paths'], ['plugins/kivo-creator']);
+  const version = manifest('.claude-plugin').version;
+  for (const file of pkg['extra-files']) {
+    const abs = file.path.startsWith('/') ? join(ROOT, file.path) : join(ROOT, 'plugins/kivo-creator', file.path);
+    assert.ok(existsSync(abs), `${file.path} exists`);
+    assert.equal(jsonpath(readJson(abs), file.jsonpath), version, `${file.path} ${file.jsonpath}`);
+  }
+  assert.equal(pkg['extra-files'].length, 7);
+});
