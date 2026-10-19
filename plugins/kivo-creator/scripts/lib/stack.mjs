@@ -37,6 +37,8 @@ export function resolveStack(projectDir, { detection = null } = {}) {
     namespace: readNamespace(appPath) ?? app?.namespace ?? 'App\\',
     blocks: app?.blocks ?? (existsSync(join(appPath, 'app', 'Blocks')) ? 'acf-composer' : 'native'),
     runner: flag?.runner ?? detection?.runtime?.runner ?? 'none',
+    // creator.blocks ("acf" | "native"): validated by adapters/shared/block-type.mjs.
+    creatorBlocks: flag?.creator?.blocks ?? null,
   };
 }
 

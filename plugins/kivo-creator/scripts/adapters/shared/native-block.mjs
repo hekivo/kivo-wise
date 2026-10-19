@@ -1,8 +1,9 @@
 // plugins/kivo-creator/scripts/adapters/shared/native-block.mjs
 /**
- * Native blocks (block.json). Used by the radicle adapter and by sage-theme
- * when the theme registers blocks without ACF Composer. The layout follows the
- * project's existing block.json files; nothing about folders is assumed.
+ * Native blocks (block.json). Every adapter reads them into its catalog and
+ * scaffolds them when the project's block type is "native" (block-type.mjs).
+ * The layout follows the project's existing block.json files; nothing about
+ * folders is assumed.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
@@ -48,6 +49,7 @@ export function nativeCatalog(stack) {
     if (!json.name) continue;
     blocks.push({
       name: json.name,
+      type: 'native',
       slug: json.name.split('/')[1],
       title: json.title ?? json.name,
       description: json.description ?? '',
@@ -105,9 +107,11 @@ function mostCommon(values, fallback) {
  */
 export function scaffoldNative(stack, spec, { theme, catalog = [], fallbackPrefix = 'app', fallbackDir = 'resources/blocks' }) {
   const { slug, title } = uniqueName(spec, catalog.map((b) => ({ ...b, className: '' })));
-  const prefix = mostCommon(catalog.map((b) => b.name.split('/')[0]), fallbackPrefix);
+  // The catalog can hold ACF blocks too (it is the union of both types); only native ones set the prefix.
+  const native = catalog.filter((b) => (b.type ? b.type === 'native' : !String(b.name).startsWith('acf/')));
+  const prefix = mostCommon(native.map((b) => b.name.split('/')[0]), fallbackPrefix);
   const app = posix(relative(stack.projectDir, stack.appPath));
-  const blocksDir = mostCommon(catalog.filter((b) => b.dir).map((b) => posix(dirname(b.dir))), posix(join(app, fallbackDir)));
+  const blocksDir = mostCommon(native.filter((b) => b.dir).map((b) => posix(dirname(b.dir))), posix(join(app, fallbackDir)));
   const { fields, notes } = fieldsFromSlots(spec.slots);
   const { utils, proposals } = roleUtilities(spec.tokens, theme);
   const name = `${prefix}/${slug}`;
@@ -132,6 +136,6 @@ export function scaffoldNative(stack, spec, { theme, catalog = [], fallbackPrefi
     `register the block where the project registers the others, on init: register_block_type(base_path('${blockDir}'), ['render_callback' => fn ($attributes) => view('blocks.${slug}', ['data' => $attributes])->render()]); (adjust base_path to the project's helper)`,
     'the editor UI (edit script) is not generated: run the project\'s make:block generator if it has one, or add a ServerSideRender edit script the way the existing blocks do',
   );
-  const block = { name, slug, title, description: blockJson.description, whenToUse: WHEN[spec.kind], source: files[0].path, dir: blockDir, fields: fields.map(catalogField) };
+  const block = { name, type: 'native', slug, title, description: blockJson.description, whenToUse: WHEN[spec.kind], source: files[0].path, dir: blockDir, fields: fields.map(catalogField) };
   return { block, commands: [], files, notes, proposals };
 }

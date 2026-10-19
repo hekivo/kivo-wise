@@ -7,7 +7,10 @@
  * step of the block-scaffolding-from-design skill, after the project's
  * generator ran.
  *
- * Usage: node scripts/emit.mjs --run=.creator/<run> [--project=.] [--stack=<detector.json>] [--selector=<css>]
+ * Usage: node scripts/emit.mjs --run=.creator/<run> [--project=.] [--stack=<detector.json>] [--selector=<css>] [--blocks=acf|native]
+ * New blocks follow the project's block type (adapters/shared/block-type.mjs);
+ * emit refuses to scaffold while it is undecided. --blocks is the person's
+ * answer for this run; emitted.json records the decision as blockType.
  * emitted.json records the CSS selector of one rendered section for verify.mjs:
  * --selector when given, else the adapter default.
  */
@@ -16,6 +19,7 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { parseOptions, runCli } from './lib/args.mjs';
 import { loadContext } from './lib/context.mjs';
 import { checkPlan } from './lib/match.mjs';
+import { unresolvedMessage } from './adapters/shared/block-type.mjs';
 import { assign } from './lib/fill.mjs';
 import { readSpecs } from './lib/spec.mjs';
 import { readJson, runPaths, writeJson } from './lib/run.mjs';
@@ -23,19 +27,21 @@ import { readJson, runPaths, writeJson } from './lib/run.mjs';
 const posix = (p) => p.split('\\').join('/');
 
 export async function main(argv) {
-  const o = parseOptions(argv, { project: '.', run: '', stack: '', selector: '' });
+  const o = parseOptions(argv, { project: '.', run: '', stack: '', selector: '', blocks: '' });
   if (!o.run) throw new Error('usage: emit.mjs --run=<.creator/run> [--project=.]');
   const ctx = await loadContext(o);
   const project = resolve(o.project);
   const runDir = resolve(o.run);
   const paths = runPaths(runDir);
   const plan = readJson(paths.plan);
+  const scaffolds = plan.sections.some((s) => s.decision?.action === 'scaffold');
+  if (scaffolds && !ctx.blockType.type) throw new Error(unresolvedMessage(ctx.blockType));
   const errors = checkPlan(plan, ctx.catalog, { allowsGeneratedBlocks: ctx.adapter.allowsGeneratedBlocks });
   if (errors.length) throw new Error(`the match plan is not approved yet:\n${errors.join('\n')}`);
   const specs = new Map(readSpecs(paths.specs).map((s) => [s.id, s]));
   const catalog = [...ctx.catalog];
   const entries = [];
-  const out = { adapter: ctx.adapter.name, selector: o.selector || ctx.adapter.selector, page: posix(relative(project, paths.page)), files: [], commands: [], media: [], gaps: [], proposals: [], notes: [] };
+  const out = { adapter: ctx.adapter.name, selector: o.selector || ctx.adapter.selector, page: posix(relative(project, paths.page)), blockType: ctx.blockType, files: [], commands: [], media: [], gaps: [], proposals: [], notes: [] };
   for (const section of plan.sections) {
     const spec = specs.get(section.spec);
     const d = section.decision;
@@ -47,7 +53,7 @@ export async function main(argv) {
       entries.push({ block, spec, pairs: assign(spec.slots, block.fields).pairs });
       continue;
     }
-    const made = ctx.adapter.scaffoldBlock(ctx.stack, spec, { theme: ctx.theme, catalog });
+    const made = ctx.adapter.scaffoldBlock(ctx.stack, spec, { theme: ctx.theme, catalog, blockType: ctx.blockType });
     if (made.gap) { out.gaps.push({ spec: spec.id, reason: made.gap }); continue; }
     catalog.push(made.block);
     entries.push({ block: made.block, spec, pairs: assign(spec.slots, made.block.fields).pairs });

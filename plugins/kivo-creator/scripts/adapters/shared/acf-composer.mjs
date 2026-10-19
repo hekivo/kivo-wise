@@ -1,6 +1,6 @@
 // plugins/kivo-creator/scripts/adapters/shared/acf-composer.mjs
 /**
- * ACF Composer conventions shared by the acorn-mu-plugin and sage-theme adapters.
+ * ACF Composer conventions shared by every adapter (block-type.mjs picks them when the project uses ACF Composer blocks).
  * Block name acf/{slug}; slug defaults to Str::slug(Str::kebab($name)) (acfDefaultSlug); the field group
  * is Builder::make(<literal>) or the slug ($this->slug).
  */
@@ -105,7 +105,7 @@ export function acfCatalog(stack) {
   const blocks = [];
   for (const file of phpFiles(join(stack.appPath, 'app', 'Blocks'))) {
     const block = parseBlockClass(readFileSync(file, 'utf8'), posix(relative(stack.projectDir, file)));
-    if (block) blocks.push(block);
+    if (block) blocks.push({ ...block, type: 'acf' });
   }
   return blocks.sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -286,6 +286,6 @@ export function scaffoldAcf(stack, spec, { theme, catalog = [] }) {
     { path: at('resources', 'views', 'blocks', `${slug}.blade.php`), content: renderView({ slug, spec, fields, utils, flavour: 'acf', textareaDirective }) },
     { path: at('resources', 'css', 'blocks', `${slug}.css`), content: renderBlockCss({ name: `acf/${slug}`, spec, proposals }) },
   ];
-  const block = { name: `acf/${slug}`, slug, className, title, description: `${title} section generated from the design.`, whenToUse: WHEN[spec.kind], group: slug, source: files[0].path, fields: fields.map(toCatalogField) };
+  const block = { name: `acf/${slug}`, type: 'acf', slug, className, title, description: `${title} section generated from the design.`, whenToUse: WHEN[spec.kind], group: slug, source: files[0].path, fields: fields.map(toCatalogField) };
   return { block, commands: [`acf:block ${className} --no-interaction`], files, notes, proposals };
 }

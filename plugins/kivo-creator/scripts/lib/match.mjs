@@ -1,5 +1,6 @@
 // plugins/kivo-creator/scripts/lib/match.mjs
 import { assign } from './fill.mjs';
+import { describeBlockType, unresolvedMessage } from '../adapters/shared/block-type.mjs';
 
 export const THRESHOLD = 0.6;
 const ACTIONS = new Set(['fill', 'scaffold', 'gap', 'skip', 'ask']);
@@ -15,7 +16,7 @@ export function candidatesFor(spec, catalog) {
     .sort((a, b) => b.coverage - a.coverage || a.block.localeCompare(b.block));
 }
 
-export function buildPlan({ run, adapter, specs, catalog, allowsGeneratedBlocks = true }) {
+export function buildPlan({ run, adapter, specs, catalog, allowsGeneratedBlocks = true, blockType = null }) {
   const sections = specs.map((spec) => {
     const base = { spec: spec.id, kind: spec.kind };
     if (spec.chrome) return { ...base, candidates: [], decision: { action: 'skip', block: null, confidence: 1, reason: 'site chrome (header, footer or navigation) is not page content' } };
@@ -29,11 +30,13 @@ export function buildPlan({ run, adapter, specs, catalog, allowsGeneratedBlocks 
     }
     return { ...base, candidates, decision: null };
   });
-  return { run, adapter, threshold: THRESHOLD, sections };
+  return { run, adapter, threshold: THRESHOLD, ...(blockType ? { blockType } : {}), sections };
 }
 
-export function checkPlan(plan, catalog, { allowsGeneratedBlocks = true } = {}) {
+/** blockType (resolveBlockType) is checked only when given: a scaffold decision needs a resolved type. */
+export function checkPlan(plan, catalog, { allowsGeneratedBlocks = true, blockType = null } = {}) {
   const errors = [];
+  if (blockType && !blockType.type && allowsGeneratedBlocks && (plan.sections ?? []).some((s) => s.decision?.action === 'scaffold')) errors.push(unresolvedMessage(blockType));
   const names = new Set(catalog.map((b) => b.name));
   for (const s of plan.sections ?? []) {
     const d = s.decision;
@@ -59,6 +62,7 @@ export function formatPlan(plan) {
     '',
     `Adapter: \`${plan.adapter}\`. Confidence threshold: ${plan.threshold}. Nothing is emitted until this plan is approved.`,
     '',
+    ...(plan.blockType ? [describeBlockType(plan.blockType), ''] : []),
     '| Section | Kind | Action | Block | Confidence | Reason |',
     '|---|---|---|---|---|---|',
   ];

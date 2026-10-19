@@ -5,10 +5,11 @@
  *  profiles               kivo-wise profiles it serves
  *  selector               CSS selector of one rendered section (verify)
  *  allowsGeneratedBlocks  false = record a gap instead of scaffolding
- *  catalog(stack)         -> Block[]  { name, slug, className?, title, description, whenToUse, group?, source, fields: Field[] }
+ *  catalog(stack)         -> Block[]  { name, type ('acf' | 'native'), slug, className?, title, description, whenToUse, group?, source, fields: Field[] }
  *                            Field { name, type (ACF vocabulary: text, textarea, wysiwyg, image, link, url, oembed, repeater, ...), min?, max?, subFields? }
- *  emitPage(stack, entries) -> { markup, media }   entries: [{ block, pairs, spec }] (pairs from lib/fill.mjs assign())
- *  scaffoldBlock(stack, spec, { theme, catalog }) -> { block, commands, files: [{ path, content }], notes, proposals } | { gap }
+ *  emitPage(stack, entries) -> { markup, media }   entries: [{ block, pairs, spec }] (pairs from lib/fill.mjs assign()); each block in its own type's markup
+ *  scaffoldBlock(stack, spec, { theme, catalog, blockType }) -> { block, commands, files: [{ path, content }], notes, proposals } | { gap }
+ *                            blockType = resolveBlockType() from shared/block-type.mjs; throws while its type is null
  *  themeCss(stack)        -> absolute path of the CSS file holding @theme, or null
  */
 const REQUIRED = ['name', 'profiles', 'selector', 'allowsGeneratedBlocks', 'catalog', 'emitPage', 'scaffoldBlock', 'themeCss'];
