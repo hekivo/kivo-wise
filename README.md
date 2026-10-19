@@ -97,6 +97,10 @@ docs-brain search "query"   # search the corpus (rg when available)
 
 The corpus lives in a separate private repository. Each project points to it in `.docs-brain.json`; the plugin ships no corpus. The `docs-brain` skill defines the lookup order and how to search.
 
+## kivo-creator
+
+A second plugin in this repository, [`plugins/kivo-creator`](plugins/kivo-creator/README.md): Figma and HTML to WordPress blocks on the Roots stack. It reuses the project's blocks first, generates only the gaps and verifies the page with a pixel diff. Install with `claude plugin install kivo-creator@kivo-wise`; it depends on kivo-wise. Released separately (`kivo-creator-vX.Y.Z` tags).
+
 ## Cursor, Codex and Copilot
 
 These assistants do not load Claude Code plugins, so copy the skills into the project:
