@@ -17,6 +17,7 @@ const FUNCTIONS = ['catalog', 'emitPage', 'scaffoldBlock', 'themeCss'];
 export const ADAPTER_FOR_PROFILE = { 'acorn-mu-plugin': 'acorn-mu-plugin', 'sage-theme': 'sage-theme', 'radicle-app': 'radicle' };
 const LOADERS = {
   'acorn-mu-plugin': () => import('./acorn-mu-plugin.mjs'),
+  'sage-theme': () => import('./sage-theme.mjs'),
 };
 
 export function assertAdapter(adapter) {
