@@ -6,7 +6,7 @@ Figma and HTML to WordPress on the Roots stack. kivo-creator turns a design into
 source ─▶ ingest ─▶ section specs ─▶ match plan (stop for approval) ─▶ emit ─▶ verify ─▶ report
 ```
 
-Requires the [kivo-wise](../../README.md) plugin (stack detection and runner context), Node.js 20+, and Playwright in the target project for HTML sources and verification. Figma sources need the official Figma MCP server connected in the session.
+Requires the [kivo-wise](../../README.md) plugin (stack detection and runner context), Node.js 20+, and Playwright in the target project for HTML sources and verification. Figma sources need the official Figma MCP server connected in the session. Pixel references for Figma sections also need a Figma personal access token exported as `FIGMA_TOKEN`; without it reference images cannot be fetched, and verify only checks styles and lint for those sections.
 
 ## Install
 
