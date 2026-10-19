@@ -3,3 +3,5 @@
 .worktrees/
 .kivo-wise/
 evals/results/
+.creator/
+.creator-eval/

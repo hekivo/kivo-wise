@@ -14,7 +14,7 @@
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 
@@ -45,6 +45,32 @@ function readJson(path) {
 
 function writeJson(path, data) {
   writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
+}
+
+const CREATOR_DIR = resolve(ROOT, 'plugins', 'kivo-creator');
+const CREATOR_MANIFESTS = ['.cursor-plugin', '.codex-plugin'].map((d) => join(CREATOR_DIR, d, 'plugin.json'));
+const MARKETPLACES = [
+  resolve(ROOT, '.claude-plugin', 'marketplace.json'),
+  resolve(ROOT, '.cursor-plugin', 'marketplace.json'),
+  resolve(ROOT, '.codex-plugin', 'marketplace.json'),
+];
+
+function syncCreator(isCheck, drift) {
+  const version = readJson(join(CREATOR_DIR, '.claude-plugin', 'plugin.json')).version;
+  for (const file of CREATOR_MANIFESTS) {
+    const data = readJson(file);
+    if (data.version === version) continue;
+    if (isCheck) drift.push(`kivo-creator: ${file} version ${data.version} != ${version}`);
+    else { data.version = version; writeJson(file, data); console.log(`Updated ${file} version to ${version}`); }
+  }
+  for (const file of MARKETPLACES) {
+    const data = readJson(file);
+    const entry = data.plugins?.[1];
+    if (entry?.name !== 'kivo-creator') { drift.push(`${file}: plugins[1] must be kivo-creator (release-please bumps $.plugins[1].version)`); continue; }
+    if (entry.version === version) continue;
+    if (isCheck) drift.push(`${file}: kivo-creator version ${entry.version} != ${version}`);
+    else { entry.version = version; writeJson(file, data); console.log(`Updated ${file} kivo-creator version to ${version}`); }
+  }
 }
 
 function main() {
@@ -84,6 +110,9 @@ function main() {
       }
     }
   }
+
+  syncCreator(isCheck, drift);
+  if (!isCheck && drift.length) { for (const d of drift) console.error(d); process.exit(1); }
 
   if (isCheck) {
     if (drift.length) {

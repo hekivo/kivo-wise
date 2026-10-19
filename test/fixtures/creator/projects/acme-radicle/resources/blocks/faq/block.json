@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acme/faq",
+  "title": "FAQ",
+  "category": "design",
+  "description": "Questions and answers.",
+  "attributes": {
+    "title": { "type": "string" },
+    "items": { "type": "array", "items": { "type": "object", "properties": { "question": { "type": "string" }, "answer": { "type": "string", "source": "html" } } } }
+  }
+}

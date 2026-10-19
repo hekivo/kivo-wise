@@ -1,0 +1,21 @@
+{
+  "name": "kivo-creator",
+  "version": "0.1.0",
+  "description": "Figma and HTML to WordPress on the Roots stack: ingest a design into neutral section specs, match each section to an existing block, scaffold only the gaps and prove fidelity with a pixel diff",
+  "author": {
+    "name": "hekivo",
+    "url": "https://github.com/hekivo"
+  },
+  "homepage": "https://github.com/hekivo/kivo-wise/tree/main/plugins/kivo-creator",
+  "repository": "https://github.com/hekivo/kivo-wise",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Kivo Creator",
+    "shortDescription": "Figma and HTML to WordPress blocks on the Roots stack, reusing existing blocks first.",
+    "longDescription": "Ingests a Figma frame or an HTML page into neutral section specs, matches each section to a block the project already has, scaffolds only what is missing in the project's conventions and verifies the rendered page with a pixel diff, a style check and a lint for arbitrary values. Requires the kivo-wise plugin for stack detection.",
+    "developerName": "hekivo",
+    "category": "Development",
+    "websiteURL": "https://github.com/hekivo/kivo-wise/tree/main/plugins/kivo-creator"
+  }
+}

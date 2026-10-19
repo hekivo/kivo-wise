@@ -1,0 +1,1 @@
+{ "name": "acme/acme-theme", "type": "wordpress-theme", "autoload": { "psr-4": { "App\\": "app/" } }, "require": { "roots/acorn": "^6.2", "log1x/acf-composer": "^3.4" } }

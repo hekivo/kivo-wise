@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acme/hero",
+  "title": "Hero",
+  "category": "design",
+  "description": "Page opening with a heading, a lead, an image and a button.",
+  "attributes": {
+    "heading": { "type": "string" },
+    "lead": { "type": "string" },
+    "image": { "type": "object" },
+    "button": { "type": "object" },
+    "dark": { "type": "boolean", "default": false }
+  }
+}

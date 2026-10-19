@@ -1,0 +1,9 @@
+{
+  "color/ink": "#111827",
+  "color/muted": "#4B5563",
+  "color/brand": "#0A84FF",
+  "color/surface": "#F5F7FA",
+  "font/family/sans": "Inter",
+  "font/size/display": "56",
+  "font/size/body": "18"
+}

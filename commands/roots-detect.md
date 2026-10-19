@@ -23,6 +23,7 @@ Runs the detector and shows the full result. With `--write` it saves the detecte
 
      Map detector kinds to profiles: `sage-theme` and `acorn-theme` -> `sage-theme`; `acorn-mu-plugin` and `acorn-plugin` -> `acorn-mu-plugin`; `radicle-app` -> `radicle-app`. For `acorn-unknown`, do not guess: ask which profile applies.
    - Add `"corpus": [...]` only if the user gives corpus roots.
+   - When overwriting, keep keys other tools added (for example kivo-creator's `"creator": { "blocks": ... }`).
    - Do not stage, commit or push the file; tell the user it is a new file in the working tree.
 
 ## Rules

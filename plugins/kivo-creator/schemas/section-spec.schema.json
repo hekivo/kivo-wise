@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hekivo/kivo-wise/blob/main/plugins/kivo-creator/schemas/section-spec.schema.json",
+  "title": "kivo-creator section spec",
+  "description": "One design section, independent of the source (Figma or HTML) and of the target. Every slot value and token carries its provenance; values that are not in the source are left out.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "source", "kind", "slots", "layout", "tokens", "refs"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "order": { "type": "integer", "minimum": 0 },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": { "enum": ["figma", "html"] },
+        "ref": { "type": "string", "minLength": 1 },
+        "url": { "type": "string" },
+        "component": { "type": "string" }
+      }
+    },
+    "kind": { "enum": ["hero", "features", "cta", "faq", "testimonial", "logos", "form", "media", "text", "stats", "steps", "custom"] },
+    "chrome": { "type": "boolean" },
+    "slots": { "type": "array", "items": { "$ref": "#/$defs/slot" } },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["columns", "align", "media", "repeat"],
+      "properties": {
+        "columns": { "type": "integer", "minimum": 1 },
+        "align": { "enum": ["left", "center", "right"] },
+        "media": { "enum": ["none", "left", "right", "top", "bottom", "background"] },
+        "repeat": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "tokens": { "type": "array", "items": { "$ref": "#/$defs/token" } },
+    "refs": { "type": "object", "additionalProperties": { "type": "string", "minLength": 1 } },
+    "codeConnect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["block"],
+      "properties": { "block": { "type": "string" }, "component": { "type": "string" } }
+    },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "provenance": { "enum": ["exact", "inferred"] },
+    "slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "provenance"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "type": { "enum": ["heading", "text", "richtext", "image", "link", "list", "form", "embed"] },
+        "value": {},
+        "items": { "type": "array", "items": { "type": "array", "items": { "$ref": "#/$defs/slot" } } },
+        "provenance": { "$ref": "#/$defs/provenance" }
+      }
+    },
+    "token": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "prop", "value", "provenance"],
+      "properties": {
+        "role": { "enum": ["section", "heading", "text", "link", "button", "media"] },
+        "prop": { "type": "string", "pattern": "^[a-z][a-zA-Z]*$" },
+        "value": { "type": "string", "minLength": 1 },
+        "token": { "type": "string", "pattern": "^--[a-z0-9-]+$" },
+        "provenance": { "$ref": "#/$defs/provenance" },
+        "node": { "type": "string" }
+      }
+    }
+  }
+}

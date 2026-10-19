@@ -5,7 +5,7 @@
     "url": "https://github.com/hekivo"
   },
   "metadata": {
-    "description": "Marketplace for the kivo-wise plugin (formerly superpowers-sage)."
+    "description": "Marketplace for kivo-wise (Roots stack skills) and kivo-creator (design to blocks)."
   },
   "plugins": [
     {
@@ -17,6 +17,16 @@
         "repo": "hekivo/kivo-wise",
         "ref": "main"
       },
+      "author": {
+        "name": "hekivo",
+        "url": "https://github.com/hekivo"
+      }
+    },
+    {
+      "name": "kivo-creator",
+      "description": "Figma and HTML to WordPress on the Roots stack: reuse existing blocks first, scaffold only the gaps, prove fidelity with a pixel diff",
+      "version": "0.1.0",
+      "source": "./plugins/kivo-creator",
       "author": {
         "name": "hekivo",
         "url": "https://github.com/hekivo"

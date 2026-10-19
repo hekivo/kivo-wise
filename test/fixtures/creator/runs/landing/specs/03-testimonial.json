@@ -1,0 +1,14 @@
+{
+  "id": "03-testimonial",
+  "order": 2,
+  "source": { "kind": "html", "ref": "body > main > section:nth-of-type(3)", "url": "file:///acme/landing.html" },
+  "kind": "testimonial",
+  "slots": [
+    { "name": "text", "type": "text", "value": "Acme cut our release time in half.", "provenance": "exact" },
+    { "name": "text_2", "type": "text", "value": "Dana Lee, CTO at Example Co", "provenance": "exact" },
+    { "name": "image", "type": "image", "value": { "src": "https://acme.test/dana.jpg", "alt": "Dana Lee" }, "provenance": "exact" }
+  ],
+  "layout": { "columns": 1, "align": "center", "media": "top", "repeat": 0 },
+  "tokens": [],
+  "refs": {}
+}

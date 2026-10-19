@@ -1,0 +1,1 @@
+{ "name": "acme/site", "autoload": { "psr-4": { "App\\": "app/" } }, "require": { "roots/acorn": "^6.3" } }

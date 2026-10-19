@@ -1,0 +1,1 @@
+{ "profile": "acorn-mu-plugin", "app": "wp-content/mu-plugins/acme-core", "runner": "lando" }

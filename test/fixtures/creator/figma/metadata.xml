@@ -1,0 +1,25 @@
+<frame id="1:2" name="Acme Landing" x="0" y="0" width="1440" height="2600">
+  <frame id="1:3" name="Header" x="0" y="0" width="1440" height="80">
+    <instance id="1:4" name="Logo/Acme" x="24" y="20" width="96" height="40" />
+  </frame>
+  <instance id="1:10" name="Hero/Default" x="0" y="80" width="1440" height="640">
+    <text id="1:11" name="Acme ships faster" x="120" y="200" width="600" height="64" />
+    <text id="1:12" name="Plan, build and launch in one place." x="120" y="280" width="600" height="28" />
+    <instance id="1:13" name="Button/Primary" x="120" y="340" width="160" height="48" />
+    <rectangle id="1:14" name="Dashboard image" x="800" y="140" width="520" height="420" />
+  </instance>
+  <frame id="1:20" name="Features" x="0" y="720" width="1440" height="560">
+    <text id="1:21" name="Why Acme" x="120" y="760" width="800" height="48" />
+    <instance id="1:22" name="Feature Card" x="120" y="860" width="380" height="240" />
+    <instance id="1:23" name="Feature Card" x="540" y="860" width="380" height="240" />
+    <instance id="1:24" name="Feature Card" x="960" y="860" width="380" height="240" />
+  </frame>
+  <frame id="1:30" name="Pricing Table" x="0" y="1280" width="1440" height="600">
+    <instance id="1:31" name="Pricing/Plan" x="120" y="1340" width="380" height="480" />
+  </frame>
+  <frame id="1:40" name="Footer CTA" x="0" y="1880" width="1440" height="320">
+    <text id="1:41" name="Ready to ship?" x="120" y="1940" width="800" height="48" />
+    <instance id="1:42" name="Button/Primary" x="120" y="2020" width="160" height="48" />
+  </frame>
+  <frame id="1:50" name="Footer" x="0" y="2200" width="1440" height="400" />
+</frame>

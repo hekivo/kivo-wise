@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Acme</title>
+<style>
+  body { margin: 0; font-family: Inter, sans-serif; color: #111827; }
+  header, footer { display: flex; align-items: center; height: 80px; padding: 0 24px; background: #ffffff; }
+  section { padding: 64px 120px; }
+  h1 { font-size: 56px; line-height: 64px; font-weight: 700; margin: 0 0 16px; }
+  h2 { font-size: 36px; font-weight: 700; margin: 0 0 24px; }
+  p { color: #4b5563; font-size: 18px; }
+  .btn { display: inline-block; padding: 12px 24px; background: #0a84ff; color: #ffffff; text-decoration: none; }
+  .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .hero img { width: 520px; height: 360px; background: #e5e7eb; }
+  .features { text-align: center; background: #f5f7fa; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .card { background: #ffffff; padding: 24px; }
+  details { border-bottom: 1px solid #e5e7eb; padding: 16px 0; }
+</style>
+</head>
+<body>
+  <header><nav><a href="/">Acme</a></nav></header>
+  <main>
+    <section class="hero">
+      <div>
+        <h1>Acme ships faster</h1>
+        <p>Plan, build and launch in one place.</p>
+        <a class="btn" href="https://acme.test/signup">Start free</a>
+      </div>
+      <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="Acme dashboard">
+    </section>
+    <section class="features">
+      <h2>Why Acme</h2>
+      <div class="grid">
+        <div class="card"><h3>Plan</h3><p>Roadmaps everyone can read.</p></div>
+        <div class="card"><h3>Build</h3><p>Reviews that do not block.</p></div>
+        <div class="card"><h3>Launch</h3><p>Releases on a schedule.</p></div>
+      </div>
+    </section>
+    <section class="faq">
+      <h2>Questions</h2>
+      <details><summary>Can I cancel any time?</summary><p>Yes, from your account settings.</p></details>
+      <details><summary>Is there a free plan?</summary><p>Yes, for up to three people.</p></details>
+      <details><summary>Where is my data stored?</summary><p>In the region you pick at sign-up.</p></details>
+    </section>
+    <section class="cta">
+      <h2>Ready to ship?</h2>
+      <p>Start in five minutes.</p>
+      <a class="btn" href="https://acme.test/signup">Start free</a>
+    </section>
+  </main>
+  <footer><p>Acme Inc.</p></footer>
+</body>
+</html>

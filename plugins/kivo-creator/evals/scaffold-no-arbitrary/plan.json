@@ -1,0 +1,8 @@
+{
+  "run": "run-1",
+  "adapter": "acorn-mu-plugin",
+  "threshold": 0.6,
+  "sections": [
+    { "spec": "04-stats", "kind": "stats", "candidates": [], "decision": { "action": "scaffold", "block": null, "confidence": 1, "reason": "approved: no stats block" } }
+  ]
+}

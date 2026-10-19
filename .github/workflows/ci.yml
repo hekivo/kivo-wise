@@ -20,6 +20,9 @@ jobs:
       - name: Validate skills against the contract (C3)
         run: node scripts/validate-skills.mjs
 
+      - name: Validate kivo-creator skills against the contract
+        run: node scripts/validate-skills.mjs --root plugins/kivo-creator
+
       - name: Install the Claude Code CLI
         id: cli
         continue-on-error: true
@@ -28,6 +31,10 @@ jobs:
       - name: Validate the plugin manifest (strict)
         if: steps.cli.outcome == 'success'
         run: claude plugin validate . --strict
+
+      - name: Validate the kivo-creator manifest (strict)
+        if: steps.cli.outcome == 'success'
+        run: claude plugin validate plugins/kivo-creator --strict
 
       - name: Report when the CLI could not be installed
         if: steps.cli.outcome != 'success'
@@ -43,13 +50,8 @@ jobs:
         with:
           node-version: 20
 
-      - name: Run node:test suites (detector, hooks)
-        run: |
-          if ls test/*.test.mjs >/dev/null 2>&1; then
-            node --test test/*.test.mjs
-          else
-            echo "no test/*.test.mjs yet"
-          fi
+      - name: Run node:test suites (detector, hooks, kivo-creator)
+        run: node --test test/*.test.mjs test/creator/*.test.mjs
 
       - name: Run validate-skills tests
         run: node scripts/test-validate-skills.mjs
