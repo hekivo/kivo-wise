@@ -22,8 +22,13 @@ precedence over skill-local guidance unless a skill explicitly overrides.
   `.codex-plugin/plugin.json`, and this `AGENTS.md`) by
   `scripts/build-codex-plugin.mjs`; run it after changing those, never edit
   the generated files (`plugins/`, `.agents/`) by hand (CI enforces sync via
-  `--check`). Codex does not load a plugin's own context file; it reads
-  `AGENTS.md` from the project root — see README → OpenAI Codex.
+  `--check`).
+  `plugins/kivo-creator/` is the exception: a second, **hand-authored**
+  plugin (edit it directly). Its three manifests and its entry in every
+  marketplace (always `plugins[1]`) share one version, checked by
+  `scripts/sync-codex-manifests.mjs` and bumped by release-please as the
+  `kivo-creator` package. Codex does not load a plugin's own context file;
+  it reads `AGENTS.md` from the project root — see README → OpenAI Codex.
 
 ## Protected files (never edit directly)
 

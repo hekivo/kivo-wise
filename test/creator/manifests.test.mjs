@@ -26,3 +26,27 @@ test('the Codex manifest points at the skills folder', () => {
   assert.equal(m.skills, './skills/');
   assert.equal(m.interface.displayName, 'Kivo Creator');
 });
+
+import { ROOT } from './helpers.mjs';
+
+const RELATIVE = './plugins/kivo-creator';
+const MARKETPLACES = [
+  ['.claude-plugin/marketplace.json', RELATIVE],
+  ['.cursor-plugin/marketplace.json', RELATIVE],
+  ['.codex-plugin/marketplace.json', { source: 'local', path: RELATIVE }],
+  ['.agents/plugins/marketplace.json', { source: 'local', path: RELATIVE }],
+];
+
+test('every marketplace lists kivo-creator second, with the plugin version and a relative source', () => {
+  const version = manifest('.claude-plugin').version;
+  for (const [file, source] of MARKETPLACES) {
+    const entry = readJson(join(ROOT, file)).plugins[1];
+    assert.equal(entry?.name, 'kivo-creator', `${file} plugins[1]`);
+    assert.equal(entry.version, version, `${file} version`);
+    assert.deepEqual(entry.source, source, `${file} source`);
+  }
+});
+
+test('kivo-wise stays the first entry of every marketplace', () => {
+  for (const [file] of MARKETPLACES) assert.equal(readJson(join(ROOT, file)).plugins[0].name, 'kivo-wise', file);
+});

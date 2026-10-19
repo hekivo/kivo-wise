@@ -45,6 +45,10 @@ const GENERATED_NOTE =
 // Dirs/arquivos da raiz que o plugin do Codex precisa (o que .codex-plugin/plugin.json declara).
 const MIRROR = ['skills', 'hooks'];
 
+// Hand-authored plugins that already live under plugins/<name>/ with real content.
+// They are listed in the Codex marketplace but never generated, copied or deleted here.
+const HAND_AUTHORED = ['kivo-creator'];
+
 function readJson(p) {
   return JSON.parse(readFileSync(p, 'utf8'));
 }
@@ -71,6 +75,16 @@ function buildArtifacts() {
       },
     ],
   };
+  for (const name of HAND_AUTHORED) {
+    const m = readJson(resolve(ROOT, 'plugins', name, '.codex-plugin', 'plugin.json'));
+    marketplace.plugins.push({
+      name,
+      version: m.version,
+      source: { source: 'local', path: `./plugins/${name}` },
+      policy: { installation: 'AVAILABLE' },
+      category: m.interface?.category ?? 'Development',
+    });
+  }
   out[relative(ROOT, MARKETPLACE)] = JSON.stringify(marketplace, null, 2) + '\n';
 
   // 2. plugin manifest (cópia) + marcador GENERATED

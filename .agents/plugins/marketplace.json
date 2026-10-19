@@ -15,6 +15,18 @@
         "installation": "AVAILABLE"
       },
       "category": "Development"
+    },
+    {
+      "name": "kivo-creator",
+      "version": "0.1.0",
+      "source": {
+        "source": "local",
+        "path": "./plugins/kivo-creator"
+      },
+      "policy": {
+        "installation": "AVAILABLE"
+      },
+      "category": "Development"
     }
   ]
 }

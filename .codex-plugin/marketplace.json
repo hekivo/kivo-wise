@@ -21,6 +21,19 @@
         "name": "hekivo",
         "url": "https://github.com/hekivo"
       }
+    },
+    {
+      "name": "kivo-creator",
+      "description": "Figma and HTML to WordPress on the Roots stack: reuse existing blocks first, scaffold only the gaps, prove fidelity with a pixel diff",
+      "version": "0.1.0",
+      "source": {
+        "source": "local",
+        "path": "./plugins/kivo-creator"
+      },
+      "author": {
+        "name": "hekivo",
+        "url": "https://github.com/hekivo"
+      }
     }
   ]
 }
