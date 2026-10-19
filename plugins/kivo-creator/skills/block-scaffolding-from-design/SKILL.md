@@ -30,7 +30,7 @@ Runner placeholders (`{{runner.wp}}`, `{{runner.acorn}}`, `{{runner.cache}}`) co
 3. For each new block, in order:
    1. run the project's generator with the runner, exactly as listed in `emitted.commands` (for example `{{runner.acorn}} acf:block Stats --no-interaction`);
    2. show the difference between the generated files and `scaffold/<path>` as a diff;
-   3. check what the prepared view assumes: the Blade directives it uses (for example `@textarea`) must exist in the project; if one does not, ask before changing the escaping;
+   3. check what the prepared view assumes. ACF textarea fields follow the kivo-wise escaping rule `@textarea(...)` when emit finds `Blade::directive('textarea', …)` in the project's own code; otherwise the view uses `{!! nl2br(e(...)) !!}` and `emitted.notes` says so. Keep that fallback (it is not the forbidden `nl2br(esc_html())`), or, if the directive comes from a Composer package emit cannot see, switch back to `@textarea(...)`. Any other directive the view uses must exist in the project; if one does not, ask before changing the escaping;
    4. copy the reviewed files over the generated ones.
 4. Rebuild caches: `{{runner.acorn}} acf:cache` (or `{{runner.cache}}`) so ACF Composer picks up the new fields.
 5. Media: for each `emitted.media` entry, import the file (`{{runner.wp}} media import <src> --porcelain`) and put the attachment id in place of `null` for that field in `page.html`. Ask before importing remote files you do not recognise.
@@ -50,7 +50,7 @@ Runner placeholders (`{{runner.wp}}`, `{{runner.acorn}}`, `{{runner.cache}}`) co
 | `the match plan is not approved yet` | Open, low-confidence or invalid decisions | Go back to `section-matching` |
 | Generator command not found | The project has no ACF Composer generator or uses its own stubs | Run `{{runner.acorn}} list`; use the project's generator; if there is none, ask before creating files by hand |
 | New fields missing in the editor | ACF Composer manifest not rebuilt | `{{runner.acorn}} acf:cache` (or `{{runner.cache}}`) |
-| A view uses a directive the project lacks | The prepared view follows the kivo-wise escaping rules | Ask; do not swap in a different escaping on your own |
+| A view uses a directive the project lacks | The directive is registered somewhere emit does not scan (a Composer package) or not at all | For `@textarea`, the fallback `{!! nl2br(e(...)) !!}` is safe; for anything else ask, do not swap in a different escaping on your own |
 | A proposal keeps coming back | The token was added under another name or namespace | Use the suggested namespace (`--color-*`, `--text-*`) so the mapper finds it |
 
 ## Escalation

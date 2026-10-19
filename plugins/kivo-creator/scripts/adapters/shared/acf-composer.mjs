@@ -76,13 +76,29 @@ export function parseBlockClass(php, source) {
   };
 }
 
-function* phpFiles(dir) {
-  if (!existsSync(dir)) return;
+const NOT_PROJECT_CODE = new Set(['node_modules', 'vendor', 'wp', 'uploads', 'storage', 'build', 'dist', '.git', '.creator']);
+
+function* phpFiles(dir, { skip = new Set(), depth = 0, maxDepth = Infinity } = {}) {
+  if (!existsSync(dir) || depth > maxDepth) return;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const full = join(dir, entry.name);
-    if (entry.isDirectory()) yield* phpFiles(full);
+    if (entry.isDirectory()) { if (!skip.has(entry.name)) yield* phpFiles(full, { skip, depth: depth + 1, maxDepth }); }
     else if (entry.name.endsWith('.php')) yield full;
   }
+}
+
+/**
+ * Whether the project's own PHP registers a Blade directive
+ * (Blade::directive('<name>', ...)). Composer packages are not scanned: a
+ * directive that only a package registers reads as missing, and the view then
+ * falls back to plain escaping, which is still safe.
+ */
+export function bladeDirectiveRegistered(stack, name) {
+  const re = new RegExp(`directive\\(\\s*['"]${name}['"]`);
+  for (const file of phpFiles(stack.projectDir, { skip: NOT_PROJECT_CODE, maxDepth: 8 })) {
+    if (re.test(readFileSync(file, 'utf8'))) return true;
+  }
+  return false;
 }
 
 export function acfCatalog(stack) {
@@ -259,12 +275,15 @@ export function renderBlockCss({ name, spec, proposals }) {
 export function scaffoldAcf(stack, spec, { theme, catalog = [] }) {
   const { className, slug, title } = uniqueName(spec, catalog);
   const { fields, notes } = fieldsFromSlots(spec.slots);
+  const textareaDirective = bladeDirectiveRegistered(stack, 'textarea');
+  const hasTextarea = (list) => list.some((f) => f.acfType === 'textarea' || (f.subFields && hasTextarea(f.subFields)));
+  if (!textareaDirective && hasTextarea(fields)) notes.push('@textarea is not registered in the project, so textarea fields are escaped with {!! nl2br(e(...)) !!}; switch to @textarea(...) if the project adds the directive');
   const { utils, proposals } = roleUtilities(spec.tokens, theme);
   const app = posix(relative(stack.projectDir, stack.appPath)) || '.';
   const at = (...parts) => posix(join(app, ...parts));
   const files = [
     { path: at('app', 'Blocks', `${className}.php`), content: renderAcfClass({ namespace: stack.namespace.replace(/\\+$/, ''), className, title, slug, spec, fields }) },
-    { path: at('resources', 'views', 'blocks', `${slug}.blade.php`), content: renderView({ slug, spec, fields, utils, flavour: 'acf' }) },
+    { path: at('resources', 'views', 'blocks', `${slug}.blade.php`), content: renderView({ slug, spec, fields, utils, flavour: 'acf', textareaDirective }) },
     { path: at('resources', 'css', 'blocks', `${slug}.css`), content: renderBlockCss({ name: `acf/${slug}`, spec, proposals }) },
   ];
   const block = { name: `acf/${slug}`, slug, className, title, description: `${title} section generated from the design.`, whenToUse: WHEN[spec.kind], group: slug, source: files[0].path, fields: fields.map(toCatalogField) };
