@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
-import { parseBlockClass, acfCatalog } from '../../plugins/kivo-creator/scripts/adapters/shared/acf-composer.mjs';
+import { parseBlockClass, acfCatalog, acfDefaultSlug } from '../../plugins/kivo-creator/scripts/adapters/shared/acf-composer.mjs';
 import { kebab, pascal } from '../../plugins/kivo-creator/scripts/adapters/shared/names.mjs';
 import { resolveStack } from '../../plugins/kivo-creator/scripts/lib/stack.mjs';
 import { FIX } from './helpers.mjs';
@@ -36,4 +36,12 @@ test('Builder::make with a literal sets the field group name', () => {
   const block = parseBlockClass("<?php class Promo extends Block { public $name = 'Promo'; public function fields(): array { $f = Builder::make('promo_box'); $f->addTrueFalse('dark'); return $f->build(); } }", 'Promo.php');
   assert.equal(block.group, 'promo_box');
   assert.deepEqual(block.fields, [{ name: 'dark', type: 'true_false' }]);
+});
+
+test('the default slug follows ACF Composer: Str::slug(Str::kebab($name))', () => {
+  assert.equal(acfDefaultSlug('Feature Grid'), 'feature-grid');
+  assert.equal(acfDefaultSlug('Call to Action'), 'call-to-action');
+  assert.equal(acfDefaultSlug('CTA Banner'), 'c-t-a-banner');
+  assert.equal(acfDefaultSlug('faq'), 'faq');
+  assert.equal(parseBlockClass("<?php class X extends Block { public $name = 'CTA Banner'; }", 'X.php').name, 'acf/c-t-a-banner');
 });

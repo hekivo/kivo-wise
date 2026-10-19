@@ -1,7 +1,7 @@
 // plugins/kivo-creator/scripts/adapters/shared/acf-composer.mjs
 /**
  * ACF Composer conventions shared by the acorn-mu-plugin and sage-theme adapters.
- * Block name acf/{slug}; slug defaults to the kebab-case $name; the field group
+ * Block name acf/{slug}; slug defaults to Str::slug(Str::kebab($name)) (acfDefaultSlug); the field group
  * is Builder::make(<literal>) or the slug ($this->slug).
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
@@ -34,13 +34,35 @@ export function parseFields(php) {
   return root;
 }
 
+/**
+ * ACF Composer's default slug: Str::slug(Str::kebab($name)) in Block::compose().
+ * Str::kebab joins words (ucwords, spaces removed) and puts a dash before every
+ * capital, so 'CTA Banner' becomes 'c-t-a-banner'.
+ */
+export function acfDefaultSlug(name) {
+  let v = String(name);
+  if (!/^[a-z]+$/.test(v)) {
+    v = v.replace(/(^|\s)(\S)/g, (_, gap, ch) => gap + ch.toUpperCase()).replace(/\s+/g, '');
+    v = v.replace(/(.)(?=[A-Z])/gu, '$1-').toLowerCase();
+  }
+  return v
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/_/g, '-')
+    .replace(/@/g, '-at-')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/[\s-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export function parseBlockClass(php, source) {
   const cls = php.match(/(abstract\s+)?class\s+(\w+)\s+extends\s+\w+/);
   if (!cls || cls[1]) return null;
   const prop = (name) => php.match(new RegExp(`\\$${name}\\s*=\\s*(['"])(.*?)\\1`))?.[2] ?? null;
   const title = prop('name');
   if (!title) return null;
-  const slug = prop('slug') ?? kebab(title);
+  const slug = prop('slug') ?? acfDefaultSlug(title);
   return {
     name: `acf/${slug}`,
     slug,
