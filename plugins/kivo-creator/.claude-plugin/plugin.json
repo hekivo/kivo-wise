@@ -1,0 +1,28 @@
+{
+  "name": "kivo-creator",
+  "description": "Figma and HTML to WordPress on the Roots stack: ingest a design into neutral section specs, match each section to an existing block, scaffold only the gaps and prove fidelity with a pixel diff",
+  "version": "0.1.0",
+  "author": {
+    "name": "hekivo",
+    "url": "https://github.com/hekivo"
+  },
+  "homepage": "https://github.com/hekivo/kivo-wise/tree/main/plugins/kivo-creator",
+  "repository": "https://github.com/hekivo/kivo-wise",
+  "license": "MIT",
+  "keywords": [
+    "wordpress",
+    "roots",
+    "acorn",
+    "sage",
+    "radicle",
+    "acf",
+    "blocks",
+    "figma",
+    "code-connect",
+    "design-to-code",
+    "visual-regression"
+  ],
+  "dependencies": [
+    "kivo-wise"
+  ]
+}
