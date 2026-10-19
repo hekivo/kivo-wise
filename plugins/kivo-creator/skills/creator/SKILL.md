@@ -26,6 +26,8 @@ Arguments: `<figma.com URL | file.html | https URL>` or `--run=.creator/<run>` t
 1. **Route the source.** `figma.com/design/...` or `figma.com/file/...` → `figma-ingest`. A path ending in `.html` or an `http(s)` URL → `html-ingest`. `--run=` → skip to step 3 with that folder. Anything else: ask. There is no fallback: if the Figma MCP server is missing, stop with the instructions from `figma-ingest`.
 2. **Ingest** with the routed skill. It ends with valid specs in `.creator/<run>/specs/`.
 3. **Match** with `section-matching` until `node <kivo-creator>/scripts/match.mjs --run=.creator/<run> --check --project=.` passes.
+   - **Block type for new blocks.** New blocks follow the project's existing pattern: ACF Composer projects get ACF blocks, `block.json` projects get native blocks, whatever the profile. `match.mjs` prints `blockType` (also in `match-plan.json` and `match-plan.md`). `creator.blocks` in `.roots-stack.json` wins (`source: "override"`); otherwise the count of existing blocks decides when one type holds at least 80% (`source: "count"`).
+   - When `blockType.type` is `null` and the plan scaffolds anything, ask the person **once**: for `reason: "mixed"` show `counts` and ask which type new blocks use; for `reason: "none"` recommend `blockType.recommended` (the profile default). Then offer to record the answer: `node <kivo-creator>/scripts/block-type.mjs --set=<acf|native> --project=.` writes `"creator": { "blocks": "<type>" }` into `.roots-stack.json` and keeps its other keys. If the person does not want it recorded, pass `--blocks=<type>` to `match.mjs --check` and later to `emit.mjs` (`source: "asked"`). Never pick the type yourself.
 4. **Stop.** Show `.creator/<run>/match-plan.md`, the gaps and any question still open, and ask the person to approve the plan. Do not emit, scaffold or edit project files in this turn.
 5. After the person approves (a later message): `block-scaffolding-from-design`, then `visual-fidelity` (at most three fix rounds). Finish with the fidelity report.
 
@@ -41,6 +43,8 @@ Arguments: `<figma.com URL | file.html | https URL>` or `--run=.creator/<run>` t
 | No profile found | No `.roots-stack.json` and no detector output | Run kivo-wise `/roots-detect --write`, then resume with `--run=` |
 | Figma tools unavailable | The Figma MCP server is not connected in this session | Stop; follow the connection steps in `figma-ingest` |
 | Plan check fails | Open or invalid decisions | Finish `section-matching` before stopping |
+| `New blocks need a block type` | Mixed project (neither type reaches 80%) or no blocks yet, and no `creator.blocks` | Ask the person once; record with `block-type.mjs --set=` or pass `--blocks=` |
+| `creator.blocks must be "acf" or "native"` | Invalid value in `.roots-stack.json` | Fix the value (or remove the key to go back to counting) |
 | Files appear in the project before approval | Emit started too early | Revert them; emitting waits for approval |
 
 ## Escalation

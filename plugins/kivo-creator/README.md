@@ -45,15 +45,23 @@ Every run writes to `.creator/<run>/` in the project (ignored by git) and stops 
 
 ## Scripts
 
-All scripts are dependency-free Node ESM in `scripts/`: `ingest-html.mjs`, `validate-spec.mjs`, `match.mjs`, `emit.mjs`, `verify.mjs`, `png.mjs` (PNG decoder and pixel diff on `node:zlib`), `figma-sections.mjs`, `figma-ref.mjs`, `code-connect.mjs`. Section specs follow `schemas/section-spec.schema.json`.
+All scripts are dependency-free Node ESM in `scripts/`: `ingest-html.mjs`, `validate-spec.mjs`, `match.mjs`, `block-type.mjs`, `emit.mjs`, `verify.mjs`, `png.mjs` (PNG decoder and pixel diff on `node:zlib`), `figma-sections.mjs`, `figma-ref.mjs`, `code-connect.mjs`. Section specs follow `schemas/section-spec.schema.json`.
 
 ## Adapters
 
-| Adapter | Target | Emit |
+| Adapter | Target | New blocks when the project has none yet |
 |---|---|---|
-| `acorn-mu-plugin` | ACF Composer blocks in an Acorn mu-plugin | block class, Blade view, CSS notes, `acf/*` block markup |
-| `sage-theme` | Sage theme blocks (ACF Composer or native `block.json`) | same, inside the theme |
-| `radicle` | Radicle native blocks | `block.json`, Blade view, block markup |
+| `acorn-mu-plugin` | Blocks in an Acorn mu-plugin | ACF Composer (recommended) |
+| `sage-theme` | Blocks in a Sage theme | ACF Composer when `composer.json` requires `log1x/acf-composer`, otherwise native (recommended) |
+| `radicle` | Blocks in a Radicle project | native `block.json` (recommended) |
+
+Every adapter reads both block types into its catalog (ACF Composer classes and `block.json` files), so a section can fill any existing block, and each existing block is emitted in its own markup. **New blocks follow the project's existing pattern**: if the project uses ACF Composer blocks they are always ACF (block class, Blade view, CSS notes, `acf/*` markup); if it uses `block.json` they are always native (`block.json`, Blade view, markup). The decision (`scripts/adapters/shared/block-type.mjs`):
+
+1. `.roots-stack.json` `"creator": { "blocks": "acf" | "native" }` wins; any other value is an error.
+2. Otherwise the existing blocks are counted; a type with at least 80% of them (`DOMINANT_SHARE`) is the project's type.
+3. Both types and neither at 80%, or no blocks at all: nothing is guessed. `/creator` asks the person once (recommending the profile default from the table when there are no blocks) and offers to record the answer with `node scripts/block-type.mjs --set=acf|native`; until then `emit.mjs` refuses to scaffold. `--blocks=acf|native` answers for one run.
+
+The decision is recorded as `blockType` (`type`, `source`: `override` | `count` | `asked`, `counts`) in `match-plan.json`, `match-plan.md` and `emitted.json`.
 
 ## Rules
 

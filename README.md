@@ -99,7 +99,7 @@ The corpus lives in a separate private repository. Each project points to it in 
 
 ## kivo-creator
 
-A second plugin in this repository, [`plugins/kivo-creator`](plugins/kivo-creator/README.md): Figma and HTML to WordPress blocks on the Roots stack. It reuses the project's blocks first, generates only the gaps and verifies the page with a pixel diff. Install with `claude plugin install kivo-creator@kivo-wise`; it depends on kivo-wise. Released separately (`kivo-creator-vX.Y.Z` tags).
+A second plugin in this repository, [`plugins/kivo-creator`](plugins/kivo-creator/README.md): Figma and HTML to WordPress blocks on the Roots stack. It reuses the project's blocks first, generates only the gaps (in the project's own block type: ACF Composer or `block.json`) and verifies the page with a pixel diff. Install with `claude plugin install kivo-creator@kivo-wise`; it depends on kivo-wise. Released separately (`kivo-creator-vX.Y.Z` tags).
 
 ## Cursor, Codex and Copilot
 

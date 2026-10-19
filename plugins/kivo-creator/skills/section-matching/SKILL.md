@@ -23,7 +23,7 @@ Recognise first, generate last. Each section is matched to a block the project a
 
 ## Procedure
 
-1. Read the catalog: `node <kivo-creator>/scripts/match.mjs --catalog --project=.` (name, title, description, `whenToUse`, fields).
+1. Read the catalog: `node <kivo-creator>/scripts/match.mjs --catalog --project=.` (name, `type`, title, description, `whenToUse`, fields). It holds every existing block of both types (ACF Composer classes and `block.json` files); a section may fill either. The project's block type only matters for new blocks (`blockType` in the plan; see `/creator`).
 2. Build the plan: `node <kivo-creator>/scripts/match.mjs --run=.creator/<run> --project=.`. It writes `match-plan.json` and prints the sections to `judge`. Already decided by the script:
    - chrome sections: `skip`;
    - a Code Connect mapping (`spec.codeConnect.block`): `fill` with confidence 1;
@@ -60,7 +60,7 @@ Recognise first, generate last. Each section is matched to a block the project a
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Every section goes to `scaffold` | Catalog empty: blocks live outside the adapter's folder or are not ACF Composer classes | Run `--catalog`; if blocks are missing, check the profile in `.roots-stack.json` and the block folder |
+| Every section goes to `scaffold` | Catalog empty: blocks live outside the adapter's folder (ACF Composer classes in `app/Blocks`, `block.json` files under the app) | Run `--catalog`; if blocks are missing, check the profile in `.roots-stack.json` and the block folder |
 | A good block is missing from `candidates` | A slot type its fields cannot hold (for example an image slot and no image field) | Decide whether the slot matters; dropping it is the person's call, never yours |
 | `did not pass the compatibility filter` | A fill names a block that cannot hold all slots | Pick a candidate, or ask the person and record `approvedBy` |
 | `confidence ... is below 0.6` | A low-confidence fill without approval | Ask the person; record `approvedBy: "person"` |
