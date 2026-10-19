@@ -47,6 +47,13 @@ test('count: an ACF Composer project scaffolds ACF blocks', async () => {
   assert.deepEqual(decision, { type: 'acf', source: 'count', counts: { acf: 4, native: 0 } });
 });
 
+test('count: ACF Composer\'s cached block.json files (storage/) are not native blocks', async () => {
+  const project = tmpCopy(join(FIX, 'projects', 'acme-mu-plugin'));
+  addBlockJson(join(project, MU_APP, 'storage', 'framework', 'cache', 'acf-composer', 'blocks', 'hero'), 'acf/hero');
+  const { decision } = await contextFor(project);
+  assert.deepEqual(decision, { type: 'acf', source: 'count', counts: { acf: 4, native: 0 } });
+});
+
 test('count: a block.json project scaffolds native blocks, whatever the profile', async () => {
   const project = tmpCopy(join(FIX, 'projects', 'acme-sage'));
   const app = join(project, 'web', 'app', 'themes', 'acme');
