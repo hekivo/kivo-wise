@@ -7,7 +7,9 @@
  *
  * Usage:
  *   node scripts/verify.mjs --run=.creator/<run> --url=<rendered page URL>
- *        [--project=.] [--widths=390,1440] [--threshold=0.02] [--selector=[data-block]]
+ *        [--project=.] [--widths=390,1440] [--threshold=0.02] [--selector=<css>]
+ * The selector defaults to the one emit.mjs recorded from the adapter
+ * (emitted.json), then to [data-block].
  * Exit: 0 pass, 1 fail or error, 3 Playwright missing in the project.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -23,11 +25,16 @@ import { lintFiles } from './lib/lint.mjs';
 import { evaluateSection, formatFidelity, summarize } from './lib/fidelity.mjs';
 
 export function parseVerifyArgs(argv) {
-  const o = parseOptions(argv, { run: '', url: '', project: '.', widths: '390,1440', threshold: '0.02', selector: '[data-block]' });
-  if (!o.run || !o.url) throw new Error('usage: verify.mjs --run=<.creator/run> --url=<rendered page> [--project=.] [--widths=390,1440] [--threshold=0.02] [--selector=[data-block]]');
+  const o = parseOptions(argv, { run: '', url: '', project: '.', widths: '390,1440', threshold: '0.02', selector: '' });
+  if (!o.run || !o.url) throw new Error('usage: verify.mjs --run=<.creator/run> --url=<rendered page> [--project=.] [--widths=390,1440] [--threshold=0.02] [--selector=<css>]');
   const threshold = Number(o.threshold);
   if (!(threshold > 0 && threshold < 1)) throw new Error('--threshold must be between 0 and 1');
   return { ...o, threshold, widths: String(o.widths).split(',').map(Number).filter((w) => w > 0) };
+}
+
+/** --selector wins; then the adapter selector emit.mjs recorded; then [data-block]. */
+export function selectorFor(options, emitted) {
+  return options.selector || emitted?.selector || '[data-block]';
 }
 
 /** Sections that are rendered on the page, in plan order (chrome, gaps and skips are not). */
@@ -43,6 +50,7 @@ export async function main(argv) {
   const plan = existsSync(paths.plan) ? readJson(paths.plan) : null;
   const targets = targetsFor(readSpecs(paths.specs), plan);
   const emitted = existsSync(paths.emitted) ? readJson(paths.emitted) : { files: [] };
+  const selector = selectorFor(o, emitted);
   const pw = await loadPlaywright(o.project);
   if (!pw) { process.exitCode = 3; throw new Error(NO_PLAYWRIGHT); }
   mkdirSync(paths.verify, { recursive: true });
@@ -55,9 +63,9 @@ export async function main(argv) {
     for (const width of o.widths) {
       await page.setViewportSize({ width, height: 900 });
       await page.waitForTimeout(200);
-      const blocks = page.locator(o.selector);
+      const blocks = page.locator(selector);
       const count = await blocks.count();
-      if (count !== targets.length) throw new Error(`found ${count} elements for ${o.selector} at ${width}px, expected ${targets.length} (one per emitted section); pass --selector for blocks that do not print data-block`);
+      if (count !== targets.length) throw new Error(`found ${count} elements for ${selector} at ${width}px, expected ${targets.length} (one per emitted section); pass --selector for blocks that do not print data-block`);
       for (const [i, spec] of targets.entries()) {
         const shot = join(paths.verify, `${spec.id}-${width}.png`);
         await blocks.nth(i).screenshot({ path: shot, animations: 'disabled' });
@@ -67,7 +75,7 @@ export async function main(argv) {
           diff = diffImages(decodePng(readFileSync(join(runDir, ref))), decodePng(readFileSync(shot)));
           writeFileSync(join(paths.verify, `${spec.id}-${width}.diff.png`), encodePng(diff.image));
         }
-        const styles = width === widest ? styleCheck(spec, await page.evaluate(collectSnapshot, { selector: o.selector, index: i })) : [];
+        const styles = width === widest ? styleCheck(spec, await page.evaluate(collectSnapshot, { selector, index: i })) : [];
         rows.push(evaluateSection({ spec, width, diff, styles, threshold: o.threshold }));
       }
     }

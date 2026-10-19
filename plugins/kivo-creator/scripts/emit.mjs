@@ -7,7 +7,9 @@
  * step of the block-scaffolding-from-design skill, after the project's
  * generator ran.
  *
- * Usage: node scripts/emit.mjs --run=.creator/<run> [--project=.] [--stack=<detector.json>]
+ * Usage: node scripts/emit.mjs --run=.creator/<run> [--project=.] [--stack=<detector.json>] [--selector=<css>]
+ * emitted.json records the CSS selector of one rendered section for verify.mjs:
+ * --selector when given, else the adapter default.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
@@ -21,7 +23,7 @@ import { readJson, runPaths, writeJson } from './lib/run.mjs';
 const posix = (p) => p.split('\\').join('/');
 
 export async function main(argv) {
-  const o = parseOptions(argv, { project: '.', run: '', stack: '' });
+  const o = parseOptions(argv, { project: '.', run: '', stack: '', selector: '' });
   if (!o.run) throw new Error('usage: emit.mjs --run=<.creator/run> [--project=.]');
   const ctx = await loadContext(o);
   const project = resolve(o.project);
@@ -33,7 +35,7 @@ export async function main(argv) {
   const specs = new Map(readSpecs(paths.specs).map((s) => [s.id, s]));
   const catalog = [...ctx.catalog];
   const entries = [];
-  const out = { adapter: ctx.adapter.name, page: posix(relative(project, paths.page)), files: [], commands: [], media: [], gaps: [], proposals: [], notes: [] };
+  const out = { adapter: ctx.adapter.name, selector: o.selector || ctx.adapter.selector, page: posix(relative(project, paths.page)), files: [], commands: [], media: [], gaps: [], proposals: [], notes: [] };
   for (const section of plan.sections) {
     const spec = specs.get(section.spec);
     const d = section.decision;

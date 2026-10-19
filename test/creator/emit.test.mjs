@@ -15,7 +15,7 @@ function prepare(decisions) {
   writeFileSync(join(run, 'match-plan.json'), JSON.stringify({ run: 'run-1', adapter: 'acorn-mu-plugin', threshold: 0.6, sections }));
   return { project, run };
 }
-const emit = (project, run) => spawnSync(process.execPath, [join(PLUGIN, 'scripts', 'emit.mjs'), `--project=${project}`, `--run=${run}`], { encoding: 'utf8' });
+const emit = (project, run, ...extra) => spawnSync(process.execPath, [join(PLUGIN, 'scripts', 'emit.mjs'), `--project=${project}`, `--run=${run}`, ...extra], { encoding: 'utf8' });
 
 test('fills existing blocks, scaffolds the gap under .creator and records what to do next', () => {
   const { project, run } = prepare({
@@ -40,6 +40,14 @@ test('fills existing blocks, scaffolds the gap under .creator and records what t
   assert.deepEqual(emitted.gaps, [{ spec: '03-testimonial', reason: 'no testimonial block; asked to skip' }]);
   assert.equal(emitted.media.length, 1);
   assert.deepEqual(emitted.proposals.map((p) => p.suggested), ['--text-body']);
+  assert.equal(emitted.selector, '[data-block]', 'the adapter default selector is recorded for verify');
+});
+
+test('--selector overrides the adapter default for projects whose blocks do not print data-block', () => {
+  const { project, run } = prepare({ '01-hero': { action: 'fill', block: 'acf/hero', confidence: 0.9, reason: 'hero' } });
+  const res = emit(project, run, '--selector=.wp-block-acf');
+  assert.equal(res.status, 0, res.stderr);
+  assert.equal(JSON.parse(readFileSync(join(run, 'emitted.json'), 'utf8')).selector, '.wp-block-acf');
 });
 
 test('refuses a plan that does not pass --check', () => {

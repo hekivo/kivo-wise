@@ -11,6 +11,8 @@ import { FIX, PLUGIN } from './helpers.mjs';
 test('options: source is required, widths are numbers', () => {
   assert.deepEqual(parseIngestArgs(['--source=page.html', '--widths=390,1440']).widths, [390, 1440]);
   assert.throws(() => parseIngestArgs([]), /--source/);
+  assert.equal(parseIngestArgs(['--source=x']).selector, '');
+  assert.equal(parseIngestArgs(['--source=x', '--selector=main > section']).selector, 'main > section');
 });
 
 const PW_DIR = process.env.CREATOR_PLAYWRIGHT_DIR;
@@ -27,4 +29,11 @@ test('ingests the fixture page into chrome plus four content specs with referenc
   assert.equal(hero.layout.media, 'right');
   const png = decodePng(readFileSync(join(out, hero.refs['1440'])));
   assert.equal(png.width, 1440);
+});
+
+test('--selector replaces the segmentation heuristic with the project selector', { skip: !PW_DIR && 'set CREATOR_PLAYWRIGHT_DIR to a folder with Playwright installed' }, () => {
+  const out = join(mkdtempSync(join(tmpdir(), 'ingest-')), 'run');
+  const res = spawnSync(process.execPath, [join(PLUGIN, 'scripts', 'ingest-html.mjs'), `--project=${PW_DIR}`, `--source=${join(FIX, 'html', 'acme-landing.html')}`, `--run=${out}`, '--selector=main > section', '--widths=1440'], { encoding: 'utf8' });
+  assert.equal(res.status, 0, res.stderr);
+  assert.deepEqual(readdirSync(join(out, 'specs')).sort(), ['01-hero.json', '02-features.json', '03-faq.json', '04-cta.json']);
 });

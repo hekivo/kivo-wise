@@ -7,7 +7,9 @@
  *
  * Usage:
  *   node scripts/ingest-html.mjs --source=<file.html | https://...> [--project=.]
- *        [--run=.creator/<run>] [--widths=390,1440] [--label=<name>]
+ *        [--run=.creator/<run>] [--widths=390,1440] [--label=<name>] [--selector=<css>]
+ * --selector takes the project's section elements as they are (no chrome,
+ * no heuristic split); without it the segmentation heuristic runs.
  * Exit: 0 ok, 1 error, 3 Playwright missing in the project.
  */
 import { basename, join, relative, resolve } from 'node:path';
@@ -21,9 +23,20 @@ import { checkSpec } from './lib/spec.mjs';
 import { createRun, runPaths, writeJson } from './lib/run.mjs';
 
 export function parseIngestArgs(argv) {
-  const o = parseOptions(argv, { source: '', project: '.', run: '', widths: '390,1440', label: '' });
-  if (!o.source) throw new Error('usage: ingest-html.mjs --source=<file.html | url> [--project=.] [--run=<dir>] [--widths=390,1440]');
+  const o = parseOptions(argv, { source: '', project: '.', run: '', widths: '390,1440', label: '', selector: '' });
+  if (!o.source) throw new Error('usage: ingest-html.mjs --source=<file.html | url> [--project=.] [--run=<dir>] [--widths=390,1440] [--selector=<css>]');
   return { ...o, widths: String(o.widths).split(',').map(Number).filter((w) => w > 0) };
+}
+
+/** One section per element matching the project selector, in document order. */
+async function selectSections(page, selector) {
+  const count = await page.locator(selector).count();
+  const sections = [];
+  for (let index = 0; index < count; index++) {
+    const node = await page.evaluate(collectSnapshot, { selector, index, maxDepth: 12 });
+    if (node?.visible) sections.push({ node, chrome: false });
+  }
+  return sections;
 }
 
 export async function main(argv) {
@@ -39,7 +52,8 @@ export async function main(argv) {
   try {
     const page = await browser.newPage({ viewport: { width: widest, height: 900 }, deviceScaleFactor: 1 });
     await page.goto(url, { waitUntil: 'networkidle' });
-    const sections = segment(await page.evaluate(collectSnapshot, { maxDepth: 12 }));
+    const sections = o.selector ? await selectSections(page, o.selector) : segment(await page.evaluate(collectSnapshot, { maxDepth: 12 }));
+    if (!sections.length) throw new Error(o.selector ? `no element matches --selector=${o.selector}` : 'no sections found on the page');
     const specs = sections.map((section, index) => toSpec(section, { index, sourceRef: url }));
     for (const width of o.widths) {
       await page.setViewportSize({ width, height: 900 });
