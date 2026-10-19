@@ -1,0 +1,26 @@
+{
+  "id": "04-stats",
+  "order": 3,
+  "source": { "kind": "html", "ref": "body > main > section:nth-of-type(4)", "url": "file:///acme/landing.html" },
+  "kind": "stats",
+  "slots": [
+    { "name": "heading", "type": "heading", "value": "Acme in numbers", "provenance": "exact" },
+    { "name": "items", "type": "list", "provenance": "exact", "items": [
+      [ { "name": "heading", "type": "heading", "value": "120k", "provenance": "exact" }, { "name": "text", "type": "text", "value": "Teams on Acme", "provenance": "exact" } ],
+      [ { "name": "heading", "type": "heading", "value": "99.9%", "provenance": "exact" }, { "name": "text", "type": "text", "value": "Uptime last year", "provenance": "exact" } ],
+      [ { "name": "heading", "type": "heading", "value": "40", "provenance": "exact" }, { "name": "text", "type": "text", "value": "Countries", "provenance": "exact" } ]
+    ] }
+  ],
+  "layout": { "columns": 3, "align": "center", "media": "none", "repeat": 3 },
+  "tokens": [
+    { "role": "section", "prop": "backgroundColor", "value": "rgb(245, 247, 250)", "provenance": "exact" },
+    { "role": "section", "prop": "paddingTop", "value": "64px", "provenance": "exact" },
+    { "role": "section", "prop": "paddingBottom", "value": "64px", "provenance": "exact" },
+    { "role": "heading", "prop": "color", "value": "rgb(17, 24, 39)", "provenance": "exact" },
+    { "role": "heading", "prop": "fontSize", "value": "36px", "provenance": "exact" },
+    { "role": "heading", "prop": "fontWeight", "value": "700", "provenance": "exact" },
+    { "role": "text", "prop": "color", "value": "rgb(75, 85, 99)", "provenance": "exact" },
+    { "role": "text", "prop": "fontSize", "value": "13px", "provenance": "exact" }
+  ],
+  "refs": { "1440": "refs/04-stats-1440.png" }
+}

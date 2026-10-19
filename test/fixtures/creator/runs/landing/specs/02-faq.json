@@ -1,0 +1,17 @@
+{
+  "id": "02-faq",
+  "order": 1,
+  "source": { "kind": "html", "ref": "body > main > section:nth-of-type(2)", "url": "file:///acme/landing.html" },
+  "kind": "faq",
+  "slots": [
+    { "name": "heading", "type": "heading", "value": "Questions", "provenance": "exact" },
+    { "name": "items", "type": "list", "provenance": "exact", "items": [
+      [ { "name": "heading", "type": "heading", "value": "Can I cancel any time?", "provenance": "exact" }, { "name": "text", "type": "text", "value": "Yes, from your account settings.", "provenance": "exact" } ],
+      [ { "name": "heading", "type": "heading", "value": "Is there a free plan?", "provenance": "exact" }, { "name": "text", "type": "text", "value": "Yes, for up to three people.", "provenance": "exact" } ],
+      [ { "name": "heading", "type": "heading", "value": "Where is my data stored?", "provenance": "exact" }, { "name": "text", "type": "text", "value": "In the region you pick at sign-up.", "provenance": "exact" } ]
+    ] }
+  ],
+  "layout": { "columns": 1, "align": "left", "media": "none", "repeat": 3 },
+  "tokens": [],
+  "refs": {}
+}
