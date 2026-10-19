@@ -20,6 +20,9 @@ jobs:
       - name: Validate skills against the contract (C3)
         run: node scripts/validate-skills.mjs
 
+      - name: Validate kivo-creator skills against the contract
+        run: node scripts/validate-skills.mjs --root plugins/kivo-creator
+
       - name: Install the Claude Code CLI
         id: cli
         continue-on-error: true
