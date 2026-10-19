@@ -7550,3 +7550,4 @@ Do not push and do not open the merge request unless asked. The first release of
 Recorded while executing the plan; each one is the smallest change that made the task's own test pass or kept the repo checks green.
 
 - **Task 9 (segment):** the unwrapping loops descended into any single visible child with 2+ children, so `main > [hero, hidden cta]` was split into the hero's own children (the `invisible nodes are not sections` test got 2 sections). Unwrapping now only enters a generic wrapper: not a `section` or `article` element and without a heading of its own (`isWrapper`).
+- **Task 24 (block markup):** the native-first check against WordPress 7.1 `wp-includes/blocks.php` (`serialize_block_attributes`) showed a sixth replacement, an escaped backslash (`\\`) to `\`, applied with `strtr` (one left-to-right pass). `serializeAttributes` now uses a single alternation regex with the same six replacements, and the test has a backslash case.
