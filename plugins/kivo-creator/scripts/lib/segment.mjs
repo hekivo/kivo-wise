@@ -103,3 +103,54 @@ function union(a, b) {
   const y = Math.min(a.y, b.y);
   return { x, y, w: Math.max(a.x + a.w, b.x + b.w) - x, h: Math.max(a.y + a.h, b.y + b.h) - y };
 }
+
+const signature = (n) => `${n.tag}.${[...(n.cls ?? [])].sort().join('.')}`;
+const ITEM_TAGS = new Set(['li', 'details', 'figure', 'img', 'dt']);
+
+/** First container (breadth-first) holding 3+ siblings that share tag and classes. */
+export function repeatedGroup(node) {
+  const queue = [node];
+  while (queue.length) {
+    const current = queue.shift();
+    const kids = current.children ?? [];
+    if (kids.length >= 3) {
+      const counts = new Map();
+      for (const k of kids) counts.set(signature(k), (counts.get(signature(k)) ?? 0) + 1);
+      const [sig, count] = [...counts].sort((a, b) => b[1] - a[1])[0];
+      if (count >= 3 && count / kids.length >= 0.6) {
+        const items = kids.filter((k) => signature(k) === sig);
+        if (items.every((i) => (i.children ?? []).length > 0) || ITEM_TAGS.has(items[0].tag)) return { container: current, items };
+      }
+    }
+    queue.push(...kids);
+  }
+  return null;
+}
+
+const NUMERIC = /^[~<>]?\d[\d.,]*\s*(%|[kmb]|x)?\+?$/i;
+const firstText = (node) => find(node, (n) => !!n.text)?.text.trim() ?? '';
+
+export function classify(node) {
+  const has = (pred) => !!find(node, pred);
+  const headings = findAll(node, (n) => HEADING.test(n.tag));
+  if (has((n) => n.tag === 'form')) return 'form';
+  if (has((n) => n.tag === 'details') || headings.filter((h) => textOf(h).endsWith('?')).length >= 2) return 'faq';
+  if (has((n) => n.tag === 'h1')) return 'hero';
+  if (has((n) => n.tag === 'blockquote')) return 'testimonial';
+  const group = repeatedGroup(node);
+  if (group) {
+    const { container, items } = group;
+    const isLogo = (i) => (i.tag === 'img' || !!find(i, (n) => n.tag === 'img')) && !find(i, (n) => HEADING.test(n.tag)) && !textOf(i);
+    if (items.every(isLogo)) return 'logos';
+    if (items.map(firstText).filter((t) => NUMERIC.test(t)).length * 2 >= items.length) return 'stats';
+    if (container.tag === 'ol') return 'steps';
+    return 'features';
+  }
+  if (has((n) => n.tag === 'iframe' || n.tag === 'video')) return 'media';
+  const actions = findAll(node, (n) => n.tag === 'button' || (n.tag === 'a' && !!textOf(n)));
+  const paragraphs = findAll(node, (n) => n.tag === 'p');
+  if (actions.length >= 1 && actions.length <= 3 && headings.length <= 1 && paragraphs.length <= 2) return 'cta';
+  if (headings.length || paragraphs.length) return 'text';
+  if (has((n) => n.tag === 'img')) return 'media';
+  return 'custom';
+}
