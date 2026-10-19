@@ -1,0 +1,6 @@
+{
+  "name": "acme/acme-core",
+  "type": "wordpress-muplugin",
+  "autoload": { "psr-4": { "AcmeCore\\": "app/" } },
+  "require": { "roots/acorn": "^6.2", "log1x/acf-composer": "^3.4" }
+}
