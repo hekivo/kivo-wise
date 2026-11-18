@@ -47,7 +47,7 @@ const MIRROR = ['skills', 'hooks'];
 
 // Hand-authored plugins that already live under plugins/<name>/ with real content.
 // They are listed in the Codex marketplace but never generated, copied or deleted here.
-const HAND_AUTHORED = ['kivo-creator'];
+const HAND_AUTHORED = ['kivo-creator', 'kivo-rebuild'];
 
 function readJson(p) {
   return JSON.parse(readFileSync(p, 'utf8'));

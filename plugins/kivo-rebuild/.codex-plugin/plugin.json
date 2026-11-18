@@ -1,0 +1,18 @@
+{
+  "name": "kivo-rebuild",
+  "version": "0.1.0",
+  "description": "Rebuild an existing WordPress site on the Roots stack: connect search and measurement sources, survey the live site into a decided URL inventory, audit legacy features against the new project, review it on a shared board",
+  "author": { "name": "hekivo", "url": "https://github.com/hekivo" },
+  "homepage": "https://github.com/hekivo/kivo-wise/tree/main/plugins/kivo-rebuild",
+  "repository": "https://github.com/hekivo/kivo-wise",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Kivo Rebuild",
+    "shortDescription": "Survey a live WordPress site and audit parity before rebuilding it on the Roots stack.",
+    "longDescription": "Connects Search Console, GA4, Tag Manager and edge sources, crawls the live site into a URL inventory with proposed keep/redirect/gone/noindex decisions, groups URLs by template, inventories what the legacy code does and classifies each feature against the new project. Plans new-site GA4, Tag Manager and Search Console setup behind an approval gate. Requires the kivo-wise plugin.",
+    "developerName": "hekivo",
+    "category": "Development",
+    "websiteURL": "https://github.com/hekivo/kivo-wise/tree/main/plugins/kivo-rebuild"
+  }
+}

@@ -47,29 +47,34 @@ function writeJson(path, data) {
   writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
 }
 
-const CREATOR_DIR = resolve(ROOT, 'plugins', 'kivo-creator');
-const CREATOR_MANIFESTS = ['.cursor-plugin', '.codex-plugin'].map((d) => join(CREATOR_DIR, d, 'plugin.json'));
+const HAND_AUTHORED = [
+  { name: 'kivo-creator', index: 1 },
+  { name: 'kivo-rebuild', index: 2 },
+];
 const MARKETPLACES = [
   resolve(ROOT, '.claude-plugin', 'marketplace.json'),
   resolve(ROOT, '.cursor-plugin', 'marketplace.json'),
   resolve(ROOT, '.codex-plugin', 'marketplace.json'),
 ];
 
-function syncCreator(isCheck, drift) {
-  const version = readJson(join(CREATOR_DIR, '.claude-plugin', 'plugin.json')).version;
-  for (const file of CREATOR_MANIFESTS) {
-    const data = readJson(file);
-    if (data.version === version) continue;
-    if (isCheck) drift.push(`kivo-creator: ${file} version ${data.version} != ${version}`);
-    else { data.version = version; writeJson(file, data); console.log(`Updated ${file} version to ${version}`); }
-  }
-  for (const file of MARKETPLACES) {
-    const data = readJson(file);
-    const entry = data.plugins?.[1];
-    if (entry?.name !== 'kivo-creator') { drift.push(`${file}: plugins[1] must be kivo-creator (release-please bumps $.plugins[1].version)`); continue; }
-    if (entry.version === version) continue;
-    if (isCheck) drift.push(`${file}: kivo-creator version ${entry.version} != ${version}`);
-    else { entry.version = version; writeJson(file, data); console.log(`Updated ${file} kivo-creator version to ${version}`); }
+function syncHandAuthored(isCheck, drift) {
+  for (const { name, index } of HAND_AUTHORED) {
+    const dir = resolve(ROOT, 'plugins', name);
+    const version = readJson(join(dir, '.claude-plugin', 'plugin.json')).version;
+    for (const file of ['.cursor-plugin', '.codex-plugin'].map((d) => join(dir, d, 'plugin.json'))) {
+      const data = readJson(file);
+      if (data.version === version) continue;
+      if (isCheck) drift.push(`${name}: ${file} version ${data.version} != ${version}`);
+      else { data.version = version; writeJson(file, data); console.log(`Updated ${file} version to ${version}`); }
+    }
+    for (const file of MARKETPLACES) {
+      const data = readJson(file);
+      const entry = data.plugins?.[index];
+      if (entry?.name !== name) { drift.push(`${file}: plugins[${index}] must be ${name} (release-please bumps $.plugins[${index}].version)`); continue; }
+      if (entry.version === version) continue;
+      if (isCheck) drift.push(`${file}: ${name} version ${entry.version} != ${version}`);
+      else { entry.version = version; writeJson(file, data); console.log(`Updated ${file} ${name} version to ${version}`); }
+    }
   }
 }
 
@@ -111,7 +116,7 @@ function main() {
     }
   }
 
-  syncCreator(isCheck, drift);
+  syncHandAuthored(isCheck, drift);
   if (!isCheck && drift.length) { for (const d of drift) console.error(d); process.exit(1); }
 
   if (isCheck) {
