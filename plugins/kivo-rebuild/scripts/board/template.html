@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rebuild review</title>
+<style>
+:root{--bg:#fff;--fg:#1b1f24;--muted:#5b6470;--line:#d9dee4;--accent:#1d6fd6;--ok:#1a7f37;--warn:#9a6700;--bad:#cf222e}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1216;--fg:#e6e9ee;--muted:#9aa4b2;--line:#2a3038;--accent:#5aa2ff;--ok:#3fb950;--warn:#d29922;--bad:#f85149}}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,sans-serif}
+header,main{padding:12px 16px;max-width:1200px;margin:0 auto}
+nav button{border:1px solid var(--line);background:none;color:var(--fg);padding:6px 10px;border-radius:6px;cursor:pointer}
+nav button[aria-selected=true]{border-color:var(--accent);color:var(--accent)}
+table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.wrap{overflow-x:auto}select,input{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:3px}
+.muted{color:var(--muted)}
+</style></head><body>
+<header><h1>Rebuild review</h1><p class="muted" id="meta"></p>
+<nav role="tablist"><button data-tab="how">How to review</button><button data-tab="templates">Templates</button><button data-tab="urls">URLs</button><button data-tab="parity">Parity</button><button data-tab="queue">Queue</button> <button id="download">Download marks</button></nav></header>
+<main id="view"></main>
+<script>
+const DATA = /*__DATA__*/null;
+let store = null;
+const local = { get(){ try { return JSON.parse(localStorage.getItem('rebuild-marks-' + DATA.run) || '{}'); } catch { return {}; } }, set(v){ try { localStorage.setItem('rebuild-marks-' + DATA.run, JSON.stringify(v)); } catch {} } };
+let marks = Object.assign({ urls: {}, templates: {}, parity: {} }, local.get());
+const b64 = (s) => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+async function save(kind, key, value) {
+  marks[kind][key] = Object.assign({}, marks[kind][key], value);
+  local.set(marks);
+  if (store) {
+    const coll = kind === 'urls' ? 'decisions' : kind;
+    const id = kind === 'urls' ? b64(key) : key;
+    const field = kind === 'urls' ? 'path' : kind === 'templates' ? 'group' : 'feature';
+    try { await store.doc(coll + '/' + id).set(Object.assign({ [field]: key }, marks[kind][key])); } catch (e) { console.warn(e); }
+  }
+}
+async function loadDb() {
+  try { store = await (window.claude && window.claude.use ? window.claude.use('db') : null); } catch { store = null; }
+  if (!store) return;
+  for (const [coll, kind, field] of [['decisions', 'urls', 'path'], ['templates', 'templates', 'group'], ['parity', 'parity', 'feature']]) {
+    try { const snap = await store.collection(coll).get(); for (const d of snap.docs || []) { const v = d.data(); marks[kind][v[field]] = v; } } catch {}
+  }
+  render();
+}
+function el(tag, attrs = {}, ...kids) { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'on') for (const [ev, fn] of Object.entries(v)) e.addEventListener(ev, fn); else e.setAttribute(k, v); } for (const k of kids) e.append(k instanceof Node ? k : document.createTextNode(k ?? '')); return e; }
+const DECISIONS = ['', 'keep', 'redirect', 'gone', 'noindex'];
+const STATUSES = ['todo', 'ok', 'issues', 'na'];
+let tab = 'how';
+function render() {
+  const v = document.getElementById('view'); v.textContent = '';
+  document.querySelectorAll('nav [data-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+  if (tab === 'how') v.append(el('div', {}, el('p', {}, 'Compare each template group with the live site on desktop (1280) and mobile (390). Mark the group ok or issues, write what differs, and open one issue per confirmed problem with the URL, viewport, a screenshot, and live vs new.'), el('p', {}, 'URLs: confirm or change the proposed decision. Grey-zone rows (review) are proposals; the owner decides.')));
+  if (tab === 'templates') v.append(table(['Group', 'Template', 'URLs', 'Clicks', 'Samples', 'Status', 'Note'], DATA.templates.map((t) => { const m = marks.templates[t.group] || {}; return [t.label, t.template, t.count, t.clicks ?? 0, (t.samples ?? []).join('\n'), select(STATUSES, m.status || t.status || 'todo', (x) => save('templates', t.group, { status: x })), input(m.note || t.note || '', (x) => save('templates', t.group, { note: x }))]; })));
+  if (tab === 'urls' || tab === 'queue') {
+    const rows = DATA.urls.filter((u) => tab === 'urls' || (u.proposed === 'review' && !(marks.urls[u.path] || {}).final));
+    v.append(el('p', { class: 'muted' }, `${rows.length} rows${DATA.truncated ? `; ${DATA.truncated} low-traffic rows not shown` : ''}`));
+    v.append(table(['Path', 'Type', 'Clicks', 'Proposed', 'Reason', 'Final', 'Note'], rows.map((u) => { const m = marks.urls[u.path] || {}; return [u.path, u.type, u.clicks ?? '-', u.proposed, u.reason, select(DECISIONS, m.final || u.final || '', (x) => save('urls', u.path, { final: x || null, decided_by: 'reviewer' })), input(m.note || u.note || '', (x) => save('urls', u.path, { note: x }))]; })));
+  }
+  if (tab === 'parity') { const f = new Map(DATA.features.map((x) => [x.id, x])); v.append(table(['Feature', 'Area', 'Class', 'Priority', 'Where', 'Note'], DATA.parity.map((p) => [f.get(p.feature)?.name ?? p.feature, f.get(p.feature)?.area ?? '', p.class, p.priority, p.location || '', input((marks.parity[p.feature] || {}).note || p.note || '', (x) => save('parity', p.feature, { note: x }))]))); }
+}
+function table(head, rows) { return el('div', { class: 'wrap' }, el('table', {}, el('thead', {}, el('tr', {}, ...head.map((h) => el('th', {}, h)))), el('tbody', {}, ...rows.map((r) => el('tr', {}, ...r.map((c) => el('td', {}, c))))))); }
+function select(opts, value, onChange) { const s = el('select', { on: { change: (e) => onChange(e.target.value) } }, ...opts.map((o) => el('option', { value: o }, o || '-'))); s.value = value; return s; }
+function input(value, onChange) { const i = el('input', { value, on: { change: (e) => onChange(e.target.value) } }); return i; }
+document.querySelectorAll('nav [data-tab]').forEach((b) => b.addEventListener('click', () => { tab = b.dataset.tab; render(); }));
+document.getElementById('download').addEventListener('click', () => { const a = el('a', { href: URL.createObjectURL(new Blob([JSON.stringify({ run: DATA.run, marks }, null, 2)], { type: 'application/json' })), download: 'marks.json' }); a.click(); });
+document.getElementById('meta').textContent = `Run ${DATA.run} · generated ${DATA.generated}`;
+render(); loadDb();
+</script></body></html>

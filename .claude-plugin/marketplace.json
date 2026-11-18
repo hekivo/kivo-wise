@@ -5,7 +5,7 @@
     "url": "https://github.com/hekivo"
   },
   "metadata": {
-    "description": "Marketplace for kivo-wise (Roots stack skills) and kivo-creator (design to blocks)."
+    "description": "Marketplace for kivo-wise (Roots stack skills), kivo-creator (design to blocks) and kivo-rebuild (rebuild existing sites)."
   },
   "plugins": [
     {
@@ -27,6 +27,16 @@
       "description": "Figma and HTML to WordPress on the Roots stack: reuse existing blocks first, scaffold only the gaps, prove fidelity with a pixel diff",
       "version": "0.1.0",
       "source": "./plugins/kivo-creator",
+      "author": {
+        "name": "hekivo",
+        "url": "https://github.com/hekivo"
+      }
+    },
+    {
+      "name": "kivo-rebuild",
+      "description": "Rebuild an existing WordPress site on the Roots stack: connect sources, survey the live site, audit parity",
+      "version": "0.1.0",
+      "source": "./plugins/kivo-rebuild",
       "author": {
         "name": "hekivo",
         "url": "https://github.com/hekivo"

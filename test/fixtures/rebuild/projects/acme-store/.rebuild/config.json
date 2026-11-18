@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "kind": "config",
+  "run_id": "2026-01-02-acme",
+  "live": "https://www.example.test",
+  "staging": "https://staging.example.test",
+  "legacy": "./legacy",
+  "slug": "acme",
+  "gsc": {
+    "property": "sc-domain:example.test",
+    "service_account": "reader@acme-proj.iam.example.test"
+  },
+  "staging_access": {
+    "headers_ref": "op://Infra/staging-token"
+  }
+}

@@ -70,7 +70,7 @@ test('release-please releases kivo-creator as its own package with a kivo-creato
   assert.equal(pkg.component, 'kivo-creator');
   assert.equal(pkg['include-component-in-tag'], true);
   assert.equal(pkg['initial-version'], '0.1.0');
-  assert.deepEqual(config.packages['.']['exclude-paths'], ['plugins/kivo-creator']);
+  assert.deepEqual(config.packages['.']['exclude-paths'], ['plugins/kivo-creator', 'plugins/kivo-rebuild']);
   const version = manifest('.claude-plugin').version;
   for (const file of pkg['extra-files']) {
     const abs = file.path.startsWith('/') ? join(ROOT, file.path) : join(ROOT, 'plugins/kivo-creator', file.path);

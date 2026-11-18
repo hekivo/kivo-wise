@@ -1,0 +1,4 @@
+schema_version: '1.1'
+name: connect-guides-missing-permission
+context:
+  scaffold_script: scaffold.sh

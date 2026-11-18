@@ -5,3 +5,4 @@
 evals/results/
 .creator/
 .creator-eval/
+.rebuild-eval/

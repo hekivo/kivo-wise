@@ -27,6 +27,18 @@
         "installation": "AVAILABLE"
       },
       "category": "Development"
+    },
+    {
+      "name": "kivo-rebuild",
+      "version": "0.1.0",
+      "source": {
+        "source": "local",
+        "path": "./plugins/kivo-rebuild"
+      },
+      "policy": {
+        "installation": "AVAILABLE"
+      },
+      "category": "Development"
     }
   ]
 }

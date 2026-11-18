@@ -5,7 +5,7 @@
     "url": "https://github.com/hekivo"
   },
   "metadata": {
-    "description": "Marketplace for the kivo-wise plugin (Codex)."
+    "description": "Marketplace for kivo-wise (Roots stack skills), kivo-creator (design to blocks) and kivo-rebuild (rebuild existing sites)."
   },
   "plugins": [
     {
@@ -29,6 +29,19 @@
       "source": {
         "source": "local",
         "path": "./plugins/kivo-creator"
+      },
+      "author": {
+        "name": "hekivo",
+        "url": "https://github.com/hekivo"
+      }
+    },
+    {
+      "name": "kivo-rebuild",
+      "description": "Rebuild an existing WordPress site on the Roots stack: connect sources, survey the live site, audit parity",
+      "version": "0.1.0",
+      "source": {
+        "source": "local",
+        "path": "./plugins/kivo-rebuild"
       },
       "author": {
         "name": "hekivo",

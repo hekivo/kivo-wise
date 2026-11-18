@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "kind": "urls",
+  "run_id": "2026-01-02-acme",
+  "generated_at": "2026-01-02T10:00:00.000Z",
+  "items": [
+    { "path": "/", "origin": "sitemap", "sitemap": "https://www.example.test/page-sitemap.xml", "type": "page", "lastmod": "2025-12-01", "live": { "status": 200 }, "staging": { "status": 200 } },
+    { "path": "/about/", "origin": "sitemap", "sitemap": "https://www.example.test/page-sitemap.xml", "type": "page", "lastmod": "2025-06-10", "live": { "status": 200 }, "staging": { "status": 200 } },
+    { "path": "/contact/", "origin": "sitemap", "sitemap": "https://www.example.test/page-sitemap.xml", "type": "page", "lastmod": "2025-06-10", "live": { "status": 200 }, "staging": { "status": 200 } },
+    { "path": "/shop/", "origin": "sitemap", "sitemap": "https://www.example.test/page-sitemap.xml", "type": "page", "lastmod": "2025-11-20", "live": { "status": 200 }, "staging": { "status": 200 } },
+    { "path": "/product/acme-widget/", "origin": "sitemap", "sitemap": "https://www.example.test/product-sitemap.xml", "type": "product", "lastmod": "2025-10-05", "live": { "status": 200 }, "staging": { "status": 200 } },
+    { "path": "/product/acme-gadget/", "origin": "sitemap", "sitemap": "https://www.example.test/product-sitemap.xml", "type": "product", "lastmod": "2025-10-05", "live": { "status": 200 }, "staging": { "status": 404 } },
+    { "path": "/blog/spring-sale/", "origin": "sitemap", "sitemap": "https://www.example.test/post-sitemap.xml", "type": "post", "lastmod": "2025-03-18", "live": { "status": 200 }, "staging": { "status": 200 } },
+    { "path": "/tag/sale/", "origin": "sitemap", "sitemap": "https://www.example.test/post_tag-sitemap.xml", "type": "post_tag", "lastmod": "2025-03-18", "live": { "status": 200 }, "staging": { "status": 200 } },
+    { "path": "/tag/clearance/", "origin": "sitemap", "sitemap": "https://www.example.test/post_tag-sitemap.xml", "type": "post_tag", "lastmod": "2025-03-18", "live": { "status": 200 }, "staging": { "status": 404 } },
+    { "path": "/tag/misc/", "origin": "sitemap", "sitemap": "https://www.example.test/post_tag-sitemap.xml", "type": "post_tag", "lastmod": "2025-03-18", "live": { "status": 200 }, "staging": { "status": 404 } }
+  ],
+  "failures": []
+}

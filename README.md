@@ -101,6 +101,10 @@ The corpus lives in a separate private repository. Each project points to it in 
 
 A second plugin in this repository, [`plugins/kivo-creator`](plugins/kivo-creator/README.md): Figma and HTML to WordPress blocks on the Roots stack. It reuses the project's blocks first, generates only the gaps (in the project's own block type: ACF Composer or `block.json`) and verifies the page with a pixel diff. Install with `claude plugin install kivo-creator@kivo-wise`; it depends on kivo-wise. Released separately (`kivo-creator-vX.Y.Z` tags).
 
+## kivo-rebuild
+
+A third plugin in this repository, [`plugins/kivo-rebuild`](plugins/kivo-rebuild/README.md): rebuild an existing WordPress site on the Roots stack without losing what the live site does. It connects Search Console, GA4 and Tag Manager, surveys the live site into a URL inventory with a proposed decision per URL, groups URLs by template, inventories the legacy features, audits parity and publishes a review board. Setup of the new site (GA4, Tag Manager workspace, Search Console, staging access) runs only from a plan the person approves by hash, and never publishes Tag Manager. Install with `claude plugin install kivo-rebuild@kivo-wise`; it depends on kivo-wise. Released separately (`kivo-rebuild-vX.Y.Z` tags).
+
 ## Cursor, Codex and Copilot
 
 These assistants do not load Claude Code plugins, so copy the skills into the project:

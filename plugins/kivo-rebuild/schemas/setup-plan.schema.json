@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "kind", "run_id", "generated_at", "hash", "actions"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "setup-plan" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string" },
+    "hash": { "type": "string" },
+    "actions": { "type": "array", "items": { "$ref": "#/$defs/action" } }
+  },
+  "$defs": {
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "provider", "op", "resource", "change", "undo"],
+      "properties": {
+        "id": { "type": "string" },
+        "provider": { "enum": ["ga4", "gtm", "gsc", "cloudflare"] },
+        "op": { "type": "string" },
+        "resource": { "type": "string" },
+        "params": { "type": "object" },
+        "change": { "type": "string" },
+        "undo": { "type": "string" },
+        "status": { "enum": ["planned", "applied", "failed"] },
+        "result": { "type": "object" }
+      }
+    }
+  }
+}

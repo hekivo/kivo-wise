@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "kind"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "config"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "live": {
+      "type": "string",
+      "pattern": "^https?://"
+    },
+    "staging": {
+      "type": "string"
+    },
+    "legacy": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "import_date": {
+      "type": "string"
+    },
+    "types": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "templates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/template"
+      }
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "disable": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "junk_prefixes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tag_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "file_ext": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "gsc": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "property": {
+          "type": "string"
+        },
+        "service_account": {
+          "type": "string"
+        }
+      }
+    },
+    "ga4": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "property_id": {
+          "type": "string"
+        },
+        "service_account": {
+          "type": "string"
+        }
+      }
+    },
+    "gtm": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "type": "string"
+        },
+        "container_id": {
+          "type": "string"
+        },
+        "service_account": {
+          "type": "string"
+        }
+      }
+    },
+    "setup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "service_account": {
+          "type": "string"
+        }
+      }
+    },
+    "cloudflare": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "zone_id": {
+          "type": "string"
+        },
+        "token_ref": {
+          "type": "string",
+          "pattern": "^(op://|tf-output:)"
+        }
+      }
+    },
+    "staging_access": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "headers_ref": {
+          "type": "string",
+          "pattern": "^(op://|tf-output:)"
+        }
+      }
+    },
+    "redirects_csv": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "template": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "group",
+        "label",
+        "template",
+        "match"
+      ],
+      "properties": {
+        "group": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "template": {
+          "type": "string"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "match": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "prefix": {
+              "type": "string"
+            },
+            "regex": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

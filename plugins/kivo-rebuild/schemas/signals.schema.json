@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "kind", "run_id", "generated_at"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "signals" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string" },
+    "sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "gsc": { "$ref": "#/$defs/source" },
+        "ga4": { "$ref": "#/$defs/source" }
+      }
+    },
+    "items": { "type": "array", "items": { "$ref": "#/$defs/item" } }
+  },
+  "$defs": {
+    "source": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "period": { "type": "string" },
+        "path": { "enum": ["api", "csv", "mcp"] },
+        "rows": { "type": "integer" }
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^(/|https?://)" },
+        "clicks": { "type": "integer", "minimum": 0 },
+        "impressions": { "type": "integer", "minimum": 0 },
+        "ctr": { "type": "number" },
+        "position": { "type": "number" },
+        "sessions": { "type": ["integer", "null"], "minimum": 0 },
+        "conversions": { "type": ["integer", "null"], "minimum": 0 }
+      }
+    }
+  }
+}
