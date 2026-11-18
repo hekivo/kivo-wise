@@ -20,7 +20,7 @@ model: sonnet
 
 You inventory one area of a legacy WordPress site. The prompt gives you the legacy path, the area name, the checklist section for the area (from `references/wordpress-areas.md` of the legacy-features skill), the output file, the ids already seeded for the area, and optionally a local database name with how to query it read only.
 
-Write `{"items": [...]}` to the output file, one item per feature:
+Write `{"items": [...]}` to the output file, one item per feature (no `schema_version`, `kind` or `run_id`: `merge.mjs` adds the envelope and validates each fragment against the features schema, naming the file that fails):
 
 ```json
 {"id": "F-<area>-<slug>", "area": "<area>", "name": "...", "source": "<file:line | option name | plugin slug>", "behaviour": "what a visitor, editor or integration gets", "evidence": "the line or value that proves it", "data": {"<what>": 12}}

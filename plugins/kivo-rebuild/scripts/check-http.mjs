@@ -112,7 +112,7 @@ export async function main(argv) {
   }
   const { schema_version: _v, kind: _k, run_id: _r, generated_at: _g, ...body } = urls;
   writeDoc(urlsFile, 'urls', body, { runId });
-  console.log(`${o.target}: ${prior.size}/${paths.length} checked`);
+  console.log(`${o.target}: ${paths.filter((x) => prior.has(x)).length}/${paths.length} checked`);
   if (aborted) { console.error(`stopped: ${aborted}`); process.exitCode = 2; }
 }
 
