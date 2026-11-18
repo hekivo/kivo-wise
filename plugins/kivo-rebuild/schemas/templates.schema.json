@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "kind", "run_id", "generated_at"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "templates" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string" },
+    "items": { "type": "array", "items": { "$ref": "#/$defs/item" } }
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["group", "label", "template", "count"],
+      "properties": {
+        "group": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "label": { "type": "string" },
+        "template": { "type": "string" },
+        "blocks": { "type": "array", "items": { "type": "string" } },
+        "count": { "type": "integer", "minimum": 0 },
+        "clicks": { "type": "integer", "minimum": 0 },
+        "samples": { "type": "array", "items": { "type": "string", "pattern": "^(/|https?://)" } },
+        "status": { "enum": ["todo", "ok", "issues", "na"] },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}

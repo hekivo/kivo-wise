@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "kind", "run_id", "generated_at"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "parity" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string" },
+    "items": { "type": "array", "items": { "$ref": "#/$defs/item" } }
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["feature", "class", "priority"],
+      "properties": {
+        "feature": { "type": "string", "pattern": "^F-[a-z0-9-]+$" },
+        "class": { "enum": ["done", "partial", "missing-planned", "missing-not-planned", "dropped", "data-only"] },
+        "priority": { "enum": ["P0", "P1", "P2", "P3"] },
+        "location": { "type": "string" },
+        "owner": { "type": "string" },
+        "note": { "type": "string" },
+        "decision": { "type": "string" }
+      }
+    }
+  }
+}

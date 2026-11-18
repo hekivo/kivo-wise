@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "kind"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "connections" },
+    "run_id": { "type": "string" },
+    "generated_at": { "type": "string" },
+    "items": { "type": "array", "items": { "$ref": "#/$defs/item" } }
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "path", "ok", "tested_at"],
+      "properties": {
+        "source": { "enum": ["gsc", "ga4", "gtm", "pagespeed", "cloudflare", "playwright", "bing", "rdstation", "merchant"] },
+        "path": { "enum": ["mcp", "api", "manual", "none"] },
+        "identity": { "type": "string" },
+        "error": { "type": "string" },
+        "tested_at": { "type": "string" },
+        "ok": { "type": "boolean" }
+      }
+    }
+  }
+}

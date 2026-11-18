@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "kind", "run_id", "generated_at"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "urls" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string" },
+    "items": { "type": "array", "items": { "$ref": "#/$defs/item" } }
+  },
+  "$defs": {
+    "http": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "type": "integer" },
+        "location": { "type": "string" },
+        "ms": { "type": "integer" },
+        "error": { "type": "string" }
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "origin", "type"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^(/|https?://)" },
+        "origin": { "enum": ["sitemap", "search", "both"] },
+        "sitemap": { "type": "string" },
+        "type": { "type": "string" },
+        "lastmod": { "type": ["string", "null"] },
+        "live": { "$ref": "#/$defs/http" },
+        "staging": { "$ref": "#/$defs/http" },
+        "title": { "type": "string" },
+        "h1": { "type": "string" },
+        "canonical": { "type": "string" },
+        "robots": { "type": "string" }
+      }
+    }
+  }
+}
