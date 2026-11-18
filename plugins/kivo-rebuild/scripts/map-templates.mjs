@@ -44,7 +44,7 @@ export function main(argv) {
   const prev = readDoc(join(dir, 'templates.json'));
   const items = mapTemplates({ items: inv.items ?? [], groups: config.templates ?? DEFAULT_GROUPS });
   const old = new Map((prev?.items ?? []).map((t) => [t.group, t]));
-  for (const t of items) if (old.has(t.group)) Object.assign(t, { status: old.get(t.group).status, ...(old.get(t.group).note ? { note: old.get(t.group).note } : {}) });
+  for (const t of items) if (old.has(t.group)) Object.assign(t, { status: old.get(t.group).status, ...(old.get(t.group).note ? { note: old.get(t.group).note } : {}), ...(old.get(t.group).issue ? { issue: old.get(t.group).issue } : {}) });
   writeDoc(join(dir, 'templates.json'), 'templates', { items }, { runId });
   for (const t of items) console.log(`${String(t.count).padStart(6)} ${t.group} -> ${t.template}`);
 }

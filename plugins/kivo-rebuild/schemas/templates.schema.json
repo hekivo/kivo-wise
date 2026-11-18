@@ -23,7 +23,8 @@
         "clicks": { "type": "integer", "minimum": 0 },
         "samples": { "type": "array", "items": { "type": "string", "pattern": "^(/|https?://)" } },
         "status": { "enum": ["todo", "ok", "issues", "na"] },
-        "note": { "type": "string" }
+        "note": { "type": "string" },
+        "issue": { "type": "integer", "minimum": 1 }
       }
     }
   }

@@ -77,12 +77,14 @@ test('cli writes a schema-valid templates.json, prints counts and keeps reviewed
 
   doc.items.find((t) => t.group === 'product').status = 'ok';
   doc.items.find((t) => t.group === 'product').note = 'checked with the owner';
+  doc.items.find((t) => t.group === 'product').issue = 12;
   writeFileSync(join(rd, 'templates.json'), JSON.stringify(doc));
   const second = run('map-templates.mjs', [`--project=${project}`, `--run=${runId}`]);
   assert.equal(second.code, 0, second.stderr);
   const product = readJson(join(rd, 'templates.json')).items.find((t) => t.group === 'product');
   assert.equal(product.status, 'ok');
   assert.equal(product.note, 'checked with the owner');
+  assert.equal(product.issue, 12, 'a filed issue number survives a re-map, so issues.mjs does not file it twice');
 });
 
 test('cli uses config.templates instead of the defaults when present', () => {
