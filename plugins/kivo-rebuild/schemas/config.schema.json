@@ -162,6 +162,12 @@
         "template": {
           "type": "string"
         },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "match": {
           "type": "object",
           "additionalProperties": false,
