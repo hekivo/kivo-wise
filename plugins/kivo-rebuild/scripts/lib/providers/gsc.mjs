@@ -15,3 +15,19 @@ export async function readTest({ config, token, fetchImpl = fetch }) {
   if (res.status === 403) return { ok: false, identity: identityOf(config), error: `${identityOf(config)} is not a user of ${config.gsc.property}: add it in Search Console > Settings > Users and permissions (Restricted is enough)` };
   return { ok: false, identity: identityOf(config), error: `HTTP ${res.status} from Search Console` };
 }
+
+const wm = 'https://www.googleapis.com/webmasters/v3/sites';
+const sv = 'https://www.googleapis.com/siteVerification/v1';
+async function req(method, url, body, { token, fetchImpl = fetch }) {
+  const res = await fetchImpl(url, { method, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, ...(body ? { body: JSON.stringify(body) } : {}) });
+  if (!res.ok) throw new Error(`Google HTTP ${res.status}`);
+  const text = await res.text();
+  return text ? JSON.parse(text) : {};
+}
+const need = (p, keys) => keys.filter((k) => !p?.[k]).map((k) => `params.${k} is required`);
+export const actions = {
+  verificationToken: { validate: (p) => need(p, ['domain']), apply: async (p, ctx) => ({ token: (await req('POST', `${sv}/token`, { site: { type: 'INET_DOMAIN', identifier: p.domain }, verificationMethod: 'DNS_TXT' }, ctx)).token }) },
+  verify: { validate: (p) => need(p, ['domain']), apply: async (p, ctx) => ({ id: (await req('POST', `${sv}/webResource?verificationMethod=DNS_TXT`, { site: { type: 'INET_DOMAIN', identifier: p.domain } }, ctx)).id }) },
+  addSite: { validate: (p) => need(p, ['property']), apply: async (p, ctx) => { await req('PUT', `${wm}/${encodeURIComponent(p.property)}`, null, ctx); return { property: p.property }; } },
+  submitSitemap: { validate: (p) => need(p, ['property', 'sitemap']), apply: async (p, ctx) => { await req('PUT', `${wm}/${encodeURIComponent(p.property)}/sitemaps/${encodeURIComponent(p.sitemap)}`, null, ctx); return { sitemap: p.sitemap }; } },
+};

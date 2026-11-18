@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseOptions, runCli } from './lib/args.mjs';
-import { accessToken } from './lib/credentials.mjs';
+import { googleToken, GOOGLE_SCOPES } from './lib/credentials.mjs';
 import { parseCsv } from './lib/csv.mjs';
 import { normalizePath } from './lib/paths.mjs';
 import { queryUrl } from './lib/providers/gsc.mjs';
@@ -78,7 +78,7 @@ export async function main(argv) {
   if (!o.csv && !config.gsc?.property) throw new Error('config.gsc.property missing: set it, or pass --csv=<Search Console export>');
   const data = o.csv
     ? fromCsv(readFileSync(o.csv, 'utf8'), config.live)
-    : await fromApi({ property: config.gsc.property, token: accessToken(config.gsc.service_account), start, end, origin: config.live });
+    : await fromApi({ property: config.gsc.property, token: await googleToken(config.gsc.service_account, GOOGLE_SCOPES.read), start, end, origin: config.live });
   mergeSignals(runDir(o.project, runId), runId, 'gsc', data, { period: `${start}..${end}`, path: o.via || (o.csv ? 'csv' : 'api'), rows: data.size });
   console.log(`gsc: ${data.size} pages (${start}..${end})`);
 }

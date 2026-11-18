@@ -115,6 +115,15 @@
         }
       }
     },
+    "setup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "service_account": {
+          "type": "string"
+        }
+      }
+    },
     "cloudflare": {
       "type": "object",
       "additionalProperties": false,

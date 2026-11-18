@@ -2,7 +2,7 @@
 // plugins/kivo-rebuild/scripts/ga4.mjs
 import { join } from 'node:path';
 import { parseOptions, runCli } from './lib/args.mjs';
-import { accessToken } from './lib/credentials.mjs';
+import { googleToken, GOOGLE_SCOPES } from './lib/credentials.mjs';
 import { normalizePath } from './lib/paths.mjs';
 import { reportUrl } from './lib/providers/ga4.mjs';
 import { latestRun, readDoc, rebuildDir, runDir } from './lib/state.mjs';
@@ -35,7 +35,7 @@ export async function main(argv) {
   const config = readDoc(join(rebuildDir(o.project), 'config.json')) ?? {};
   if (!config.ga4?.property_id) throw new Error('config.ga4.property_id missing');
   const { start, end } = period(Number(o.months));
-  const data = await fromApi({ propertyId: config.ga4.property_id, token: accessToken(config.ga4.service_account), start, end });
+  const data = await fromApi({ propertyId: config.ga4.property_id, token: await googleToken(config.ga4.service_account, GOOGLE_SCOPES.read), start, end });
   mergeSignals(runDir(o.project, runId), runId, 'ga4', data, { period: `${start}..${end}`, path: 'api', rows: data.size });
   console.log(`ga4: ${data.size} pages (${start}..${end})`);
 }

@@ -3,7 +3,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseOptions, runCli } from './lib/args.mjs';
-import { accessToken, defaultExec } from './lib/credentials.mjs';
+import { googleToken, GOOGLE_SCOPES, defaultExec } from './lib/credentials.mjs';
 import { readDoc, rebuildDir, writeDoc, ensureGitignore } from './lib/state.mjs';
 import * as gsc from './lib/providers/gsc.mjs';
 import * as ga4 from './lib/providers/ga4.mjs';
@@ -30,7 +30,7 @@ export async function testAll({ config, providers = PROVIDERS, exec = defaultExe
     if (p.usesGoogleToken !== false) {
       const sa = config[p.id]?.service_account ?? config.gsc?.service_account ?? '';
       try {
-        if (!tokens.has(sa)) tokens.set(sa, accessToken(sa, { exec }));
+        if (!tokens.has(sa)) tokens.set(sa, await googleToken(sa, GOOGLE_SCOPES.read, { exec, fetchImpl }));
         token = tokens.get(sa);
       } catch (e) {
         items.push({ source: p.id, path: 'api', ok: false, identity: sa || 'gcloud user', error: `${e.message}: run gcloud auth login (and grant roles/iam.serviceAccountTokenCreator on ${sa || 'the service account'})`, tested_at: now() });

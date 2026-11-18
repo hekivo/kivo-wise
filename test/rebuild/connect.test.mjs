@@ -10,6 +10,7 @@ const exec = (cmd, args) => { if (cmd === 'gcloud' && args[1] === 'print-access-
 
 test('gsc ok, ga4 403 explains the human step, unconfigured is none', async () => {
   const fetchImpl = async (url, init) => {
+    if (url.includes('iamcredentials')) return new Response(JSON.stringify({ accessToken: 'tok' }), { status: 200 });
     assert.equal(init.headers.Authorization, 'Bearer tok');
     if (url.includes('searchconsole')) return new Response(JSON.stringify({ rows: [{ keys: ['/'] }] }), { status: 200 });
     return new Response('{}', { status: 403 });
