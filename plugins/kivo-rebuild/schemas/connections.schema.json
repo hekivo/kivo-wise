@@ -7,7 +7,8 @@
     "kind": { "const": "connections" },
     "run_id": { "type": "string" },
     "generated_at": { "type": "string" },
-    "items": { "type": "array", "items": { "$ref": "#/$defs/item" } }
+    "items": { "type": "array", "items": { "$ref": "#/$defs/item" } },
+    "tools": { "type": "object", "additionalProperties": { "type": "boolean" } }
   },
   "$defs": {
     "item": {
