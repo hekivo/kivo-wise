@@ -7,7 +7,18 @@
     "kind": { "const": "urls" },
     "run_id": { "type": "string", "minLength": 1 },
     "generated_at": { "type": "string" },
-    "items": { "type": "array", "items": { "$ref": "#/$defs/item" } }
+    "items": { "type": "array", "items": { "$ref": "#/$defs/item" } },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["sitemap", "error"],
+        "properties": {
+          "sitemap": { "type": "string" },
+          "error": { "type": "string" }
+        }
+      }
+    }
   },
   "$defs": {
     "http": {
