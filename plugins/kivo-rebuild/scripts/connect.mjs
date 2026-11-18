@@ -55,7 +55,13 @@ export async function main(argv) {
   const tools = detect({ project: o.project });
   items.push({ source: 'playwright', path: tools.playwright ? 'api' : 'none', ok: tools.playwright, tested_at: new Date().toISOString(), ...(tools.playwright ? {} : { error: 'install @playwright/test in the project' }) });
   for (const m of MANUAL) if (config[m]) items.push({ source: m, path: 'manual', ok: true, identity: 'export', tested_at: new Date().toISOString() });
-  writeDoc(join(rebuildDir(o.project), 'connections.json'), 'connections', { items, tools });
+  // --only re-tests some sources; the others keep their last result instead of disappearing.
+  const file = join(rebuildDir(o.project), 'connections.json');
+  if (only) {
+    const fresh = new Set(items.map((i) => i.source));
+    for (const prev of readDoc(file)?.items ?? []) if (!fresh.has(prev.source)) items.push(prev);
+  }
+  writeDoc(file, 'connections', { items, tools });
   for (const i of items) console.log(`${i.source} ${i.path} ${i.ok ? 'ok' : 'FAIL'} ${i.ok ? i.identity ?? '' : i.error}`);
   if (items.some((i) => !i.ok && i.path !== 'none')) process.exitCode = 1;
 }

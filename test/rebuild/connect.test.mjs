@@ -35,3 +35,17 @@ test('output never contains the token', async () => {
   const items = await testAll({ config, providers: [gsc], exec, fetchImpl, mcp: [] });
   assert.doesNotMatch(JSON.stringify(items), /tok/);
 });
+
+test('connect --only keeps the last result of the sources it did not re-test', async () => {
+  const { mkdirSync, writeFileSync } = await import('node:fs');
+  const { join } = await import('node:path');
+  const { readJson, run, tmpProject } = await import('./helpers.mjs');
+  const project = tmpProject();
+  mkdirSync(join(project, '.rebuild'), { recursive: true });
+  writeFileSync(join(project, '.rebuild', 'config.json'), JSON.stringify({ schema_version: 1, kind: 'config', live: 'https://www.example.test', cloudflare: { zone_id: 'z1' } }));
+  writeFileSync(join(project, '.rebuild', 'connections.json'), JSON.stringify({ schema_version: 1, kind: 'connections', generated_at: '2026-01-01T00:00:00Z', items: [{ source: 'gsc', path: 'api', ok: true, identity: 'reader', tested_at: '2026-01-01T00:00:00Z' }], tools: {} }));
+  const r = run('connect.mjs', [`--project=${project}`, '--only=cloudflare'], { env: { CLOUDFLARE_API_TOKEN: '' } });
+  const items = readJson(join(project, '.rebuild', 'connections.json')).items;
+  assert.ok(items.find((i) => i.source === 'cloudflare' && i.ok === false), r.stderr);
+  assert.deepEqual(items.find((i) => i.source === 'gsc'), { source: 'gsc', path: 'api', ok: true, identity: 'reader', tested_at: '2026-01-01T00:00:00Z' });
+});
