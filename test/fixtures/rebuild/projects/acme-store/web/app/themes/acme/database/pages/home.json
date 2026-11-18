@@ -1,0 +1,12 @@
+{
+  "title": "Home",
+  "slug": "home",
+  "blocks": [
+    {
+      "name": "acme/hero-banner",
+      "data": {
+        "slides": []
+      }
+    }
+  ]
+}

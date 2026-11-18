@@ -1,0 +1,4 @@
+{
+  "html_scripts_header": "<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-TEST000\"></script>",
+  "html_scripts_footer": "<script src=\"https://cdn.example-crm.test/loader.js\"></script>"
+}

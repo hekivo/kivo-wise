@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "kind": "inventory",
+  "run_id": "2026-01-02-acme",
+  "generated_at": "2026-11-18T15:08:50.357Z",
+  "items": [
+    {
+      "path": "/",
+      "origin": "both",
+      "sitemap": "https://www.example.test/page-sitemap.xml",
+      "type": "page",
+      "lastmod": "2025-12-01",
+      "live": {
+        "status": 200
+      },
+      "staging": {
+        "status": 200
+      },
+      "clicks": 1200,
+      "impressions": 30000,
+      "position": 4.2,
+      "sessions": null,
+      "proposed": "keep",
+      "reason": "same URL on the new project",
+      "rule_id": "R14"
+    },
+    {
+      "path": "/about/",
+      "origin": "sitemap",
+      "sitemap": "https://www.example.test/page-sitemap.xml",
+      "type": "page",
+      "lastmod": "2025-06-10",
+      "live": {
+        "status": 200
+      },
+      "staging": {
+        "status": 200
+      },
+      "clicks": 0,
+      "impressions": 0,
+      "position": null,
+      "sessions": null,
+      "proposed": "keep",
+      "reason": "same URL on the new project",
+      "rule_id": "R14"
+    },
+    {
+      "path": "/contact/",
+      "origin": "sitemap",
+      "sitemap": "https://www.example.test/page-sitemap.xml",
+      "type": "page",
+      "lastmod": "2025-06-10",
+      "live": {
+        "status": 200
+      },
+      "staging": {
+        "status": 200
+      },
+      "clicks": 0,
+      "impressions": 0,
+      "position": null,
+      "sessions": null,
+      "proposed": "keep",
+      "reason": "same URL on the new project",
+      "rule_id": "R14"
+    },
+    {
+      "path": "/shop/",
+      "origin": "both",
+      "sitemap": "https://www.example.test/page-sitemap.xml",
+      "type": "page",
+      "lastmod": "2025-11-20",
+      "live": {
+        "status": 200
+      },
+      "staging": {
+        "status": 200
+      },
+      "clicks": 640,
+      "impressions": 15000,
+      "position": 6.1,
+      "sessions": null,
+      "proposed": "keep",
+      "reason": "same URL on the new project",
+      "rule_id": "R14"
+    },
+    {
+      "path": "/product/acme-widget/",
+      "origin": "both",
+      "sitemap": "https://www.example.test/product-sitemap.xml",
+      "type": "product",
+      "lastmod": "2025-10-05",
+      "live": {
+        "status": 200
+      },
+      "staging": {
+        "status": 200
+      },
+      "clicks": 310,
+      "impressions": 9000,
+      "position": 7.8,
+      "sessions": null,
+      "proposed": "keep",
+      "reason": "same URL on the new project",
+      "rule_id": "R14"
+    },
+    {
+      "path": "/product/acme-gadget/",
+      "origin": "both",
+      "sitemap": "https://www.example.test/product-sitemap.xml",
+      "type": "product",
+      "lastmod": "2025-10-05",
+      "live": {
+        "status": 200
+      },
+      "staging": {
+        "status": 404
+      },
+      "clicks": 95,
+      "impressions": 4100,
+      "position": 9.4,
+      "sessions": null,
+      "proposed": "review",
+      "reason": "no rule fits (staging 404)",
+      "rule_id": "R99"
+    },
+    {
+      "path": "/blog/spring-sale/",
+      "origin": "both",
+      "sitemap": "https://www.example.test/post-sitemap.xml",
+      "type": "post",
+      "lastmod": "2025-03-18",
+      "live": {
+        "status": 200
+      },
+      "staging": {
+        "status": 200
+      },
+      "clicks": 40,
+      "impressions": 2200,
+      "position": 12.5,
+      "sessions": null,
+      "proposed": "keep",
+      "reason": "same URL on the new project",
+      "rule_id": "R14"
+    },
+    {
+      "path": "/tag/sale/",
+      "origin": "both",
+      "sitemap": "https://www.example.test/post_tag-sitemap.xml",
+      "type": "post_tag",
+      "lastmod": "2025-03-18",
+      "live": {
+        "status": 200
+      },
+      "staging": {
+        "status": 200
+      },
+      "clicks": 3,
+      "impressions": 180,
+      "position": 18,
+      "sessions": null,
+      "proposed": "keep",
+      "reason": "tag archive resolves",
+      "rule_id": "R09"
+    },
+    {
+      "path": "/tag/clearance/",
+      "origin": "both",
+      "sitemap": "https://www.example.test/post_tag-sitemap.xml",
+      "type": "post_tag",
+      "lastmod": "2025-03-18",
+      "live": {
+        "status": 200
+      },
+      "staging": {
+        "status": 404
+      },
+      "clicks": 0,
+      "impressions": 8,
+      "position": 41,
+      "sessions": null,
+      "proposed": "noindex",
+      "reason": "shown in search but never clicked",
+      "rule_id": "R12"
+    },
+    {
+      "path": "/tag/misc/",
+      "origin": "sitemap",
+      "sitemap": "https://www.example.test/post_tag-sitemap.xml",
+      "type": "post_tag",
+      "lastmod": "2025-03-18",
+      "live": {
+        "status": 200
+      },
+      "staging": {
+        "status": 404
+      },
+      "clicks": 0,
+      "impressions": 0,
+      "position": null,
+      "sessions": null,
+      "proposed": "gone",
+      "reason": "never shown in search",
+      "rule_id": "R13"
+    }
+  ]
+}

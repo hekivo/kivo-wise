@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "kind": "signals",
+  "run_id": "2026-01-02-acme",
+  "generated_at": "2026-01-02T10:05:00.000Z",
+  "sources": {
+    "gsc": { "period": "2024-09-01..2026-01-01", "path": "csv", "rows": 7 }
+  },
+  "items": [
+    { "path": "/", "clicks": 1200, "impressions": 30000, "position": 4.2 },
+    { "path": "/shop/", "clicks": 640, "impressions": 15000, "position": 6.1 },
+    { "path": "/product/acme-widget/", "clicks": 310, "impressions": 9000, "position": 7.8 },
+    { "path": "/product/acme-gadget/", "clicks": 95, "impressions": 4100, "position": 9.4 },
+    { "path": "/blog/spring-sale/", "clicks": 40, "impressions": 2200, "position": 12.5 },
+    { "path": "/tag/sale/", "clicks": 3, "impressions": 180, "position": 18.0 },
+    { "path": "/tag/clearance/", "clicks": 0, "impressions": 8, "position": 41.0 }
+  ]
+}

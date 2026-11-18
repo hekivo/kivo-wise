@@ -1,0 +1,9 @@
+{
+  "post_type": "acme_banner",
+  "posts": [
+    { "ID": 101, "post_title": "Spring sale", "post_status": "publish", "image": "/wp-content/uploads/2025/03/spring-sale.jpg", "link": "/blog/spring-sale/" },
+    { "ID": 102, "post_title": "New widgets", "post_status": "publish", "image": "/wp-content/uploads/2025/04/new-widgets.jpg", "link": "/product/acme-widget/" },
+    { "ID": 103, "post_title": "Free shipping week", "post_status": "publish", "image": "/wp-content/uploads/2025/06/free-shipping.jpg", "link": "/shop/" },
+    { "ID": 104, "post_title": "Gadget clearance", "post_status": "publish", "image": "/wp-content/uploads/2025/09/gadget-clearance.jpg", "link": "/product/acme-gadget/" }
+  ]
+}
