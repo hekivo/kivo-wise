@@ -73,3 +73,29 @@ test('stops when the error rate passes the limit', async () => {
   assert.match(aborted, /error rate/);
   assert.ok(results.size < 200);
 });
+
+test('cli also checks search-only paths with clicks once signals.json exists', async () => {
+  const { createServer } = await import('node:http');
+  const { spawn } = await import('node:child_process');
+  const { mkdirSync, writeFileSync, readFileSync } = await import('node:fs');
+  const { join } = await import('node:path');
+  const { PLUGIN, tmpProject } = await import('./helpers.mjs');
+  const hits = [];
+  const server = createServer((req, res) => { hits.push(req.url); if (req.url === '/old-file.pdf') { res.writeHead(301, { location: '/files/new.pdf' }); res.end(); } else { res.writeHead(200, { 'content-type': 'text/html' }); res.end('<title>T</title>'); } });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  const origin = `http://127.0.0.1:${server.address().port}`;
+  const project = tmpProject();
+  const rd = join(project, '.rebuild', 'runs', '2026-01-02-acme');
+  mkdirSync(rd, { recursive: true });
+  writeFileSync(join(project, '.rebuild', 'config.json'), JSON.stringify({ schema_version: 1, kind: 'config', live: origin }));
+  writeFileSync(join(rd, 'urls.json'), JSON.stringify({ schema_version: 1, kind: 'urls', run_id: '2026-01-02-acme', generated_at: '', items: [{ path: '/', origin: 'sitemap', type: 'page', lastmod: null }] }));
+  writeFileSync(join(rd, 'signals.json'), JSON.stringify({ schema_version: 1, kind: 'signals', run_id: '2026-01-02-acme', generated_at: '', sources: {}, items: [{ path: '/old-file.pdf', clicks: 3 }, { path: '/no-clicks/', clicks: 0 }, { path: '/', clicks: 9 }] }));
+  const code = await new Promise((r) => spawn(process.execPath, [join(PLUGIN, 'scripts', 'check-http.mjs'), `--project=${project}`, '--target=live'], { stdio: 'ignore' }).on('exit', r));
+  server.close();
+  assert.equal(code, 0);
+  assert.deepEqual(hits.sort(), ['/', '/old-file.pdf']);
+  const items = JSON.parse(readFileSync(join(rd, 'urls.json'), 'utf8')).items;
+  const pdf = items.find((i) => i.path === '/old-file.pdf');
+  assert.equal(pdf.origin, 'search');
+  assert.deepEqual(pdf.live, { status: 301, location: '/files/new.pdf', ms: pdf.live.ms });
+});

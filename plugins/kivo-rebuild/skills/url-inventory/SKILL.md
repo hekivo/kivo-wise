@@ -24,15 +24,16 @@ Writes `inventory.json`: one row per URL with the live and staging answers, the 
 
 ## Procedure
 
-1. Run `node <root>/scripts/build-inventory.mjs --project=.`. It prints the row count and the count per type and proposed decision.
-2. Explain the result with the rules in `references/decision-rules.md`. The first matching rule wins, so a row's `rule_id` says why. R99 (`review`, no rule fits) is the fallback and cannot be disabled.
-3. To change behavior, edit the config and re-run:
+1. When `signals.json` exists, first re-run `node <root>/scripts/check-http.mjs --project=. --target=live` (and `--target=staging` when set). It resumes, so it only fetches the URLs that Search Console knows and the sitemap does not (old URLs, files, queries with clicks); without this step those rows have no HTTP status and fall to R99.
+2. Run `node <root>/scripts/build-inventory.mjs --project=.`. It prints the row count and the count per type and proposed decision.
+3. Explain the result with the rules in `references/decision-rules.md`. The first matching rule wins, so a row's `rule_id` says why. R99 (`review`, no rule fits) is the fallback and cannot be disabled.
+4. To change behavior, edit the config and re-run:
    - `rules.disable: ["R12"]` skips a rule. Add `rules.junk_prefixes` (`["/test", "/draft"]`) for R08.
    - Approved redirects: a CSV at `redirects_csv` with the columns `source,target,approved`. Only rows with a non-empty `approved` count (rule R01). A missing column is an error, not a silent skip.
-4. Redirect targets on the live or staging host are stored as paths (`/new-page/`); a foreign host stays absolute (`https://other.example.test/page`).
-5. Re-running keeps what a person decided: `final`, `decided_by`, `note` and `issue`, and the `target` of a row with a `final`. The proposals are recomputed.
-6. Proposals are not decisions. Never write `final` yourself. The person sets it through `review-board` or by editing the row, and `export.mjs --what=redirects` exports only rows with `final: redirect`.
-7. Show the counts per decision and the largest `review` groups by type, so the person knows where attention is needed.
+5. Redirect targets on the live or staging host are stored as paths (`/new-page/`); a foreign host stays absolute (`https://other.example.test/page`).
+6. Re-running keeps what a person decided: `final`, `decided_by`, `note` and `issue`, and the `target` of a row with a `final`. The proposals are recomputed.
+7. Proposals are not decisions. Never write `final` yourself. The person sets it through `review-board` or by editing the row, and `export.mjs --what=redirects` exports only rows with `final: redirect`.
+8. Show the counts per decision and the largest `review` groups by type, so the person knows where attention is needed.
 
 ## Verification
 

@@ -83,6 +83,13 @@ export async function main(argv) {
   const urlsFile = join(runDir(o.project, runId), 'urls.json');
   const urls = readDoc(urlsFile);
   if (!urls) throw new Error(`${urlsFile} not found: run crawl-sitemap.mjs first`);
+  // URLs that only Search Console knows (old URLs, files, queries with clicks) are checked too once signals exist,
+  // so the rules can see how the live site and staging answer them. Re-running after search-signals fetches only those.
+  const signals = readDoc(join(runDir(o.project, runId), 'signals.json'));
+  const known = new Set(urls.items.map((u) => u.path));
+  for (const s of signals?.items ?? []) {
+    if ((s.clicks ?? 0) > 0 && !known.has(s.path) && s.path.startsWith('/')) { urls.items.push({ path: s.path, origin: 'search', type: 'search', lastmod: null }); known.add(s.path); }
+  }
   const stream = join(runDir(o.project, runId), `http-${o.target}.jsonl`);
   const prior = new Map();
   if (existsSync(stream)) for (const line of readFileSync(stream, 'utf8').split('\n').filter(Boolean)) { const r = JSON.parse(line); prior.set(r.path, r); }
