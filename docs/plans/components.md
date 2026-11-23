@@ -2,4 +2,50 @@
 
 # Components
 
-No components yet.
+## Phase 1
+
+### 01 Compose detection and runner map
+
+batch A; decisions D-008, D-009, D-010, D-012, D-013, D-018; rules The detector never spawns a process and never reads .env (S-2, D-006)., runtime.lando keeps its shape and stays required; Lando and DDEV runners stay byte-identical (D-018)., Compose service roles are never guessed from names outside the kivo-wp contract (S-2)..
+
+- [ ] **AC-01-1** A root Compose file (compose.yaml, compose.yml, docker-compose.yaml, docker-compose.yml, in that order) plus an executable bin/wp that passes the bin/ signature check gives runner compose; with x-kivo-wp contract 1 the services come from the contract (app holds php and web) and runtime.compose matches the S-2 example on the compose-bin fixture.
+- [ ] **AC-01-2** Without a contract, roles come from each service image as listed in S-2; a service built from a Dockerfile is matched only by a contract name, otherwise left out with a note (compose-no-contract fixture).
+- [ ] **AC-01-3** Edge signals: root Compose file without bin/ gives compose with the 'no bin/ scripts' warning; bin/ without a Compose file gives none with its warning; a Compose file only under .devcontainer/ is not a runner and produces the editor-attached note; a Composer bin-dir named bin is ignored with a note (compose-no-bin, devcontainer-legacy, composer-bin-dir fixtures).
+- [ ] **AC-01-4** Compose and a Landofile together, no flag: runner compose, the D-009 'Landofile still present' warning, and runtime.lando still filled from the Landofile (compose-and-lando fixture).
+- [ ] **AC-01-5** The .roots-stack.json runner flag overrides detection when it is one of lando, compose, ddev, none and its environment exists; an unknown value is ignored with the S-2 warning; a value whose environment is absent keeps the detected runner with the S-2 warning; the drift warning stays (flag-runner-override, flag-runner-missing-env fixtures; D-010).
+- [ ] **AC-01-6** parseYamlSubset reads a block under an anchor-only value, skips merge keys and aliases with a note, and never throws on the compose-anchors fixture; the contract version is read from a block map with Number(); extends, include and unreadable profiles produce a parse note, never a crash.
+- [ ] **AC-01-7** runtime.session.kind follows the S-2 order from an injected opts.env (cloud, codespaces, devcontainer, local) and dockerCli comes from a PATH directory scan; triage.schema.json gains the compose enum value and the required nullable compose and session blocks, and every fixture output validates against it.
+- [ ] **AC-01-8** The compose runner map matches the S-3 table: one shared candidate constant used by both Lando and Compose, bin/wp acorn fallback, login null, logs fallback to docker compose logs, and docker compose exec -T <php service> for wp, acorn and composer when bin/ is absent; formatText prints 'compose <file> (contract kivo-wp v<n>)'.
+- [ ] **AC-01-9** No regression: every existing fixture keeps its runner, runners and warnings (only the two new null or default runtime blocks are added), node --test, validate-skills and build-codex-plugin --check are green, and the change ships as one pull request.
+
+Sub-plan: `docs/plans/2026-11-22-compose-runner/phase-1/01.md`
+
+### 02 Compose session context and hook guards
+
+batch B; depends on 01; decisions D-006, D-009, D-010, D-013, D-016; rules Hooks stay silent on any failure and never print a secret (D-006)., hooks/hooks.json and hooks/cursor-hooks.json stay in sync; the Codex mirror is regenerated, never edited by hand (AGENTS.md)..
+
+- [ ] **AC-02-1** For a compose detection the session context prints the S-3 runner line and a commands rule whose example comes from the runner map and which adds 'from the project root' only for compose; the sage-compose golden pins the full context length under MAX_CONTEXT_CHARS.
+- [ ] **AC-02-2** The none runner line reads 'no Lando, Compose or DDEV environment'; the sage-bedrock-no-runner golden changes wording only and every Lando golden is unchanged.
+- [ ] **AC-02-3** The detection cache stores session.kind and readCache drops an entry whose kind differs from the current environment signals; a test shows a cached local detection is dropped when CODESPACES=true, and currentSessionKind agrees with the detector's sessionKind for every signal.
+- [ ] **AC-02-4** When session.kind is not local and no configured corpus root exists on disk, the rules line reads 'corpus: unavailable in this environment; web last: official documentation hosts' (cloud-no-corpus golden); local sessions keep today's wording (D-016).
+- [ ] **AC-02-5** protect-files denies edits to compose.override.yaml, compose.override.yml and docker-compose.override.yml when the project .gitignore lists them (literal line match after trimming a leading slash, skipping comments and negations) with the S-3 reason, allows them when tracked, and never denies bin/ scripts (compose-override-deny and compose-override-tracked-allow goldens).
+- [ ] **AC-02-6** post-edit-reminder prints the compose cache command from the runner map (compose-cache-command golden).
+- [ ] **AC-02-7** kivo-creator reads detection.runtime.runner before flag.runner; test/creator/stack.test.mjs covers a compose project and a flag naming a missing environment.
+- [ ] **AC-02-8** node --test, sync-cursor-hooks --check and build-codex-plugin --check are green and the change ships as one pull request.
+
+Sub-plan: `docs/plans/2026-11-22-compose-runner/phase-1/02.md`
+
+### 03 compose-wp skill and runner routing
+
+batch C; depends on 01, 02; decisions D-006, D-007, D-011, D-012, D-013, D-014, D-017, D-020; rules lando-wp stays unchanged (D-011); no new Lando-only content (D-014)., Skill markdown names no AI tool or product: 'cloud agent sessions' and 'editor devcontainers' (scripts/validate-skills.mjs)., The skill never suggests storing a token in an environment variable and never asks for a token value (D-006)..
+
+- [ ] **AC-03-1** skills/compose-wp/SKILL.md has the six-section contract, a 'Use when' description, stays under 500 lines and links the six references one hop away (compose-file.md, bin-scripts.md, tls-and-hosts.md, wsl2.md, devcontainer-and-cloud.md, failure-modes.md); validate-skills is green.
+- [ ] **AC-03-2** The procedure covers every S-5 step: read compose.yaml and the override, docker compose ps then bin/setup or bin/up with the place flag from runtime.session.kind, commands from the project root through bin/, a lifecycle table without Lando verbs, database through bin/db-import, bin/db-export and bin/db with DB_HOST as the service name, and diagnosis through {{runner.logs}} and health checks.
+- [ ] **AC-03-3** Verification and failure modes match S-5: curl -I after bin/trust-cert with -k only as a diagnostic, the bin/wp and bin/composer checks, and every seeded failure-mode row (ports, service not running, ownership, /mnt/c I/O, untrusted certificate on Windows, docker not found, daemon unreachable, database health, stdio TTY, allowlist block).
+- [ ] **AC-03-4** devcontainer-and-cloud.md states the S-6 facts: stack starts per cloud session, the allowlist hosts a kivo-wp project needs, secrets attached by the session proxy and never in files or environment variables (D-006), synthetic data only (D-007); references cite docs.docker.com and containers.dev until the kivo-wisdom change lands (D-017).
+- [ ] **AC-03-5** roots-router routes how to run, restart or read logs to compose-wp when the runner is compose and to lando-wp when it is lando, with the S-4 keywords in keywords.json and routing.json and a decision-tree row; a user-prompt-router golden routes a Compose prompt to compose-wp and the Lando goldens are unchanged.
+- [ ] **AC-03-6** dev/jev-review/prompts.json gains Compose prompts that expect compose-wp while the Lando prompts keep expecting lando-wp.
+- [ ] **AC-03-7** roots-triage documents the compose enum value, runtime.compose and runtime.session, the flag override with its two guards and the new Compose warning rows; roots-status runs docker compose ps for compose; roots-detect lists compose in the flag enum; AGENTS.md states the runner-neutral environment rule (S-4).
+- [ ] **AC-03-8** evals/compose-wp has a scaffold that copies the compose-bin fixture and runner-neutral graders (D-020); the Codex mirror is regenerated, build-codex-plugin --check is green and the change ships as one pull request.
+
+Sub-plan: `docs/plans/2026-11-22-compose-runner/phase-1/03.md`

@@ -1,0 +1,235 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "name": "compose",
+      "kind": "runner-id",
+      "owner": "01"
+    },
+    {
+      "name": "runtime.compose",
+      "kind": "triage-field",
+      "owner": "01"
+    },
+    {
+      "name": "runtime.session",
+      "kind": "triage-field",
+      "owner": "01"
+    },
+    {
+      "name": "x-kivo-wp",
+      "kind": "compose-extension-key",
+      "owner": "01"
+    },
+    {
+      "name": "kivo-wp",
+      "kind": "contract-name",
+      "owner": "01"
+    },
+    {
+      "name": "KIVO_WP_CONTEXT",
+      "kind": "env-var",
+      "owner": "01"
+    },
+    {
+      "name": "sessionKind",
+      "kind": "function",
+      "owner": "01"
+    },
+    {
+      "name": "detectCompose",
+      "kind": "function",
+      "owner": "01"
+    },
+    {
+      "name": "binSignature",
+      "kind": "function",
+      "owner": "01"
+    },
+    {
+      "name": "RUNNER_CANDIDATES",
+      "kind": "constant",
+      "owner": "01"
+    },
+    {
+      "name": "COMPOSE_FILES",
+      "kind": "constant",
+      "owner": "01"
+    },
+    {
+      "name": "COMPOSE_OVERRIDE_FILES",
+      "kind": "constant",
+      "owner": "01"
+    },
+    {
+      "name": "opts.env",
+      "kind": "option",
+      "owner": "01"
+    },
+    {
+      "name": "test/fixtures/projects/compose-bin",
+      "kind": "fixture",
+      "owner": "01"
+    },
+    {
+      "name": "test/fixtures/projects/compose-no-bin",
+      "kind": "fixture",
+      "owner": "01"
+    },
+    {
+      "name": "test/fixtures/projects/compose-no-contract",
+      "kind": "fixture",
+      "owner": "01"
+    },
+    {
+      "name": "test/fixtures/projects/compose-and-lando",
+      "kind": "fixture",
+      "owner": "01"
+    },
+    {
+      "name": "test/fixtures/projects/devcontainer-legacy",
+      "kind": "fixture",
+      "owner": "01"
+    },
+    {
+      "name": "test/fixtures/projects/composer-bin-dir",
+      "kind": "fixture",
+      "owner": "01"
+    },
+    {
+      "name": "test/fixtures/projects/flag-runner-override",
+      "kind": "fixture",
+      "owner": "01"
+    },
+    {
+      "name": "test/fixtures/projects/flag-runner-missing-env",
+      "kind": "fixture",
+      "owner": "01"
+    },
+    {
+      "name": "test/fixtures/projects/compose-anchors",
+      "kind": "fixture",
+      "owner": "01"
+    },
+    {
+      "name": "currentSessionKind",
+      "kind": "function",
+      "owner": "02"
+    },
+    {
+      "name": "isGitignored",
+      "kind": "function",
+      "owner": "02"
+    },
+    {
+      "name": "test/hooks/fixtures/detector-sage-compose.mjs",
+      "kind": "fixture",
+      "owner": "02"
+    },
+    {
+      "name": "test/hooks/session-start/sage-compose",
+      "kind": "golden",
+      "owner": "02"
+    },
+    {
+      "name": "test/hooks/session-start/cloud-no-corpus",
+      "kind": "golden",
+      "owner": "02"
+    },
+    {
+      "name": "test/hooks/protect-files/compose-override-deny",
+      "kind": "golden",
+      "owner": "02"
+    },
+    {
+      "name": "test/hooks/protect-files/compose-override-tracked-allow",
+      "kind": "golden",
+      "owner": "02"
+    },
+    {
+      "name": "test/hooks/post-edit-reminder/compose-cache-command",
+      "kind": "golden",
+      "owner": "02"
+    },
+    {
+      "name": "compose-wp",
+      "kind": "skill",
+      "owner": "03"
+    },
+    {
+      "name": "kivo-wise:compose-wp",
+      "kind": "skill-invocation",
+      "owner": "03"
+    },
+    {
+      "name": "skills/compose-wp/SKILL.md",
+      "kind": "file",
+      "owner": "03"
+    },
+    {
+      "name": "compose-file.md",
+      "kind": "reference",
+      "owner": "03"
+    },
+    {
+      "name": "bin-scripts.md",
+      "kind": "reference",
+      "owner": "03"
+    },
+    {
+      "name": "tls-and-hosts.md",
+      "kind": "reference",
+      "owner": "03"
+    },
+    {
+      "name": "wsl2.md",
+      "kind": "reference",
+      "owner": "03"
+    },
+    {
+      "name": "devcontainer-and-cloud.md",
+      "kind": "reference",
+      "owner": "03"
+    },
+    {
+      "name": "failure-modes.md",
+      "kind": "reference",
+      "owner": "03"
+    },
+    {
+      "name": "{{php_service}}",
+      "kind": "placeholder",
+      "owner": "03"
+    },
+    {
+      "name": "{{web_service}}",
+      "kind": "placeholder",
+      "owner": "03"
+    },
+    {
+      "name": "{{db_service}}",
+      "kind": "placeholder",
+      "owner": "03"
+    },
+    {
+      "name": "{{cache_service}}",
+      "kind": "placeholder",
+      "owner": "03"
+    },
+    {
+      "name": "{{node_service}}",
+      "kind": "placeholder",
+      "owner": "03"
+    },
+    {
+      "name": "evals/compose-wp",
+      "kind": "eval",
+      "owner": "03"
+    },
+    {
+      "name": "test/hooks/user-prompt-router/compose-runner-route",
+      "kind": "golden",
+      "owner": "03"
+    }
+  ]
+}

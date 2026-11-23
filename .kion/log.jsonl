@@ -94,3 +94,9 @@
 {"at":"2026-11-23T02:48:07.471Z","cmd":"spec-approve","ids":["S-7"]}
 {"at":"2026-11-23T02:48:07.509Z","cmd":"spec-approve","ids":["S-8"]}
 {"at":"2026-11-23T02:49:33.545Z","cmd":"set:section","ids":["S-6"]}
+{"at":"2026-11-23T02:53:32.449Z","cmd":"apply","ids":["01","02","03"]}
+{"at":"2026-11-23T02:53:43.228Z","cmd":"apply","ids":["compose","runtime.compose","runtime.session","x-kivo-wp","kivo-wp","KIVO_WP_CONTEXT","sessionKind","detectCompose","binSignature","RUNNER_CANDIDATES","COMPOSE_FILES","COMPOSE_OVERRIDE_FILES","opts.env","test/fixtures/projects/compose-bin","test/fixtures/projects/compose-no-bin","test/fixtures/projects/compose-no-contract","test/fixtures/projects/compose-and-lando","test/fixtures/projects/devcontainer-legacy","test/fixtures/projects/composer-bin-dir","test/fixtures/projects/flag-runner-override","test/fixtures/projects/flag-runner-missing-env","test/fixtures/projects/compose-anchors","currentSessionKind","isGitignored","test/hooks/fixtures/detector-sage-compose.mjs","test/hooks/session-start/sage-compose","test/hooks/session-start/cloud-no-corpus","test/hooks/protect-files/compose-override-deny","test/hooks/protect-files/compose-override-tracked-allow","test/hooks/post-edit-reminder/compose-cache-command","compose-wp","kivo-wise:compose-wp","skills/compose-wp/SKILL.md","compose-file.md","bin-scripts.md","tls-and-hosts.md","wsl2.md","devcontainer-and-cloud.md","failure-modes.md","{{php_service}}","{{web_service}}","{{db_service}}","{{cache_service}}","{{node_service}}","evals/compose-wp","test/hooks/user-prompt-router/compose-runner-route"]}
+{"at":"2026-11-23T02:53:43.273Z","cmd":"set:component","ids":["01"]}
+{"at":"2026-11-23T02:53:43.316Z","cmd":"set:component","ids":["02"]}
+{"at":"2026-11-23T02:53:43.359Z","cmd":"set:component","ids":["03"]}
+{"at":"2026-11-23T02:55:10.656Z","cmd":"set:component","ids":["03"]}
