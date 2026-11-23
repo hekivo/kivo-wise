@@ -1,0 +1,7 @@
+x-kivo-wp:
+  contract: 1
+services:
+  app:
+    image: kivo-wp/app:8.4
+  db:
+    image: mysql:8.4

@@ -8,8 +8,11 @@
  *   - apps[]:  every Acorn application (sage-theme, acorn-theme, acorn-mu-plugin,
  *              acorn-plugin, radicle-app, acorn-unknown) with namespace, boot,
  *              providers, blocks, post types and locked versions
- *   - runtime: Lando (merged .lando*.yml) or DDEV, with derived runner commands
- *   - flag:    .roots-stack.json or composer.json extra.roots-stack (wins over heuristics)
+ *   - runtime: Docker Compose with wp-kit bin/ scripts (kivo-wp), Lando (merged
+ *              .lando*.yml) or DDEV, with derived runner commands, plus the
+ *              session kind (local, cloud, codespaces, devcontainer)
+ *   - flag:    .roots-stack.json or composer.json extra.roots-stack (wins over
+ *              heuristics; its runner overrides detection when that environment exists)
  *
  * Usage:
  *   node scripts/detect-roots-project.mjs [--path=<dir>] [--format=json|text]
@@ -19,8 +22,8 @@
  * 5,000 files) and reports `truncated: true` when the bound is hit.
  */
 
-import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
-import { join, resolve, relative, dirname, sep } from 'node:path';
+import { readFileSync, readdirSync, existsSync, statSync, openSync, readSync, closeSync } from 'node:fs';
+import { join, resolve, relative, dirname, sep, delimiter } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export const TOOL = { name: 'detect-roots-project', version: '3.0.0' };
@@ -45,6 +48,28 @@ const SITE_PACKAGES = [
 const PROFILES = ['sage-theme', 'acorn-mu-plugin', 'radicle-app'];
 const KIND_PRECEDENCE = ['acorn-mu-plugin', 'radicle-app', 'sage-theme', 'acorn-theme', 'acorn-plugin', 'acorn-unknown'];
 const LANDO_FILES = ['.lando.base.yml', '.lando.dist.yml', '.lando.upstream.yml', '.lando.yml', '.lando.local.yml'];
+// Root Compose files in the order Compose resolves them; the first that exists wins.
+export const COMPOSE_FILES = ['compose.yaml', 'compose.yml', 'docker-compose.yaml', 'docker-compose.yml'];
+export const COMPOSE_OVERRIDE_FILES = ['compose.override.yaml', 'compose.override.yml', 'docker-compose.override.yml'];
+export const RUNNER_IDS = ['lando', 'compose', 'ddev', 'none'];
+// kivo-wp contract version 1 (wp-kit): Compose service name -> roles.
+const KIVO_WP_CONTRACT = {
+  1: { app: ['php', 'web'], db: ['database'], cache: ['cache'], node: ['node'], proxy: ['proxy'], mail: ['mail'] },
+};
+const COMPOSE_ROLES = ['php', 'web', 'database', 'cache', 'node', 'proxy', 'mail'];
+const BIN_LIBRARY = '_lib.sh';
+const BIN_SIGNATURE_BYTES = 4096;
+// Runner keys -> tool or script names, first match wins. Shared by the Lando
+// tooling map and the Compose bin/ scripts so a name means the same on both.
+export const RUNNER_CANDIDATES = {
+  node: ['yarn', 'npm', 'pnpm', 'node'],
+  test: ['phpunit', 'pest', 'test'],
+  lint: ['pint-check', 'pint', 'phpcs', 'mago', 'lint'],
+  cache: ['cache-clear', 'flush', 'cache'],
+  build: ['build', /-build$/],
+  dev: ['dev', /-dev$/],
+  login: ['login'],
+};
 
 // ---------------------------------------------------------------------------
 // Small filesystem helpers (all swallow errors; absence is a value here)
@@ -116,11 +141,15 @@ function semverLt(a, b) {
 }
 
 // ---------------------------------------------------------------------------
-// YAML subset parser (enough for landofiles and wp-cli.yml)
+// YAML subset parser (enough for landofiles, wp-cli.yml and Compose files)
 //   top-level keys, nested maps by indentation, scalars, `- item` lists,
 //   lists of single-key maps, quoted strings, `|`/`>` block scalars kept as
-//   opaque strings, `#` comments. Anchors, flow collections and multi-document
-//   streams are not supported: callers catch the error and add a note.
+//   opaque strings, `#` comments. Two narrow anchor rules: a value that is
+//   only an anchor (`&name`) is read as the block below it, and merge keys
+//   (`<<: *name`) and alias values (`*name`) are skipped and reported through
+//   `opts.skipped`; aliases are never resolved. Flow maps come back as one
+//   string, and multi-document streams are not supported: callers catch the
+//   error and add a note.
 // ---------------------------------------------------------------------------
 
 function stripComment(line) {
@@ -164,15 +193,41 @@ function looksLikeKey(text) {
   return text.includes(': ') || text.endsWith(':');
 }
 
-export function parseYamlSubset(text) {
+const ANCHOR_ONLY_RE = /^&[^\s]+$/;
+const ANCHOR_PREFIX_RE = /^&[^\s]+\s+/;
+const ALIAS_RE = /^\*[^\s]+$/;
+
+export function parseYamlSubset(text, opts = {}) {
   const raw = String(text ?? '').split(/\r?\n/);
+  const skipped = Array.isArray(opts.skipped) ? opts.skipped : [];
   let pos = 0;
+
+  // Returns true when the key/value pair is a merge key or an alias and was skipped.
+  function skipAnchorSyntax(key, value, line) {
+    if (key === '<<') { skipped.push({ line, kind: 'merge', text: `<<: ${value}`.trim() }); return true; }
+    if (ALIAS_RE.test(value)) { skipped.push({ line, kind: 'alias', text: `${key}: ${value}` }); return true; }
+    return false;
+  }
+
+  function stripAnchor(value) {
+    if (ANCHOR_ONLY_RE.test(value)) return '';
+    return value.replace(ANCHOR_PREFIX_RE, '');
+  }
   const indentOf = (line) => line.search(/\S/);
   const isBlank = (line) => stripComment(line).trim() === '';
 
   function next() {
     while (pos < raw.length && isBlank(raw[pos])) pos++;
     return pos < raw.length ? raw[pos] : null;
+  }
+
+  // Drops the lines indented deeper than `indent` that belong to a skipped key.
+  function skipNested(indent) {
+    for (;;) {
+      const line = next();
+      if (line === null || indentOf(line) <= indent) return;
+      pos++;
+    }
   }
 
   function parseBlock() {
@@ -194,8 +249,10 @@ export function parseYamlSubset(text) {
       const text = stripComment(line).trim();
       if (text === '-' || text.startsWith('- ')) break;
       const { key, value } = splitKey(text);
+      const lineNo = pos + 1;
       pos++;
-      obj[key] = parseValue(value, indent);
+      if (skipAnchorSyntax(key, value, lineNo)) { skipNested(indent); continue; }
+      obj[key] = parseValue(stripAnchor(value), indent);
     }
     return obj;
   }
@@ -234,21 +291,27 @@ export function parseYamlSubset(text) {
       if (indentOf(line) !== indent) break;
       const text = stripComment(line).trim();
       if (!(text === '-' || text.startsWith('- '))) break;
-      const rest = text.slice(1).trim();
+      const rest = stripAnchor(text.slice(1).trim());
+      const lineNo = pos + 1;
       pos++;
       if (rest === '') { arr.push(parseBlock()); continue; }
+      if (ALIAS_RE.test(rest)) { skipped.push({ line: lineNo, kind: 'alias', text: `- ${rest}` }); continue; }
       if (!looksLikeKey(rest)) { arr.push(scalar(rest)); continue; }
       const keyIndent = indent + 2;
       const { key, value } = splitKey(rest);
-      const item = { [key]: parseValue(value, keyIndent) };
+      const item = {};
+      if (skipAnchorSyntax(key, value, lineNo)) skipNested(keyIndent);
+      else item[key] = parseValue(stripAnchor(value), keyIndent);
       for (;;) {
         const more = next();
         if (more === null || indentOf(more) !== keyIndent) break;
         const t = stripComment(more).trim();
         if (t === '-' || t.startsWith('- ')) break;
         const kv = splitKey(t);
+        const moreLine = pos + 1;
         pos++;
-        item[kv.key] = parseValue(kv.value, keyIndent);
+        if (skipAnchorSyntax(kv.key, kv.value, moreLine)) { skipNested(keyIndent); continue; }
+        item[kv.key] = parseValue(stripAnchor(kv.value), keyIndent);
       }
       arr.push(item);
     }
@@ -621,8 +684,9 @@ function pickTool(tooling, candidates) {
   return null;
 }
 
-function buildRunners(runner, lando, installsComposer, hasAcorn, warnings) {
+function buildRunners(runner, lando, installsComposer, hasAcorn, warnings, compose = null) {
   const empty = { wp: null, acorn: null, composer: null, node: null, test: null, lint: null, cache: null, build: null, dev: null, login: null, logs: null };
+  const C = RUNNER_CANDIDATES;
   if (runner === 'lando') {
     const t = lando.tooling;
     const l = (name) => (name ? `lando ${name}` : null);
@@ -633,21 +697,51 @@ function buildRunners(runner, lando, installsComposer, hasAcorn, warnings) {
       wp: 'lando wp',
       acorn: t.acorn ? 'lando acorn' : (hasAcorn ? 'lando wp acorn' : null),
       composer,
-      node: l(pickTool(t, ['yarn', 'npm', 'pnpm', 'node'])),
-      test: l(pickTool(t, ['phpunit', 'pest', 'test'])),
-      lint: l(pickTool(t, ['pint-check', 'pint', 'phpcs', 'mago', 'lint'])),
-      cache: l(pickTool(t, ['cache-clear', 'flush', 'cache'])),
-      build: l(pickTool(t, ['build', /-build$/])),
-      dev: l(pickTool(t, ['dev', /-dev$/])),
-      login: l(pickTool(t, ['login'])),
+      node: l(pickTool(t, C.node)),
+      test: l(pickTool(t, C.test)),
+      lint: l(pickTool(t, C.lint)),
+      cache: l(pickTool(t, C.cache)),
+      build: l(pickTool(t, C.build)),
+      dev: l(pickTool(t, C.dev)),
+      login: l(pickTool(t, C.login)),
       logs: `lando logs -s appserver${lando.webService === 'appserver_nginx' ? ' -s appserver_nginx' : ''}`,
     };
   }
+  if (runner === 'compose') return composeRunners(compose, hasAcorn, empty);
   if (runner === 'ddev') {
     return { ...empty, wp: 'ddev wp', acorn: hasAcorn ? 'ddev wp acorn' : null, composer: 'ddev composer', logs: 'ddev logs' };
   }
   warnings.push('No Lando configuration found (.lando.yml): wp, composer and node commands would run on the host');
   return { ...empty, wp: 'wp', acorn: hasAcorn ? 'wp acorn' : null, composer: 'composer' };
+}
+
+// Compose runner map (spec S-3): paths relative to the project root, run from it.
+function composeRunners(compose, hasAcorn, empty) {
+  const bin = Object.fromEntries((compose?.bin ?? []).map((name) => [name, true]));
+  const b = (name) => (name ? `bin/${name}` : null);
+  const php = compose?.services?.php ?? null;
+  const web = compose?.services?.web ?? null;
+  if (!bin.wp) {
+    if (!php) return { ...empty };
+    const exec = `docker compose exec -T ${php}`;
+    return { ...empty, wp: `${exec} wp`, acorn: hasAcorn ? `${exec} wp acorn` : null, composer: `${exec} composer` };
+  }
+  const C = RUNNER_CANDIDATES;
+  const logServices = [...new Set([web, php].filter(Boolean))];
+  return {
+    ...empty,
+    wp: 'bin/wp',
+    acorn: bin.acorn ? 'bin/acorn' : (hasAcorn ? 'bin/wp acorn' : null),
+    composer: bin.composer ? 'bin/composer' : null,
+    node: b(pickTool(bin, C.node)),
+    test: b(pickTool(bin, C.test)),
+    lint: b(pickTool(bin, C.lint)),
+    cache: b(pickTool(bin, C.cache)),
+    build: b(pickTool(bin, C.build)),
+    dev: b(pickTool(bin, C.dev)),
+    login: b(pickTool(bin, C.login)),
+    logs: bin.logs ? 'bin/logs' : (logServices.length ? `docker compose logs -f ${logServices.join(' ')}` : null),
+  };
 }
 
 function readWpCli(root, notes) {
@@ -662,6 +756,202 @@ function readWpCli(root, notes) {
     } catch (e) { notes.push(`could not parse ${file}: ${e.message}`); }
   }
   return out;
+}
+
+// ---------------------------------------------------------------------------
+// Docker Compose (kivo-wp contract and bin/ scripts)
+//   Read-only: never runs `docker compose config` or any other process, so
+//   hooks stay fast and work without a running Docker daemon.
+// ---------------------------------------------------------------------------
+
+function readFirstBytes(p, bytes) {
+  let fd = null;
+  try {
+    fd = openSync(p, 'r');
+    const buf = Buffer.alloc(bytes);
+    const n = readSync(fd, buf, 0, bytes, 0);
+    return buf.subarray(0, n).toString('utf8');
+  } catch { return null; } finally {
+    if (fd !== null) try { closeSync(fd); } catch { /* ignore */ }
+  }
+}
+
+function isExecutableFile(p) {
+  try {
+    const st = statSync(p);
+    if (!st.isFile()) return false;
+    return process.platform === 'win32' ? true : (st.mode & 0o111) !== 0;
+  } catch { return false; }
+}
+
+/**
+ * True when `file` looks like a wp-kit bin/ script: executable, and its first
+ * 4 KB source _lib.sh from their own directory, call docker compose (or
+ * docker-compose), or call another bin/ script.
+ */
+export function binSignature(file) {
+  if (!isExecutableFile(file)) return false;
+  const head = readFirstBytes(file, BIN_SIGNATURE_BYTES);
+  if (head === null) return false;
+  const sourcesLib = /(?:^|[\s;&|(])(?:source|\.)\s+["']?[^\s"']*(?:\$\(\s*dirname|\$\{?BASH_SOURCE|\$\{?0|\$\{?(?:DIR|SCRIPT_DIR|BIN_DIR|HERE)\b)[^\n]*_lib\.sh/m.test(head);
+  const callsCompose = /\bdocker(?:\s+compose|-compose)\b/.test(head);
+  const callsBin = /(?:^|[\s;&|(`"'=])(?:\.\/)?bin\/(?!_lib\.sh)[A-Za-z0-9][\w-]*(?![\w.])/m.test(head)
+    || /\$\(\s*dirname[^)]*\)["']?\/(?!_lib\.sh)[A-Za-z0-9][\w-]*(?![\w.])/m.test(head);
+  return sourcesLib || callsCompose || callsBin;
+}
+
+function scanBin(root, notes) {
+  const dir = join(root, 'bin');
+  let entries;
+  try { entries = readdirSync(dir, { withFileTypes: true }); } catch { return []; }
+  const names = [];
+  for (const e of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+    if (e.name === BIN_LIBRARY || e.isDirectory()) continue;
+    if (binSignature(join(dir, e.name))) names.push(e.name);
+    else notes.push(`bin/${e.name}: not a Compose bin/ script (not executable, or it neither sources _lib.sh, calls docker compose nor calls another bin/ script); ignored`);
+  }
+  return names.sort();
+}
+
+function imageRoles(image) {
+  const ref = String(image).trim().toLowerCase();
+  const noDigest = ref.split('@')[0];
+  const lastSlash = noDigest.lastIndexOf('/');
+  const colon = noDigest.indexOf(':', lastSlash + 1);
+  const repo = colon === -1 ? noDigest : noDigest.slice(0, colon);
+  const tag = colon === -1 ? '' : noDigest.slice(colon + 1);
+  const segments = repo.split('/');
+  const name = segments[segments.length - 1];
+  const path = segments.slice(-2).join('/');
+  if (/fpm-nginx/.test(tag) || /fpm-nginx/.test(name)) return ['php', 'web'];
+  if (name === 'php' || path === 'serversideup/php') return ['php'];
+  if (name === 'nginx' || name === 'httpd') return ['web'];
+  if (name === 'caddy') return ['web-or-proxy'];
+  if (name === 'mysql' || name === 'mariadb') return ['database'];
+  if (name === 'redis' || name === 'valkey') return ['cache'];
+  if (name === 'node') return ['node'];
+  if (name === 'mailpit' || name === 'mailhog') return ['mail'];
+  return [];
+}
+
+function rolesFromImages(services, notes) {
+  const roles = Object.fromEntries(COMPOSE_ROLES.map((r) => [r, null]));
+  const contractNames = KIVO_WP_CONTRACT[1];
+  const webServers = []; // nginx, httpd, fpm-nginx images and a Dockerfile-built "app", in file order
+  const caddyServers = [];
+  for (const [name, svc] of Object.entries(services)) {
+    const s = svc && typeof svc === 'object' ? svc : {};
+    let found = [];
+    if (typeof s.image === 'string' && s.image.trim()) found = imageRoles(s.image);
+    else if (s.build !== undefined) {
+      if (contractNames[name]) found = contractNames[name];
+      else { notes.push(`compose: service "${name}" is built from a Dockerfile and has no image; its role is not inferred`); continue; }
+    }
+    for (const role of found) {
+      if (role === 'web-or-proxy') caddyServers.push(name);
+      else if (role === 'web') webServers.push(name);
+      else roles[role] ??= name;
+    }
+  }
+  // nginx and httpd take web before caddy; a web server left once web is taken is the proxy.
+  for (const name of [...webServers, ...caddyServers]) {
+    if (roles.web === null) roles.web = name;
+    else if (roles.web !== name && roles.proxy === null) roles.proxy = name;
+  }
+  return roles;
+}
+
+function rolesFromContract(version, services) {
+  const roles = Object.fromEntries(COMPOSE_ROLES.map((r) => [r, null]));
+  for (const [name, list] of Object.entries(KIVO_WP_CONTRACT[version])) {
+    if (!(name in services)) continue;
+    for (const role of list) roles[role] = name;
+  }
+  return roles;
+}
+
+function composeSkipNotes(file, skipped, notes) {
+  for (const s of skipped) {
+    notes.push(s.kind === 'merge'
+      ? `${file}: line ${s.line}: merge key "${s.text}" skipped (aliases are not resolved)`
+      : `${file}: line ${s.line}: alias "${s.text}" skipped (aliases are not resolved)`);
+  }
+}
+
+/**
+ * Reads the root Compose file and its overrides. Returns null when no root
+ * Compose file exists, else the runtime.compose block (spec S-2).
+ */
+export function detectCompose(root, env, notes) {
+  const main = COMPOSE_FILES.find((f) => existsSync(join(root, f)));
+  if (!main) return null;
+  const files = [main, ...COMPOSE_OVERRIDE_FILES.filter((f) => existsSync(join(root, f)))];
+  const parseErrors = [];
+  let doc = {};
+  for (const file of files) {
+    const text = readText(join(root, file));
+    if (text === null) continue;
+    const skipped = [];
+    try {
+      doc = deepMerge(doc, parseYamlSubset(text, { skipped }));
+    } catch (e) {
+      parseErrors.push(`${file}: ${e.message}`);
+      notes.push(`compose: could not parse ${file} (${e.message}); runtime facts may be incomplete`);
+    }
+    composeSkipNotes(file, skipped, notes);
+  }
+  const services = doc.services && typeof doc.services === 'object' && !Array.isArray(doc.services) ? doc.services : {};
+  if (doc.include !== undefined) notes.push('compose: include is not followed; services from included files are not read');
+  for (const [name, svc] of Object.entries(services)) {
+    if (svc && typeof svc === 'object' && svc.extends !== undefined) notes.push(`compose: service "${name}" uses extends, which is not followed`);
+  }
+
+  let contract = null;
+  const marker = doc['x-kivo-wp'];
+  if (marker !== undefined) {
+    if (marker && typeof marker === 'object' && !Array.isArray(marker)) {
+      const version = Number(marker.contract);
+      if (Number.isInteger(version) && version >= 1) contract = { name: 'kivo-wp', version };
+      else notes.push(`compose: x-kivo-wp has no valid contract number (${JSON.stringify(marker.contract ?? null)}); contract not read`);
+    } else {
+      notes.push('compose: x-kivo-wp is not a block map (write `x-kivo-wp:` with `contract: <n>` on the next line); contract not read');
+    }
+  }
+  let roles;
+  if (contract && KIVO_WP_CONTRACT[contract.version]) roles = rolesFromContract(contract.version, services);
+  else {
+    if (contract) notes.push(`unknown kivo-wp contract ${contract.version}; reading what exists`);
+    roles = rolesFromImages(services, notes);
+  }
+
+  return {
+    files,
+    contract,
+    devcontainer: existsSync(join(root, '.devcontainer', 'devcontainer.json')) ? '.devcontainer/devcontainer.json' : null,
+    services: roles,
+    bin: scanBin(root, notes),
+    parseErrors,
+  };
+}
+
+/** Session kind from environment signals (spec S-2), first match wins. */
+export function sessionKind(env = process.env) {
+  const e = env ?? {};
+  if (e.CLAUDE_CODE_REMOTE === 'true') return 'cloud';
+  if (e.CODESPACES === 'true') return 'codespaces';
+  if (e.KIVO_WP_CONTEXT === 'devcontainer' || e.REMOTE_CONTAINERS === 'true') return 'devcontainer';
+  return 'local';
+}
+
+/** True when an executable named docker exists in a PATH directory (no process is spawned). */
+export function dockerOnPath(env = process.env) {
+  const dirs = String(env?.PATH ?? env?.Path ?? '').split(delimiter).filter(Boolean);
+  const names = process.platform === 'win32' ? ['docker.exe', 'docker'] : ['docker'];
+  return dirs.some((d) => names.some((n) => isExecutableFile(join(d, n))));
+}
+
+export function detectSession(env = process.env) {
+  return { kind: sessionKind(env), dockerCli: dockerOnPath(env) };
 }
 
 // ---------------------------------------------------------------------------
@@ -682,6 +972,10 @@ function readFlag(root, composer, notes, warnings) {
   };
   if (Array.isArray(raw.corpus)) flag.corpus = raw.corpus.map(String);
   if (flag.profile && !PROFILES.includes(flag.profile)) warnings.push(`${file}: profile "${flag.profile}" is not one of ${PROFILES.join(', ')}`);
+  if (flag.runner !== null && !RUNNER_IDS.includes(flag.runner)) {
+    warnings.push(`${file}: runner "${flag.runner}" is not one of ${RUNNER_IDS.join(', ')}`);
+    flag.runner = null;
+  }
   return flag;
 }
 
@@ -693,6 +987,7 @@ export function detect(rootInput, opts = {}) {
   const notes = [];
   const warnings = [];
   const root = resolve(rootInput ?? process.cwd());
+  const env = opts.env ?? process.env;
   const result = {
     tool: TOOL,
     root,
@@ -701,7 +996,7 @@ export function detect(rootInput, opts = {}) {
     apps: [],
     active: null,
     site: { versions: {}, wpCli: { path: null, docroot: null } },
-    runtime: { runner: 'none', lando: null, runners: {} },
+    runtime: { runner: 'none', lando: null, compose: null, session: { kind: 'local', dockerCli: false }, runners: {} },
     flag: null,
     warnings,
     notes,
@@ -709,6 +1004,7 @@ export function detect(rootInput, opts = {}) {
   };
 
   try {
+    result.runtime.session = detectSession(env);
     if (!isDir(root)) {
       notes.push(`root ${root} is not a directory`);
       result.runtime.runners = buildRunners('none', null, false, false, warnings);
@@ -763,17 +1059,40 @@ export function detect(rootInput, opts = {}) {
       warnings.push(`${flag.file}: profile "${flag.profile}" differs from the detected ${result.apps[result.active].kind} at ${result.apps[result.active].path}`);
     }
 
-    // Runtime
+    // Runtime (spec S-2): root Compose, Landofile chain, DDEV, none; the flag overrides last.
     const landoFiles = LANDO_FILES.filter((f) => existsSync(join(root, f)));
-    let runner = 'none';
     let landoInfo = { lando: null, installsComposer: false };
-    if (landoFiles.length) { runner = 'lando'; landoInfo = parseLando(root, landoFiles, notes); }
-    else if (existsSync(join(root, '.ddev', 'config.yaml'))) runner = 'ddev';
+    if (landoFiles.length) landoInfo = parseLando(root, landoFiles, notes);
+    if (env?.COMPOSE_FILE) notes.push('COMPOSE_FILE is set in the environment; the detector reads the default Compose files and does not follow it');
+    const compose = detectCompose(root, env, notes);
+    const hasDdev = existsSync(join(root, '.ddev', 'config.yaml'));
+    let detected = 'none';
+    if (compose) detected = 'compose';
+    else if (landoFiles.length) detected = 'lando';
+    else if (hasDdev) detected = 'ddev';
+    if (!compose) {
+      for (const f of COMPOSE_FILES) {
+        if (existsSync(join(root, '.devcontainer', f))) notes.push(`.devcontainer/${f}: editor-attached Compose stack; not used as the runner`);
+      }
+    }
+    const available = { lando: landoFiles.length > 0, compose: Boolean(compose), ddev: hasDdev, none: true };
+    let runner = detected;
+    if (flag?.runner) {
+      if (available[flag.runner]) runner = flag.runner;
+      else warnings.push(`${flag.file}: runner "${flag.runner}" set but no ${flag.runner} environment found; using ${detected}`);
+    }
     result.runtime.runner = runner;
     result.runtime.lando = landoInfo.lando;
+    result.runtime.compose = compose;
     if (landoInfo.lando?.misplacedEnvFile) warnings.push('.lando.yml: config.env_file is ignored by Lando; env_file belongs at the top level');
-    if (flag?.runner && flag.runner !== runner) warnings.push(`${flag.file}: runner "${flag.runner}" differs from the detected ${runner}`);
-    result.runtime.runners = buildRunners(runner, landoInfo.lando, landoInfo.installsComposer, result.apps.length > 0, warnings);
+    if (flag?.runner && flag.runner !== detected) warnings.push(`${flag.file}: runner "${flag.runner}" differs from the detected ${detected}`);
+    if (runner === 'compose') {
+      if (landoFiles.length && !flag?.runner) warnings.push('Landofile still present; runner compose chosen (set runner in .roots-stack.json to override)');
+      if (!compose.bin.includes('wp')) warnings.push(`compose: no bin/ scripts; commands use docker compose exec ${compose.services.php ?? '<php service>'}`);
+      if (!result.runtime.session.dockerCli) warnings.push('docker CLI not found: bin/ scripts need Docker; open the project in the workspace container, not the app container');
+    }
+    if (runner === 'none' && !compose && scanBin(root, []).length) warnings.push('bin/ scripts found but no Compose file; runner none');
+    result.runtime.runners = buildRunners(runner, landoInfo.lando, landoInfo.installsComposer, result.apps.length > 0, warnings, compose);
 
     // Red flags
     const themesWithComposer = themeDirsWithComposer(root, contentDir);
@@ -808,9 +1127,17 @@ export function detect(rootInput, opts = {}) {
 // Text format (compact session table)
 // ---------------------------------------------------------------------------
 
+function runtimeLabel(runtime) {
+  if (runtime.runner === 'lando') return `lando webroot ${runtime.lando?.webroot ?? '.'}`;
+  if (runtime.runner === 'compose' && runtime.compose) {
+    const c = runtime.compose;
+    return `compose ${c.files[0]}${c.contract ? ` (contract ${c.contract.name} v${c.contract.version})` : ''}`;
+  }
+  return `runner ${runtime.runner}`;
+}
+
 export function formatText(r) {
   const app = r.active !== null ? r.apps[r.active] : null;
-  const lando = r.runtime.lando;
   const lines = [];
   lines.push([
     r.layout,
@@ -818,7 +1145,7 @@ export function formatText(r) {
     app?.namespace ?? '-',
     app?.postTypes ?? '-',
     `${app?.blocks ?? 'none'} blocks`,
-    r.runtime.runner === 'lando' ? `lando webroot ${lando?.webroot ?? '.'}` : `runner ${r.runtime.runner}`,
+    runtimeLabel(r.runtime),
   ].join(' · '));
   const versions = { ...r.site.versions, ...(app?.versions ?? {}) };
   if (versions['roots/wordpress'] || versions['johnpbloch/wordpress']) delete versions.wordpress;
@@ -865,14 +1192,14 @@ function parseArgs(argv) {
 export function main(argv = process.argv.slice(2)) {
   const opts = parseArgs(argv);
   if (opts.help) {
-    process.stdout.write(`${TOOL.name} ${TOOL.version}\n\nUsage: node scripts/detect-roots-project.mjs [--path=<dir>] [--format=json|text]\n\nClassifies a WordPress checkout on the Roots stack (layout, Acorn apps, Lando runtime, .roots-stack.json flag).\nExit code is always 0; failures are reported inside the JSON "notes".\n`);
+    process.stdout.write(`${TOOL.name} ${TOOL.version}\n\nUsage: node scripts/detect-roots-project.mjs [--path=<dir>] [--format=json|text]\n\nClassifies a WordPress checkout on the Roots stack (layout, Acorn apps, Compose/Lando/DDEV runtime, .roots-stack.json flag).\nExit code is always 0; failures are reported inside the JSON "notes".\n`);
     return 0;
   }
   let result;
   try {
     result = detect(opts.path ?? process.cwd());
   } catch (e) {
-    result = { tool: TOOL, root: resolve(opts.path ?? process.cwd()), layout: 'unknown', coreDir: null, apps: [], active: null, site: { versions: {}, wpCli: { path: null, docroot: null } }, runtime: { runner: 'none', lando: null, runners: {} }, flag: null, warnings: [], notes: [`detector crashed: ${e?.message ?? e}`], truncated: false };
+    result = { tool: TOOL, root: resolve(opts.path ?? process.cwd()), layout: 'unknown', coreDir: null, apps: [], active: null, site: { versions: {}, wpCli: { path: null, docroot: null } }, runtime: { runner: 'none', lando: null, compose: null, session: { kind: 'local', dockerCli: false }, runners: {} }, flag: null, warnings: [], notes: [`detector crashed: ${e?.message ?? e}`], truncated: false };
   }
   process.stdout.write(opts.format === 'text' ? `${formatText(result)}\n` : `${JSON.stringify(result, null, 2)}\n`);
   return 0;

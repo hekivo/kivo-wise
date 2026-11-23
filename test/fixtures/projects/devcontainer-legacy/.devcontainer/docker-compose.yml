@@ -1,0 +1,13 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ..:/workspace:cached
+  web:
+    image: nginx:1.27
+  db:
+    image: mysql:8.0
+  redis:
+    image: redis:7

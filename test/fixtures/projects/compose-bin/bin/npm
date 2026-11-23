@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# npm: run in the node service.
+set -euo pipefail
+source "$(dirname "$0")/_lib.sh"
+compose_exec node npm "$@"

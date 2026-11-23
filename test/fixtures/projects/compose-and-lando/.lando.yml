@@ -1,0 +1,9 @@
+name: legacy
+recipe: wordpress
+config:
+  php: '8.3'
+  via: nginx
+  database: mysql:8.0
+tooling:
+  yarn:
+    service: appserver

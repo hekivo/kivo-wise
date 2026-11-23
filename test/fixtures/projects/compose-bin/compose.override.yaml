@@ -1,0 +1,5 @@
+# Personal override (gitignored in a real project)
+services:
+  app:
+    environment:
+      XDEBUG_MODE: debug
