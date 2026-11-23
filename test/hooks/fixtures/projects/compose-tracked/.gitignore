@@ -1,0 +1,3 @@
+# compose.override.yaml is shared by the team here
+!compose.override.yaml
+vendor/

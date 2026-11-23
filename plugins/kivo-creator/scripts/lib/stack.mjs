@@ -36,7 +36,9 @@ export function resolveStack(projectDir, { detection = null } = {}) {
     appPath,
     namespace: readNamespace(appPath) ?? app?.namespace ?? 'App\\',
     blocks: app?.blocks ?? (existsSync(join(appPath, 'app', 'Blocks')) ? 'acf-composer' : 'native'),
-    runner: flag?.runner ?? detection?.runtime?.runner ?? 'none',
+    // The detector already applies the flag runner as an override with its guards (D-010), so its
+    // choice comes first; the flag runner is the fallback when no detection is passed.
+    runner: detection?.runtime?.runner ?? flag?.runner ?? 'none',
     // creator.blocks ("acf" | "native"): validated by adapters/shared/block-type.mjs.
     creatorBlocks: flag?.creator?.blocks ?? null,
   };

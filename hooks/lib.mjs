@@ -100,22 +100,46 @@ function detectorScript() {
   return join(PLUGIN_ROOT, 'scripts', 'detect-roots-project.mjs');
 }
 
-function readCache(cwd) {
-  if (process.env.KIVO_WISE_NO_CACHE === '1') return null;
+/**
+ * Session kind from environment signals, first match wins: cloud agent session, Codespaces,
+ * devcontainer, else local. Same order as `sessionKind()` in scripts/detect-roots-project.mjs;
+ * the hooks keep their own copy because the Codex mirror ships hooks/ without scripts/
+ * (a parity test holds the two together).
+ */
+export function currentSessionKind(env = process.env) {
+  const e = env || {};
+  if (e.CLAUDE_CODE_REMOTE === 'true') return 'cloud';
+  if (e.CODESPACES === 'true') return 'codespaces';
+  if (e.KIVO_WP_CONTEXT === 'devcontainer' || e.REMOTE_CONTAINERS === 'true') return 'devcontainer';
+  return 'local';
+}
+
+/** Session kind of a detection; detections without runtime.session (older detector or cache) are local. */
+export function detectionSessionKind(detection) {
+  const kind = detection && detection.runtime && detection.runtime.session && detection.runtime.session.kind;
+  return typeof kind === 'string' && kind ? kind : 'local';
+}
+
+// The same checkout can be opened on the host and in a container within the TTL, so an entry
+// written under another session kind is dropped (spec S-2, detection cache).
+export function readCache(cwd, env = process.env) {
+  if (env.KIVO_WISE_NO_CACHE === '1') return null;
   const cached = loadJson(join(cwd, CACHE_DIR, CACHE_FILE));
   if (!cached || typeof cached !== 'object') return null;
-  const { savedAt, root, detection } = cached;
+  const { savedAt, root, sessionKind, detection } = cached;
   if (typeof savedAt !== 'number' || root !== cwd || !detection || typeof detection !== 'object') return null;
   if (Date.now() - savedAt > CACHE_TTL_MS) return null;
+  if (typeof sessionKind !== 'string' || sessionKind !== currentSessionKind(env)) return null;
   return detection;
 }
 
-function writeCache(cwd, detection) {
-  if (process.env.KIVO_WISE_NO_CACHE === '1') return;
+export function writeCache(cwd, detection, env = process.env) {
+  if (env.KIVO_WISE_NO_CACHE === '1') return;
   try {
     const dir = join(cwd, CACHE_DIR);
     mkdirSync(dir, { recursive: true });
-    writeFileSync(join(dir, CACHE_FILE), `${JSON.stringify({ savedAt: Date.now(), root: cwd, detection })}\n`);
+    const entry = { savedAt: Date.now(), root: cwd, sessionKind: currentSessionKind(env), detection };
+    writeFileSync(join(dir, CACHE_FILE), `${JSON.stringify(entry)}\n`);
   } catch (error) {
     log('WARN', `cache write failed: ${error.message}`);
   }
@@ -189,6 +213,25 @@ export function runners(detection) {
   if (!runtime) return {};
   const pick = (value) => (value && typeof value === 'object' ? value : null);
   return pick(runtime.runners) || pick(runtime.lando && runtime.lando.runners) || {};
+}
+
+/**
+ * True when the project's root .gitignore lists `rel` as a literal line. Blank lines, comments
+ * and `!` negations are skipped and a leading `/` is trimmed; there is no glob engine, which
+ * covers the literal entries wp-kit generates (spec S-3).
+ */
+export function isGitignored(cwd, rel) {
+  let text;
+  try {
+    text = readFileSync(join(cwd, '.gitignore'), 'utf8');
+  } catch {
+    return false;
+  }
+  return text.split(/\r?\n/).some((raw) => {
+    const line = raw.trim();
+    if (!line || line.startsWith('#') || line.startsWith('!')) return false;
+    return line.replace(/^\/+/, '') === rel;
+  });
 }
 
 /** Normalise an app path from the detector ('.' or '' means the project root). */

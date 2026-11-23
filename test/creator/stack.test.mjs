@@ -1,7 +1,7 @@
 // test/creator/stack.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { resolveStack } from '../../plugins/kivo-creator/scripts/lib/stack.mjs';
@@ -35,4 +35,22 @@ test('no flag and no detector output is an error that says how to fix it', () =>
   const dir = mkdtempSync(join(tmpdir(), 'nostack-'));
   mkdirSync(join(dir, 'x'));
   assert.throws(() => resolveStack(dir), /roots-detect --write/);
+});
+
+test('a compose detection gives runner compose (AC-02-7)', () => {
+  const dir = tmpCopy(MU);
+  rmSync(join(dir, '.roots-stack.json'));
+  const detection = { apps: [{ kind: 'acorn-mu-plugin', path: 'wp-content/mu-plugins/acme-core' }], active: 0, runtime: { runner: 'compose' } };
+  assert.equal(resolveStack(dir, { detection }).runner, 'compose');
+});
+
+test('the detector runner wins over a flag that names a missing environment (AC-02-7)', () => {
+  // .roots-stack.json says lando here; the detector kept compose because it applies the flag
+  // only when that environment exists (D-010), so its choice is the one to use.
+  const detection = { apps: [{ kind: 'acorn-mu-plugin', path: 'wp-content/mu-plugins/acme-core' }], active: 0, runtime: { runner: 'compose' } };
+  assert.equal(resolveStack(MU, { detection }).runner, 'compose');
+  const dir = tmpCopy(MU);
+  writeFileSync(join(dir, '.roots-stack.json'), JSON.stringify({ profile: 'acorn-mu-plugin', app: 'wp-content/mu-plugins/acme-core', runner: 'compose' }));
+  const kept = { apps: [{ kind: 'acorn-mu-plugin', path: 'wp-content/mu-plugins/acme-core' }], active: 0, runtime: { runner: 'lando' } };
+  assert.equal(resolveStack(dir, { detection: kept }).runner, 'lando');
 });

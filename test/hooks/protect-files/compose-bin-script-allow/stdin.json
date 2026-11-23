@@ -1,0 +1,1 @@
+{"session_id":"s","cwd":"{{FIXTURES}}/projects/compose","hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"{{FIXTURES}}/projects/compose/bin/wp"},"tool_use_id":"tu1"}

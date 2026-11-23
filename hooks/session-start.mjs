@@ -9,8 +9,10 @@
  * the detector fails.
  */
 
-import { join } from 'node:path';
-import { PLUGIN_ROOT, activeApp, detect, loadJson, log, out, projectDir, runHook, runners } from './lib.mjs';
+import { existsSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { isAbsolute, join, resolve } from 'node:path';
+import { PLUGIN_ROOT, activeApp, detect, detectionSessionKind, loadJson, log, out, projectDir, runHook, runners } from './lib.mjs';
 
 export const MAX_CONTEXT_CHARS = 1500;
 const ROUTING_FILE = join(PLUGIN_ROOT, 'skills', 'roots-router', 'references', 'routing.json');
@@ -65,7 +67,7 @@ export function runnerLine(detection) {
   const cmds = runners(detection);
   const parts = RUNNER_KEYS.filter((k) => cmds[k]).map((k) => `${k}=${cmds[k]}`);
   if (!runner || runner === 'none') {
-    return 'runner: none detected (no .lando.yml or .ddev); use the commands the project documents';
+    return 'runner: none detected (no Lando, Compose or DDEV environment); use the commands the project documents';
   }
   if (parts.length === 0) return `runner: ${runner}`;
   return `runner: ${runner} · ${parts.join(' · ')}`;
@@ -81,14 +83,26 @@ export function corpusRoots(cwd, detection) {
   return [];
 }
 
+/** True when a configured corpus root exists on disk (`~/` is the home directory, relative is from cwd). */
+export function corpusRootExists(cwd, root) {
+  const path = root === '~' || root.startsWith('~/') ? join(homedir(), root.slice(1)) : root;
+  return existsSync(isAbsolute(path) ? path : resolve(cwd, path));
+}
+
 export function rulesLine(cwd, detection) {
   const roots = corpusRoots(cwd, detection);
-  const corpus = roots.length ? roots.join(', ') : 'none configured';
-  const hasRunner = detection.runtime && detection.runtime.runner && detection.runtime.runner !== 'none';
-  const parts = [
-    `project AGENTS.md first, corpus second (${corpus}), web last`,
-    'verify native source before custom code',
-  ];
+  const sources = (() => {
+    // Outside a local session the corpus checkout is usually not there (D-016): say so instead
+    // of pointing at paths that do not exist.
+    if (detectionSessionKind(detection) !== 'local') {
+      const present = roots.filter((r) => corpusRootExists(cwd, r));
+      if (present.length === 0) return 'project AGENTS.md first, corpus: unavailable in this environment; web last: official documentation hosts';
+      return `project AGENTS.md first, corpus second (${present.join(', ')}), web last`;
+    }
+    const corpus = roots.length ? roots.join(', ') : 'none configured';
+    return `project AGENTS.md first, corpus second (${corpus}), web last`;
+  })();
+  const parts = [sources, 'verify native source before custom code'];
   return `rules: ${parts.join('; ')}`;
 }
 
@@ -107,9 +121,11 @@ export function commandsLine(detection) {
     : cmds.wp
       ? `${cmds.wp} cache flush`
       : `${runner} <cmd>`;
+  // bin/ paths are relative to the project root, so Compose commands depend on the working directory (D-013).
+  const where = runner === 'compose' ? ', from the project root' : '';
   return (
     'commands: write every wp/acorn/composer/node/test command exactly as on the runner line ' +
-    `(e.g. \`${example}\`), in examples too, never bare or "prefix if you use ${runner}"; ` +
+    `(e.g. \`${example}\`)${where}, in examples too, never bare or "prefix if you use ${runner}"; ` +
     'CI/deploy commands that run outside the local runner go in a separate block labelled with where they run'
   );
 }
