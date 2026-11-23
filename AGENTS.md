@@ -5,8 +5,10 @@ precedence over skill-local guidance unless a skill explicitly overrides.
 
 ## Environment
 
-- All `wp`, `composer`, `artisan`, `yarn`, `npm` commands run via `lando <cmd>`.
-  Never invoke these binaries directly on the host.
+- All `wp`, `composer`, `artisan`, `yarn`, `npm` commands run through the
+  project runner from the session context (`lando <cmd>`, or `bin/<cmd>` from
+  the project root on Docker Compose projects). Never invoke these binaries
+  directly on the host.
 - Sage projects use Bedrock. Custom code lives in `web/app/`, never in `web/wp/`.
 - The plugin supports Claude Code, VS Code Copilot, Cursor, and OpenAI Codex.
   When contributing to this plugin — adding or updating automation hooks —

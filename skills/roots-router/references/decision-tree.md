@@ -37,6 +37,7 @@ Rows are ordered from most specific to broadest; the first row whose identifiers
 | `add_action`/`add_filter` timing, `after_setup_theme`, `plugins_loaded`, mu-plugin load order | `wp-hooks-lifecycle` | hooks from `functions.php` or providers | mu-plugins load before plugins and themes | root boot file loads first |
 | escaping, `esc_*`, `wp_kses`, nonces, capabilities, `$wpdb->prepare` | `wp-security-escaping` | same | same | same |
 | `lando`, `.lando.yml`, `lando rebuild`, `lndo.site`, Xdebug, DB import/export, "run wp-cli/composer/yarn" | `lando-wp` | tooling may be theme-scoped | tooling names read from `.lando.yml` | webroot usually `public` |
+| `compose.yaml`, `docker compose`, `bin/wp`, `bin/setup`, devcontainer, `*.localhost` certificate, and Xdebug, DB import/export, "run wp-cli/composer/npm" when `runtime.runner` is `compose` | `compose-wp` | Composer and Vite in the theme folder (`--working-dir`) | Composer and Vite in the plugin folder | everything at the project root |
 | install/update a plugin, `composer require`, WPackagist, `wp-packages.org`, private zips | `wp-composer-plugins` | same | same | same |
 | 500, blank page, "view not found", "class not found", `debug.log`, stale after deploy | `roots-debugging` | same | same | same |
 | Tailwind `@theme`, Vite, `Vite::asset`, `public/build`, CSS not applied | `tailwind-vite-assets` | build base = theme URL | build base = plugin URL | build base = webroot |
@@ -51,7 +52,7 @@ Rows are ordered from most specific to broadest; the first row whose identifiers
 ## 4. Tie-breaks
 
 - A symptom ("500", "blank page") beats the topic it mentions: `roots-debugging` first, which then hands off to the topic skill.
-- A command to run (`lando …`, "run the tests", "clear the cache") routes to `lando-wp` when the question is *how to run it*, and to the topic skill when the question is *what to run*.
+- A command to run (`lando …`, `bin/…`, "run the tests", "clear the cache") routes to the runner skill when the question is *how to run it* - `lando-wp` when `runtime.runner` is `lando`, `compose-wp` when it is `compose` - and to the topic skill when the question is *what to run*.
 - "Create" beats "explain": `make:*`, "new block", "new CPT" go to `acorn-scaffolding` even when providers or ACF are mentioned.
 - Two topics with equal weight: open the one whose identifiers appear verbatim in the request; mention the second as the follow-up.
 

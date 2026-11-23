@@ -18,7 +18,7 @@ Runs the detector and shows the full result. With `--write` it saves the detecte
    - Otherwise write `.roots-stack.json` at the project root with exactly these keys, taken from the active app and the runtime:
 
      ```json
-     { "profile": "<sage-theme | acorn-mu-plugin | radicle-app>", "app": "<apps[active].path>", "runner": "<lando | ddev | none>" }
+     { "profile": "<sage-theme | acorn-mu-plugin | radicle-app>", "app": "<apps[active].path>", "runner": "<lando | compose | ddev | none>" }
      ```
 
      Map detector kinds to profiles: `sage-theme` and `acorn-theme` -> `sage-theme`; `acorn-mu-plugin` and `acorn-plugin` -> `acorn-mu-plugin`; `radicle-app` -> `radicle-app`. For `acorn-unknown`, do not guess: ask which profile applies.

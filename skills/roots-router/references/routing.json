@@ -50,6 +50,10 @@
       "use": "run wp/composer/node/tests through Lando; rebuild vs restart; certs, DNS"
     },
     {
+      "skill": "compose-wp",
+      "use": "run wp/composer/node/tests through bin/; up vs restart vs rebuild; TLS, logs"
+    },
+    {
       "skill": "wp-composer-plugins",
       "use": "install or update plugins with Composer"
     },
@@ -347,6 +351,24 @@
         "clear cache"
       ],
       "skill": "lando-wp",
+      "profiles": [
+        "*"
+      ]
+    },
+    {
+      "match": [
+        "compose.yaml",
+        "compose.override.yaml",
+        "docker compose",
+        "bin/wp",
+        "bin/setup",
+        "bin/up",
+        "devcontainer",
+        "codespace",
+        "kivo-wp",
+        "localhost certificate"
+      ],
+      "skill": "compose-wp",
       "profiles": [
         "*"
       ]

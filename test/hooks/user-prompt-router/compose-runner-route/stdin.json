@@ -1,0 +1,1 @@
+{"session_id":"s","cwd":"{{FIXTURES}}/projects/compose","hook_event_name":"UserPromptSubmit","prompt":"bin/wp says the service is not running after I edited compose.yaml"}

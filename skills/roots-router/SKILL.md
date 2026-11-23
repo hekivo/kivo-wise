@@ -12,13 +12,13 @@ Entry point for every Roots-stack request: find the profile, pick one skill, app
 ## When to use
 
 - The session context names a Roots profile (`sage-theme`, `acorn-mu-plugin`, `radicle-app`) and the request is about code, configuration or commands in that project.
-- The project has a `.roots-stack.json`, a `composer.json` requiring `roots/acorn`, `roots/bedrock` or `roots/radicle`, or a `.lando.yml` with `recipe: wordpress`.
+- The project has a `.roots-stack.json`, a `composer.json` requiring `roots/acorn`, `roots/bedrock` or `roots/radicle`, a `.lando.yml` with `recipe: wordpress`, or a root `compose.yaml` with `bin/` scripts.
 - You are unsure which of the stack skills applies, or two of them seem to apply.
 - Not for: plain WordPress sites without Acorn (classify them with `roots-triage` and fall back to the project's own guidelines), production operations, or generic PHP questions.
 
 ## Inputs required
 
-- The triage JSON (`layout`, `apps[active].kind`, `apps[active].path`, `runtime.runners`, `warnings`) from the session context, or produced by `roots-triage`.
+- The triage JSON (`layout`, `apps[active].kind`, `apps[active].path`, `runtime.runner`, `runtime.runners`, `warnings`) from the session context, or produced by `roots-triage`.
 - The user's intent in their own words, including the identifiers they typed (`wire:model`, `lando rebuild`, `acf/validate_value`, ...).
 - The project's guidelines file(s): `AGENTS.md`, `.ai/` or the rules folder the repository names.
 - `references/routing.json` (profile descriptions, intent rows, `planned` list) and `references/keywords.json` (one keyword list per skill, used by the prompt router; `_triage` names symptom-first skills that win when several skills match).
@@ -30,7 +30,8 @@ Entry point for every Roots-stack request: find the profile, pick one skill, app
 3. **Classify the intent.** Match the identifiers in the request against the `intents` rows of `references/routing.json`. Exactly one row: open that skill. Several rows, or a row whose answer depends on the profile: read [references/decision-tree.md](references/decision-tree.md) (intent table, tie-breaks). None: use the lookup order below and answer from project guidelines and local source.
 4. **Apply the native-first gate.** Before proposing validation, save flows, admin behaviour, endpoints, cron, caching or routing, name the native WordPress, ACF or Acorn mechanism and verify it in the local source (core directory from triage, ACF `includes/`, the app's `vendor/`). Custom code needs a verified gap and a written reason.
 5. **Apply the lookup order for facts:** project guidelines, then local source, then the docs corpus when `.docs-brain.json` exists (`docs-brain` skill), then the web.
-6. **Carry the runner.** Every command you suggest comes from `runtime.runners` (`wp`, `acorn`, `composer`, `node`, `test`, `lint`, `cache`, `logs`). In every skill, `{{runner.<key>}}` means that value: the session context lists it as `<key>=<command>` on the `runner:` line (for example `{{runner.acorn}}` is `lando wp acorn` in one project and `lando acorn` in another). A key that is absent means the project has no such command; say so instead of inventing one. When `runtime.runner` is `none`, say so and use bare commands with a warning.
+6. **Carry the runner.** Every command you suggest comes from `runtime.runners` (`wp`, `acorn`, `composer`, `node`, `test`, `lint`, `cache`, `logs`). In every skill, `{{runner.<key>}}` means that value: the session context lists it as `<key>=<command>` on the `runner:` line (for example `{{runner.acorn}}` is `lando wp acorn` in one project, `lando acorn` in another and `bin/wp acorn` on a Compose project). A key that is absent means the project has no such command; say so instead of inventing one. When `runtime.runner` is `none`, say so and use bare commands with a warning.
+   **How to run, restart or read logs goes to the runner skill:** `lando-wp` when `runtime.runner` is `lando`, `compose-wp` when it is `compose`. Shared terms (Xdebug, database import and export, "run wp-cli") follow the runner too, even when the keyword hint named the other skill.
 7. **Open exactly one skill**, state the profile and the reason in one line, and let that skill chain to a second one only when its own procedure says so.
 
 What differs per profile (details per row in the decision tree):
