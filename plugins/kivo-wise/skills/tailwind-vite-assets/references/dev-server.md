@@ -1,6 +1,6 @@
-# Dev server and HMR through Lando
+# Dev server and HMR through Lando or Docker Compose
 
-Deep reference for the Vite dev server. Loaded on demand from `SKILL.md`. Container networking details are in the `lando-wp` skill.
+Deep reference for the Vite dev server. Loaded on demand from `SKILL.md`. Container networking details are in the `lando-wp` skill (Lando) and the `compose-wp` skill (Docker Compose).
 
 ## How hot reload works
 
@@ -21,6 +21,20 @@ Deep reference for the Vite dev server. Loaded on demand from `SKILL.md`. Contai
 | `base` in dev | Plugin configs use `/` for the dev server and the real URL path only for `build` |
 
 The reference projects reach the dev server at `localhost:<port>` over plain HTTP from an HTTPS page; browsers treat `localhost` as a trustworthy origin for this. Putting the dev server behind a TLS hostname needs a proxy that terminates TLS for that port; Lando's proxy only routes the web ports, so do not set a `wss` protocol unless something terminates TLS.
+
+## Docker Compose (kivo-wp)
+
+Vite runs in the `node` service (`bin/dev`), with `server.host: '0.0.0.0'`, a fixed `server.port` and `strictPort: true` as above. The browser reaches it through TLS, so `server.hmr` names an HTTPS host. Which host depends on `runtime.compose.contract.version`; the URLs `bin/info` prints are the reference.
+
+| Contract | Dev server URL the browser uses | `server.hmr` |
+|---|---|---|
+| 1 (per-project `proxy` service) | `https://vite.<project>.localhost`, plus the HTTPS port `bin/setup` chose when 443 was taken | `host: 'vite.<project>.localhost'`, `protocol: 'wss'`, `clientPort` = that HTTPS port |
+| 2 (global router `kivo-wp-router`) | `https://vite-<host>.<domain>` (default domain `kivowp.dev`), no port | `host: 'vite-<host>.<domain>'`, `protocol: 'wss'`, `clientPort: 443`; `HTTPS_PORT` no longer exists |
+| Codespaces (either) | the forwarded URL of the Vite port (5173) | that forwarded host with `clientPort: 443` |
+
+- On contract 2 the router passes the WebSocket through; the `node` service carries the router labels for port 5173. Do not publish 5173 with `ports:` and do not point HMR at `localhost`.
+- The page origin is the site URL (`https://<host>.<domain>` on contract 2), so set `APP_URL` for the Vite process to it, or list it in `server.cors.origin`.
+- WSL2: the names resolve to `127.0.0.1`, which WSL forwards to Windows; certificate trust is in `compose-wp`.
 
 ## Where Node runs
 
@@ -44,7 +58,8 @@ Vite's default is 5173. If another Lando app on the same machine already publish
 | Console: blocked by CORS policy on the module script | Set `APP_URL` for the Node process to the Lando site URL, or list the origin in `server.cors.origin` |
 | Assets load but never update | The file is not in `input`; or a polling watcher is needed on network file systems (set `server.watch.usePolling`) |
 | Mixed content blocked | A non-localhost HTTP dev host on an HTTPS page; use `localhost` or terminate TLS |
-| Dev server not reachable from Windows browser | WSL2 localhost forwarding; see `lando-wp` |
+| Dev server not reachable from Windows browser | WSL2 localhost forwarding; see `lando-wp` or `compose-wp` |
+| Compose contract 2: HMR WebSocket fails with a port in the URL | A contract 1 setting (`HTTPS_PORT`, `vite.<project>.localhost`) is left in `vite.config.js` | `hmr.host` = `vite-<host>.<domain>`, `clientPort: 443`; restart `bin/dev` |
 | Blade edits do not reload the page | `refresh: true` (or explicit globs) in the `laravel()` options |
 
 ## Production parity

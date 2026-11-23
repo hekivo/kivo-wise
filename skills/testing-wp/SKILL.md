@@ -7,7 +7,7 @@ description: Use when writing, running or fixing tests on a Roots/Acorn WordPres
 
 Pick the cheapest level that proves the behaviour, run it through the project runner, and report only what you observed.
 
-Runner placeholders (`{{runner.test}}`, `{{runner.node}}`, `{{runner.wp}}`, `{{runner.composer}}`, `{{runner.cache}}`) come from the session context. `{{runner.test}}` is the profile's PHP test command (PHPUnit or Pest). On Lando the default is a tooling command such as `lando phpunit` or `lando pest`; `lando-wp` explains the wiring.
+Runner placeholders (`{{runner.test}}`, `{{runner.node}}`, `{{runner.wp}}`, `{{runner.composer}}`, `{{runner.cache}}`) come from the session context. `{{runner.test}}` is the profile's PHP test command (PHPUnit or Pest). On Lando the default is a tooling command such as `lando phpunit` or `lando pest`; `lando-wp` explains the wiring. On Docker Compose it is `bin/test`, the browser suite is `bin/e2e`, and the site URL comes from `bin/info` (`compose-wp` explains the wiring).
 
 ## When to use
 
@@ -49,7 +49,7 @@ Commands: write every command with the runner value from the session context fil
    - Keep logic in small methods that do not call WordPress directly, so the test needs few stubs. For classes whose constructor needs the framework, create them with `ReflectionClass::newInstanceWithoutConstructor()` and test protected helpers through `ReflectionMethod`.
    - Details: [references/unit-without-wordpress.md](references/unit-without-wordpress.md).
 4. **Integration tests with WordPress booted (Radicle style).** Read [references/pest-wordpress.md](references/pest-wordpress.md) before writing: these run against a real database.
-5. **Browser tests.** Read [references/playwright.md](references/playwright.md): base URL, projects, headed runs on the host, API request tests, visual checks.
+5. **Browser tests.** Read [references/playwright.md](references/playwright.md): base URL (on Compose, per kivo-wp contract: no port on contract 2), projects, headed runs on the host, API request tests, visual checks.
 6. **Run.** Execute the narrowest command first (a filter on the test class or name), then the whole suite: `{{runner.test}} --filter <Name>` then `{{runner.test}}`. Read the output, not only the exit code.
 7. **Before reporting done.** Run, in this order, whatever the project defines: formatter/linter check, `{{runner.test}}`, the asset build when CSS or JS changed (`{{runner.node}} run build`), and `{{runner.cache}}` if PHP registration code changed. State which you ran and the result.
 8. **Never** claim a pass you did not observe; say so when a level could not run (no browser, no database).

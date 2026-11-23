@@ -59,7 +59,8 @@ Loader note: open this page from `roots-triage` step 3 when a field of the JSON 
 | Field | Meaning |
 |---|---|
 | `files` | The root Compose file Compose would use (`compose.yaml`, `compose.yml`, `docker-compose.yaml`, `docker-compose.yml`, first match) and every override it merges (`compose.override.yaml`, `compose.override.yml`, `docker-compose.override.yml`). `COMPOSE_FILE` is noted, not followed |
-| `contract` | `{ "name": "kivo-wp", "version": <n> }` from the top-level `x-kivo-wp:` block map, or `null`. Version 1 fixes the service names (`app` holds `php` and `web`, `db`, `cache`, `node`, `proxy`, `mail`); a higher version is noted and read from images |
+| `contract` | `{ "name": "kivo-wp", "version": <n> }` from the top-level `x-kivo-wp:` block map, or `null`. Version 1 fixes the service names (`app` holds `php` and `web`, `db`, `cache`, `node`, `proxy`, `mail`). Version 2 (wp-kit 6.1) has the same names without `proxy`: TLS moves to the global router, so `services.proxy` is `null` and a leftover `proxy` service is ignored with a note. A higher version is noted and read from images |
+| `router` | Contract 2 only, else `null`: `{ "container": "kivo-wp-router", "network": "kivo-wp", "networkDeclared": <bool> }`. The router is one container per machine outside the project; `networkDeclared` is false (with a note) when the Compose files declare no top-level `kivo-wp` network. Whether the router runs is a `bin/router status` question; the detector starts no process |
 | `devcontainer` | `.devcontainer/devcontainer.json` when it exists, else `null` |
 | `services` | Role to service name: `php`, `web`, `database`, `cache`, `node`, `proxy`, `mail` (null when no service holds the role). Without a contract the roles come from `image:` only; a Dockerfile-built service is matched only by a contract name |
 | `bin` | Sorted names of the `bin/` scripts that are executable and source `_lib.sh`, call `docker compose` or call another `bin/` script |

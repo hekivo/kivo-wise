@@ -10,7 +10,17 @@ The same `compose.yaml` and the same `bin/` scripts run in three places. What ch
 | `devcontainer`, `codespaces` | the **workspace container** that the generated `.devcontainer/devcontainer.json` opens (a devcontainer base image with Docker-in-Docker) | the Docker daemon inside the workspace container |
 | `cloud` | the virtual machine of a cloud agent session, with the repository cloned | Docker and `docker compose` on that machine |
 
-In every place `bin/*` call `docker compose exec` the same way. If `docker` is not found, the shell is in the wrong container: the older template attached the editor to the PHP container (`.devcontainer/docker-compose.yml` with `app`, `web`, `db`, `redis`), where `docker compose exec` does not exist. The detector notes that layout and never uses it as the runner.
+On contract 2 the router also depends on the place:
+
+| Place | Router | Names resolve through | Certificate |
+|---|---|---|---|
+| `local` (Linux, WSL2, macOS) | on the host, 80 and 443 | public DNS (`*.kivowp.dev` to loopback) | team wildcard, or the machine-local CA |
+| `devcontainer` (editor on the developer machine) | inside the workspace container; the editor forwards 443 and 80 | public DNS | as on the host; when the editor cannot get 443 on the host the URL breaks and `bin/info` says so |
+| `cloud` | on the session machine, 80 and 443 | `/etc/hosts` lines that `bin/setup --cloud` writes | machine-local CA, trusted on the machine |
+| CI (`bin/setup --ci`) | on the runner | `/etc/hosts` lines that `bin/setup --ci` writes | machine-local CA |
+| `codespaces` | none: the Codespaces override publishes `app` 8080, `node` 5173 and `mail` 8025 to the forwarder | the forwarded URLs | the forwarder's own |
+
+Contract 1 has its `proxy` service in every place. In every place `bin/*` call `docker compose exec` the same way. If `docker` is not found, the shell is in the wrong container: the older template attached the editor to the PHP container (`.devcontainer/docker-compose.yml` with `app`, `web`, `db`, `redis`), where `docker compose exec` does not exist. The detector notes that layout and never uses it as the runner.
 
 ## Editor devcontainers
 
@@ -21,6 +31,7 @@ In every place `bin/*` call `docker compose exec` the same way. If `docker` is n
 ## Cloud agent sessions
 
 - **The stack starts per session.** The environment cache keeps pulled images and installed files but no running containers. Run `docker compose ps` first, then `bin/setup --cloud` (or `bin/up` when the setup already ran in this session).
+- **Router (contract 2).** `bin/setup --cloud` starts the router on the session machine, writes the `/etc/hosts` lines and uses the machine-local CA; the team's wildcard key never enters a cloud agent session. The router image comes from Docker Hub, which the default allowlist covers. Whether the session machine lets the router bind 80 and 443 and how the session proxy treats loopback names is not documented by the platform: if `bin/setup --cloud` fails there, report its output instead of working around it.
 - **Network allowlist.** The default allowlist of a cloud agent session covers GitHub, Docker Hub, `ghcr.io`, `mcr.microsoft.com`, `packagist.org`, `repo.packagist.org`, `registry.npmjs.org` and the Ubuntu archives. A kivo-wp project also needs:
 
   | Host | Why |

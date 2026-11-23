@@ -4,9 +4,9 @@ Loader note: open this page from `compose-wp` steps 1 to 3 when you need to know
 
 The contract is owned by wp-kit, which generates and versions it. kivo-wise reads it; it never redefines it. When a script behaves differently from this page, the project's `bin/<script> --help` and wp-kit's documentation win.
 
-## Contract version 1
+## Contract versions 1 and 2
 
-Every script sources `bin/_lib.sh` from its own directory and runs `docker compose exec` in the right service, adding `-T` when stdin is not a terminal (pipes, CI, stdio MCP clients). Run them from the project root.
+Both versions have the scripts below; the differences are marked. Every script sources `bin/_lib.sh` from its own directory and runs `docker compose exec` in the right service, adding `-T` when stdin is not a terminal (pipes, CI, stdio MCP clients). Run them from the project root.
 
 | Script | Runs | Notes |
 |---|---|---|
@@ -14,19 +14,20 @@ Every script sources `bin/_lib.sh` from its own directory and runs `docker compo
 | `bin/composer` | Composer in `app` | `--working-dir=<container path>` for a theme or plugin project |
 | `bin/php` | PHP CLI in `app` | |
 | `bin/npm`, `bin/node` | npm and Node in `node` | |
-| `bin/build`, `bin/dev` | production build, Vite dev server | `bin/dev` serves through the proxy |
+| `bin/build`, `bin/dev` | production build, Vite dev server | `bin/dev` serves through the `proxy` service (contract 1) or the global router at `vite-<host>.<domain>` (contract 2) |
 | `bin/test` | the PHP test suite | |
 | `bin/e2e` | the browser test suite | |
 | `bin/stan`, `bin/mago` | static analysis, lint and format | `bin/mago` is the `lint` runner |
 | `bin/flush` | object cache, Acorn caches, rewrites | the `cache` runner |
 | `bin/logs` | `docker compose logs -f` for the services | the `logs` runner |
-| `bin/info` | URLs, chosen ports, login | the only source of the site URL |
-| `bin/setup` | first run: build, start with health checks, install dependencies, seed synthetic data | idempotent |
-| `bin/up`, `bin/down` | start and stop the stack | `bin/down --volumes` deletes the data volumes |
+| `bin/info` | URLs, login; the chosen ports on contract 1 | the only source of the site URL; contract 2 URLs have no port |
+| `bin/setup` | first run: build, start with health checks, install dependencies, seed synthetic data | idempotent; on contract 2 it also starts the router, installs the certificate and checks DNS |
+| `bin/up`, `bin/down` | start and stop the stack | `bin/down --volumes` deletes the data volumes; on contract 2 `bin/up` starts the router when missing and `bin/down` leaves it running |
+| `bin/router` | contract 2 only: `status`, `restart`, `stop`, `logs` of the global `kivo-wp-router` | `status` lists the routed hosts; `stop` affects every project on the machine |
 | `bin/db`, `bin/db-import`, `bin/db-export` | database client shell, import, export | |
 | `bin/seed` | synthetic data | never production data |
 | `bin/xdebug` | Xdebug control in `app` | read `bin/xdebug --help` for its arguments |
-| `bin/trust-cert` | exports Caddy's root CA and prints the trust command per OS | see `tls-and-hosts.md` |
+| `bin/trust-cert` | contract 1: exports Caddy's root CA; contract 2: the machine-local CA; prints the trust command per OS | not needed on contract 2 with the team's wildcard certificate; see `tls-and-hosts.md` |
 
 ## Place flags of `bin/setup`
 
@@ -38,7 +39,7 @@ The setup flag per place comes from the contract version and is chosen from `run
 | `cloud` (cloud agent session) | `bin/setup --cloud` |
 | CI pipeline | `bin/setup --ci` |
 
-These are the names contract 1 documents. If `bin/setup --help` lists different ones, use those and report the difference.
+These are the names contracts 1 and 2 document. If `bin/setup --help` lists different ones, use those and report the difference.
 
 ## How the detector recognises a script
 

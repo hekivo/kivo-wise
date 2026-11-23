@@ -1,6 +1,6 @@
 ---
 name: tailwind-vite-assets
-description: Use when working on the front-end build of a Roots/Acorn project - vite.config.js, laravel-vite-plugin, @roots/vite-plugin, Tailwind 4 (@theme, @source, @reference), design tokens, Vite::asset and @vite URLs (including from an mu-plugin), public/build, manifest.json, public/hot, HMR through Lando, editor.css, "styles missing", "assets 404". For block registration in PHP use acorn-scaffolding; for container networking use lando-wp.
+description: Use when working on the front-end build of a Roots/Acorn project - vite.config.js, laravel-vite-plugin, @roots/vite-plugin, Tailwind 4 (@theme, @source, @reference), design tokens, Vite::asset and @vite URLs (including from an mu-plugin), public/build, manifest.json, public/hot, HMR through Lando or Docker Compose (kivo-wp), editor.css, "styles missing", "assets 404". For block registration in PHP use acorn-scaffolding; for container networking use lando-wp or compose-wp.
 ---
 
 # Tailwind 4 and Vite assets
@@ -54,7 +54,7 @@ Commands: write every command with the runner value from the session context fil
    - A single URL in Blade or PHP: `Vite::asset('resources/images/logo.svg')`; contents: `Vite::content('resources/css/editor.css')`; dev server running: `Vite::isRunningHot()`.
    - Images and fonts referenced from Blade must be listed under `assets: [...]` in the `laravel()` options (for example `resources/images/**`), otherwise they are not copied into the build.
    - Editor styles: inject the editor stylesheet through `block_editor_settings_all` or `add_editor_style`; load editor scripts only in the editor screen.
-7. **Dev server.** `{{runner.node}} run dev`, with host `0.0.0.0`, a fixed port, `strictPort`, HMR host/port the browser can reach, and `APP_URL` set to the site URL so CORS allows the page origin. Details and Lando wiring: [references/dev-server.md](references/dev-server.md).
+7. **Dev server.** `{{runner.node}} run dev`, with host `0.0.0.0`, a fixed port, `strictPort`, HMR host/port the browser can reach, and `APP_URL` set to the site URL so CORS allows the page origin. Details, Lando wiring and Compose wiring per kivo-wp contract: [references/dev-server.md](references/dev-server.md).
 8. **Production build.** `{{runner.node}} run build`. Confirm `manifest.json` and the hashed files exist under the output folder, then `{{runner.cache}}`.
 9. **Report** the config change, the command you ran and what the manifest now contains.
 
@@ -89,7 +89,7 @@ Per-profile config examples: [references/vite-config.md](references/vite-config.
 
 - A new global CSS rule that affects markup you do not own (theme, plugin, third-party blocks): propose scoping first, then ask.
 - Changing the Node major version, adding a bundler plugin, or changing the public base affects every deploy: show the diff and wait for approval.
-- Container networking, ports and DNS: hand over to `lando-wp`.
+- Container networking, ports and DNS: hand over to `lando-wp` (Lando) or `compose-wp` (Docker Compose).
 
 <!-- verified: node_modules/laravel-vite-plugin/dist/index.js:55-61 — default dev CORS: localhost, APP_URL, *.test;
 refs/roots-sage/vite.config.js:7-9,11-45 — Sage config: base '/app/themes/sage/public/build/', laravel input app/editor css+js, assets images/fonts, wordpressPlugin, wordpressThemeJson, aliases;
