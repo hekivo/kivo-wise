@@ -1,0 +1,4 @@
+# personal settings
+/compose.override.yaml
+.kivo-wise/
+vendor/

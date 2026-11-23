@@ -1,0 +1,1 @@
+{"session_id":"s","cwd":"{{FIXTURES}}/projects/compose-tracked","hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"{{FIXTURES}}/projects/compose-tracked/compose.override.yaml"},"tool_use_id":"tu1"}

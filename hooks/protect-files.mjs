@@ -2,7 +2,8 @@
 /**
  * PreToolUse hook on Write | Edit | MultiEdit | NotebookEdit: protects secrets and managed folders.
  *
- * Generic (every profile): .env* (except .env.example), auth.json, .lando.local.yml, wp-config.php,
+ * Generic (every profile): .env* (except .env.example), auth.json, .lando.local.yml, the personal
+ * Compose override at the project root when .gitignore lists it, wp-config.php,
  * the WordPress core dir, vendor/, node_modules/, Composer-installed plugins and themes, uploads/,
  * build output (public/build/). Radicle adds its scaffolding (public/index.php, public/wp-config.php,
  * 00-acorn-boot.php, bedrock-autoloader.php, the theme stub files) and asks before touching
@@ -13,13 +14,16 @@
  */
 
 import { basename, join } from 'node:path';
-import { detect, loadJson, log, out, projectDir, projectRelative, runHook, appPath } from './lib.mjs';
+import { detect, isGitignored, loadJson, log, out, projectDir, projectRelative, runHook, appPath } from './lib.mjs';
 
 const CONTENT_DIRS = '(?:wp-content|app|content)';
 const INSTALLABLE_RE = new RegExp(`(?:^|/)${CONTENT_DIRS}/(plugins|mu-plugins|themes)/([^/]+)/`);
 const UPLOADS_RE = new RegExp(`(?:^|/)${CONTENT_DIRS}/uploads/`);
 const RADICLE_ENV_RE = /^bedrock\/environments\/([^/]+)\.php$/;
 const RADICLE_THEME_STUB_RE = /^public\/content\/themes\/[^/]+\/(functions\.php|index\.php|style\.css)$/;
+// Compose merges these over compose.yaml; when gitignored they are one developer's settings.
+// bin/ scripts are never denied: wp-kit owns and regenerates them (D-012).
+const COMPOSE_OVERRIDES = new Set(['compose.override.yaml', 'compose.override.yml', 'docker-compose.override.yml']);
 const RADICLE_FIXED = new Set(['public/index.php', 'public/wp-config.php', 'public/content/mu-plugins/00-acorn-boot.php']);
 
 function lastSegment(packageName) {
@@ -73,7 +77,7 @@ function appFolders(detection) {
 
 /**
  * Decide for a project-relative path. Returns { decision: 'deny'|'ask', reason } or null to allow.
- * ctx: { detection, composerFolders: Set<string> }
+ * ctx: { detection, composerFolders: Set<string>, isGitignored?: (rel) => boolean }
  */
 export function decide(rel, ctx) {
   const { detection } = ctx;
@@ -89,6 +93,9 @@ export function decide(rel, ctx) {
   }
   if (base === '.lando.local.yml') {
     return { decision: 'deny', reason: `${prefix} is the developer's unversioned Lando override; change .lando.yml instead.` };
+  }
+  if (COMPOSE_OVERRIDES.has(rel) && typeof ctx.isGitignored === 'function' && ctx.isGitignored(rel)) {
+    return { decision: 'deny', reason: `${prefix} is the developer's unversioned Compose override; change compose.yaml instead.` };
   }
 
   if (isRadicle(detection)) {
@@ -158,7 +165,11 @@ await runHook('protect-files', (input) => {
     return 0;
   }
 
-  const verdict = decide(rel, { detection: detect(cwd), composerFolders: composerFolders(cwd) });
+  const verdict = decide(rel, {
+    detection: detect(cwd),
+    composerFolders: composerFolders(cwd),
+    isGitignored: (path) => isGitignored(cwd, path),
+  });
   if (!verdict) return 0;
 
   out({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: verdict.decision, permissionDecisionReason: verdict.reason } });

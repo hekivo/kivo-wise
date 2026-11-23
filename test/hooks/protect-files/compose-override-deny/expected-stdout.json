@@ -1,0 +1,7 @@
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "kivo-wise: compose.override.yaml is the developer's unversioned Compose override; change compose.yaml instead."
+  }
+}

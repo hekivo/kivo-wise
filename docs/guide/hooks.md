@@ -12,7 +12,13 @@ Hooks are Node scripts (stdin JSON in, JSON out) that run on lifecycle events. T
 
 ## Protected files
 
-Denied in every profile: `.env*` (except `.env.example`), `auth.json`, `.lando.local.yml`, `wp-config.php`, the WordPress core directory, `vendor/`, `node_modules/`, Composer-installed plugins and themes, `uploads/` and build output such as `public/build/`. Radicle adds its scaffolding files, and edits to `bedrock/environments/*.php` ask first. Paths outside the project are ignored.
+Denied in every profile: `.env*` (except `.env.example`), `auth.json`, `.lando.local.yml`, the personal Compose override at the project root (`compose.override.yaml`, `compose.override.yml` or `docker-compose.override.yml`) when the project `.gitignore` lists it as a literal line, `wp-config.php`, the WordPress core directory, `vendor/`, `node_modules/`, Composer-installed plugins and themes, `uploads/` and build output such as `public/build/`. Radicle adds its scaffolding files, and edits to `bedrock/environments/*.php` ask first. Paths outside the project are ignored. The Compose `bin/` scripts are never denied: wp-kit generates them and teams patch them.
+
+## Session context and cache
+
+On a Compose project the runner line lists the `bin/` commands and the command-writing rule adds "from the project root", because `bin/` paths are relative to it. Outside a local session (cloud agent session, Codespaces, devcontainer) the reading-order rule lists only the corpus roots that exist on disk, and says `corpus: unavailable in this environment` when none does.
+
+The detector result is cached for ten minutes in `.kivo-wise/context.json`. The entry records the session kind, and an entry written under another kind (the same checkout opened on the host and then in a container) is dropped and the detector runs again.
 
 ## Debugging
 
