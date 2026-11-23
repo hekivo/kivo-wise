@@ -1,0 +1,633 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "type": "decision",
+      "tier": "pivot",
+      "status": "open",
+      "source": "catalog:delivery-model",
+      "grounds": [],
+      "options": [
+        {
+          "key": "trunk",
+          "label": "Trunk-based, no pull requests"
+        },
+        {
+          "key": "branches",
+          "label": "Short-lived branches merged by the owner"
+        },
+        {
+          "key": "pull-requests",
+          "label": "Pull requests with review"
+        }
+      ],
+      "text": "How do changes reach the main line: straight to trunk, short-lived branches, or pull requests with review? Who merges?",
+      "area": "process",
+      "id": "Q-001"
+    },
+    {
+      "type": "decision",
+      "tier": "pivot",
+      "status": "open",
+      "source": "catalog:data-strategy",
+      "grounds": [],
+      "options": [
+        {
+          "key": "clone",
+          "label": "Sanitized copy of production"
+        },
+        {
+          "key": "clean-import",
+          "label": "Clean database + staged importer"
+        }
+      ],
+      "text": "Does the new system start from a copy of production data, or from a clean database filled by a staged importer that reads the legacy?",
+      "area": "data",
+      "id": "Q-002"
+    },
+    {
+      "type": "decision",
+      "tier": "pivot",
+      "status": "open",
+      "source": "catalog:id-preservation",
+      "grounds": [],
+      "options": [
+        {
+          "key": "preserve",
+          "label": "Preserve legacy ids"
+        },
+        {
+          "key": "new-ids",
+          "label": "New ids; integrations adapt"
+        }
+      ],
+      "text": "Must record ids (orders, customers, products) be preserved from the legacy, or can integrations adapt to new ids?",
+      "area": "data",
+      "id": "Q-003"
+    },
+    {
+      "type": "decision",
+      "tier": "pivot",
+      "status": "open",
+      "source": "catalog:environments",
+      "grounds": [],
+      "options": [
+        {
+          "key": "single-local",
+          "label": "One local environment until go-live"
+        },
+        {
+          "key": "local-staging",
+          "label": "Local + staging"
+        },
+        {
+          "key": "full",
+          "label": "Local + staging + production pipeline"
+        }
+      ],
+      "text": "Which environments exist (local, staging, production), and where do tests and content entry happen?",
+      "area": "infra",
+      "id": "Q-004"
+    },
+    {
+      "type": "decision",
+      "tier": "pivot",
+      "status": "open",
+      "source": "catalog:integration-contracts",
+      "grounds": [],
+      "options": [
+        {
+          "key": "propose-correct",
+          "label": "Propose the correct contract"
+        },
+        {
+          "key": "replicate",
+          "label": "Replicate the legacy behaviour"
+        }
+      ],
+      "text": "For each external integration, do we propose the correct contract and ask the other side to adapt, or replicate the legacy behaviour?",
+      "area": "integrations",
+      "id": "Q-005"
+    },
+    {
+      "type": "decision",
+      "tier": "pivot",
+      "status": "open",
+      "source": "catalog:secrets-and-production",
+      "grounds": [],
+      "options": [
+        {
+          "key": "strict",
+          "label": "Secret manager only; per-read production authorization"
+        },
+        {
+          "key": "standard",
+          "label": "Secret manager; standing read-only production access"
+        }
+      ],
+      "text": "What is the policy for secrets and production access: no hardcoded secrets, secret-manager references only, production reads authorized one by one?",
+      "area": "security",
+      "id": "Q-006"
+    },
+    {
+      "type": "decision",
+      "tier": "pivot",
+      "status": "open",
+      "source": "catalog:external-workers",
+      "grounds": [],
+      "options": [
+        {
+          "key": "none",
+          "label": "No"
+        },
+        {
+          "key": "approved-list",
+          "label": "Only an approved list, with recorded consent"
+        }
+      ],
+      "text": "May external workers or third-party services (other AI providers, judgment services) receive project code or data?",
+      "area": "process",
+      "id": "Q-007"
+    },
+    {
+      "type": "decision",
+      "tier": "high",
+      "status": "open",
+      "source": "owner",
+      "grounds": [
+        "scripts/detect-roots-project.mjs:768-776 runner is lando|ddev|none",
+        "skills/roots-triage/references/triage.schema.json:46 enum [lando, ddev, none]",
+        "commands/roots-detect.md:21 writes the runner into .roots-stack.json"
+      ],
+      "options": [
+        {
+          "key": "compose",
+          "label": "compose (runtime.compose block; bin/ scripts are how commands are reached)",
+          "why": "Names the environment, not the wrapper; leaves room for a Compose project without bin/",
+          "recommended": true
+        },
+        {
+          "key": "bin",
+          "label": "bin (the project's bin/ wrappers are the runner)",
+          "why": "Names what the agent actually calls"
+        },
+        {
+          "key": "docker",
+          "label": "docker",
+          "why": "Short, but ambiguous with plain docker run setups"
+        }
+      ],
+      "text": "Which runner id does the detector publish for the native Docker Compose environment with bin/ scripts (runtime.runner and the .roots-stack.json runner key)?",
+      "area": "detector",
+      "id": "Q-008"
+    },
+    {
+      "type": "decision",
+      "tier": "high",
+      "status": "open",
+      "source": "owner",
+      "grounds": [
+        "scripts/detect-roots-project.mjs:770 Lando is checked first and wins over DDEV",
+        "scripts/detect-roots-project.mjs:775 the flag runner only raises a warning today; it never overrides"
+      ],
+      "options": [
+        {
+          "key": "compose-first",
+          "label": "Compose with bin/ scripts wins; warn that a Landofile is still present",
+          "why": "Matches the decided direction; a project that added bin/ has opted in",
+          "recommended": true
+        },
+        {
+          "key": "lando-first",
+          "label": "Lando wins until the Landofile is removed",
+          "why": "Safest for projects mid-migration that still use Lando daily"
+        },
+        {
+          "key": "ambiguous",
+          "label": "Report runner none plus a warning and require the flag",
+          "why": "Forces an explicit choice, but every session degrades until someone writes the flag"
+        }
+      ],
+      "text": "When a project has both a Landofile and a Compose environment (migration period), which runner wins when .roots-stack.json does not say?",
+      "area": "detector",
+      "id": "Q-009"
+    },
+    {
+      "type": "decision",
+      "tier": "high",
+      "status": "open",
+      "source": "owner",
+      "grounds": [
+        "scripts/detect-roots-project.mjs:775 flag.runner differs -> warning only",
+        "skills/roots-triage/SKILL.md:52 says the flag wins for routing, which applies to profile/app, not runner"
+      ],
+      "options": [
+        {
+          "key": "override",
+          "label": "Yes: flag.runner wins; detection still runs and warns on drift",
+          "why": "Gives teams a committed escape hatch during the Lando to Compose transition",
+          "recommended": true
+        },
+        {
+          "key": "warn-only",
+          "label": "No: keep it as a drift warning",
+          "why": "Avoids a stale flag pointing sessions at a runner that no longer exists"
+        }
+      ],
+      "text": "Should the runner key in .roots-stack.json become an override that wins over detection (today it only produces a drift warning)?",
+      "area": "detector",
+      "id": "Q-010"
+    },
+    {
+      "type": "decision",
+      "tier": "high",
+      "status": "open",
+      "source": "owner",
+      "grounds": [
+        "skills/lando-wp (110-line SKILL.md + 5 references, 404 lines) is Lando-specific end to end",
+        "skills/roots-router/references/routing.json:49,349 and keywords.json:14 route to lando-wp",
+        "session-start context lists lando-wp in the available skills"
+      ],
+      "options": [
+        {
+          "key": "sibling",
+          "label": "Keep lando-wp unchanged and add a sibling compose-wp skill; the router picks by runtime.runner",
+          "why": "No rename churn; each skill stays under the 500-line contract; Lando projects are untouched",
+          "recommended": true
+        },
+        {
+          "key": "umbrella",
+          "label": "Rename to a runner-neutral dev-env skill with per-runner references",
+          "why": "One entry point, but a rename breaks routing tests, evals and muscle memory"
+        },
+        {
+          "key": "replace",
+          "label": "Replace lando-wp with the Compose skill and move Lando content to a reference",
+          "why": "Signals the direction strongly; penalises projects that keep Lando"
+        }
+      ],
+      "text": "How is the Lando skill handled now that a Compose environment skill is needed?",
+      "area": "skills",
+      "id": "Q-011"
+    },
+    {
+      "type": "decision",
+      "tier": "pivot",
+      "status": "open",
+      "source": "owner",
+      "grounds": [
+        "wp-kit generates the Compose environment (parallel effort, not merged yet)",
+        "the Lando runner map is derived by parsing tooling: in .lando.yml (scripts/detect-roots-project.mjs:575-585, 624-645)"
+      ],
+      "options": [
+        {
+          "key": "wp-kit-contract",
+          "label": "wp-kit publishes a versioned bin/ contract; kivo-wise detects it and also parses the Compose file for services",
+          "why": "One owner for the names; kivo-wise tests pin a contract version",
+          "recommended": true
+        },
+        {
+          "key": "heuristic",
+          "label": "kivo-wise only reads what exists (bin/ file names, compose services) with no contract",
+          "why": "Works for non-wp-kit projects, but every name change in wp-kit silently breaks detection"
+        },
+        {
+          "key": "manifest",
+          "label": "Projects commit a small machine-readable manifest of their runner commands that kivo-wise reads first",
+          "why": "Explicit and runner-neutral, but one more file to keep in sync"
+        }
+      ],
+      "text": "Who owns the contract of the bin/ scripts (names, service names, behaviour inside the container), and how does kivo-wise read it?",
+      "area": "integration",
+      "id": "Q-012"
+    },
+    {
+      "type": "decision",
+      "tier": "normal",
+      "status": "open",
+      "source": "owner",
+      "grounds": [
+        "hooks/session-start.mjs:63-72 prints the runner commands verbatim and commandsLine tells the agent to copy them exactly",
+        "agent shells can change directory between commands, so a relative bin/wp depends on the working directory"
+      ],
+      "options": [
+        {
+          "key": "relative-bin",
+          "label": "bin/wp, bin/wp acorn, bin/composer, bin/npm, with the rule that they run from the project root",
+          "why": "Short, matches what humans type, survives a moved checkout",
+          "recommended": true
+        },
+        {
+          "key": "absolute-bin",
+          "label": "Absolute paths to the bin/ scripts",
+          "why": "Works from any directory, but leaks the local path into answers and differs per machine"
+        },
+        {
+          "key": "raw-compose",
+          "label": "docker compose exec -T <service> wp ... with no bin/ indirection",
+          "why": "Works without the scripts, but bypasses any logic the scripts carry (inside-container detection, user mapping)"
+        }
+      ],
+      "text": "Which form do the runner commands take on the session runner line for the Compose runner?",
+      "area": "hooks",
+      "id": "Q-013"
+    },
+    {
+      "type": "decision",
+      "tier": "pivot",
+      "status": "open",
+      "source": "owner",
+      "grounds": [
+        "docs/guide/troubleshooting.md:10-37 Lando's mount is broken on Docker Engine 28+ (supported range below 28)",
+        "the parallel work found a Landofile key the recipe ignores and a database version that does not start"
+      ],
+      "options": [
+        {
+          "key": "maintenance",
+          "label": "Maintenance mode: Lando stays detected and documented, fixes only, no new Lando-only content; removal decided later",
+          "why": "Protects projects that keep Lando without growing two parallel surfaces",
+          "recommended": true
+        },
+        {
+          "key": "first-class",
+          "label": "Both runners stay first-class indefinitely",
+          "why": "No pressure on projects, but every new skill example needs both runners"
+        },
+        {
+          "key": "deprecate-next-major",
+          "label": "Deprecate now and remove Lando support at the next major",
+          "why": "Smallest long-term surface; forces every project to migrate on kivo-wise's schedule"
+        }
+      ],
+      "text": "What is Lando's support horizon in kivo-wise once the Compose runner ships?",
+      "area": "migration",
+      "id": "Q-014"
+    },
+    {
+      "type": "decision",
+      "tier": "pivot",
+      "status": "open",
+      "source": "owner",
+      "grounds": [
+        "cloud sessions do not read the user's home configuration; plugins must be declared in repository settings",
+        "the marketplace must be reachable through the session network allowlist"
+      ],
+      "options": [
+        {
+          "key": "repo-settings",
+          "label": "wp-kit-generated projects commit the marketplace and enabled-plugins entries in the repository's agent settings",
+          "why": "Same behaviour locally, in Codespaces and in the cloud; no per-developer setup",
+          "recommended": true
+        },
+        {
+          "key": "opt-in",
+          "label": "Document it; each project opts in by hand",
+          "why": "No change to generated projects, but cloud sessions silently run without the plugin"
+        },
+        {
+          "key": "none",
+          "label": "Out of scope for this change",
+          "why": "Keeps the change small; cloud sessions keep working without kivo-wise context"
+        }
+      ],
+      "text": "How do projects get kivo-wise in cloud agent sessions, which read only repository files and not the user's home configuration?",
+      "area": "cloud",
+      "id": "Q-015"
+    },
+    {
+      "type": "decision",
+      "tier": "high",
+      "status": "open",
+      "source": "owner",
+      "grounds": [
+        "hooks/session-start.mjs:74-86 reads the corpus roots from .docs-brain.json or the flag; the default corpus lives in the user's home",
+        "skills/docs-brain/SKILL.md:12 lists Lando among corpus sources; there is no Docker Compose or devcontainer source today"
+      ],
+      "options": [
+        {
+          "key": "web-fallback",
+          "label": "Report 'corpus unavailable' on the session line and fall back to allowlisted official documentation hosts",
+          "why": "No new infrastructure; the rules line already says web last",
+          "recommended": true
+        },
+        {
+          "key": "fetch-on-start",
+          "label": "Fetch a pinned corpus snapshot from its repository when the session starts",
+          "why": "Same answers everywhere, but needs repository access and network time on every start"
+        },
+        {
+          "key": "vendor-subset",
+          "label": "Commit a corpus subset into each project",
+          "why": "Offline and fast, but duplicates documentation in every repository"
+        }
+      ],
+      "text": "Where does docs-brain get its documentation corpus in cloud sessions and Codespaces, where the local corpus checkout does not exist?",
+      "area": "cloud",
+      "id": "Q-016"
+    },
+    {
+      "type": "decision",
+      "tier": "normal",
+      "status": "open",
+      "source": "owner",
+      "grounds": [
+        "kivo-wisdom sources.yaml:227-243 carries lando-core and lando-setup; no Docker Compose or devcontainer source"
+      ],
+      "options": [
+        {
+          "key": "add-both",
+          "label": "Yes: Docker Compose manual and the devcontainer specification, in a separate kivo-wisdom change",
+          "why": "The Compose skill can cite versioned docs the same way lando-wp cites docs.lando.dev",
+          "recommended": true
+        },
+        {
+          "key": "compose-only",
+          "label": "Only the Docker Compose manual",
+          "why": "Smaller; devcontainer questions go to the web"
+        },
+        {
+          "key": "later",
+          "label": "Not now",
+          "why": "Ship detection first; the skill cites web sources until the corpus catches up"
+        }
+      ],
+      "text": "Should a Docker Compose and devcontainer documentation source be added to the corpus (kivo-wisdom) as part of this work?",
+      "area": "docs-brain",
+      "id": "Q-017"
+    },
+    {
+      "type": "decision",
+      "tier": "high",
+      "status": "open",
+      "source": "owner",
+      "grounds": [
+        "runtime.runner gains a new enum value and runtime gains a new block; runtime.lando stays",
+        "kivo-creator and kivo-rebuild read the detector output (test/creator/stack.test.mjs)"
+      ],
+      "options": [
+        {
+          "key": "minor",
+          "label": "Minor (additive: new enum value and new runtime block, nothing removed)",
+          "why": "Consumers that switch on runner already handle unknown values as none",
+          "recommended": true
+        },
+        {
+          "key": "major",
+          "label": "Major",
+          "why": "Signals the environment change loudly; justified only if Lando defaults change in the same release"
+        }
+      ],
+      "text": "Is the Compose runner support released as a minor or a major version of kivo-wise?",
+      "area": "release",
+      "id": "Q-018"
+    },
+    {
+      "type": "decision",
+      "tier": "normal",
+      "status": "open",
+      "source": "owner",
+      "grounds": [
+        "skills/lando-wp/references/wordpress-recipe.md:23 already says unknown keys under config: such as cache: are ignored, but the detector does not warn about it",
+        "skills/lando-wp/references/wordpress-recipe.md:14 lists mysql:8.4 as a valid database with no caveat"
+      ],
+      "options": [
+        {
+          "key": "same-change",
+          "label": "Same change: detector warnings for both, recipe reference and failure-modes rows corrected",
+          "why": "Small, and projects that keep Lando benefit immediately",
+          "recommended": true
+        },
+        {
+          "key": "separate",
+          "label": "Separate patch release before the Compose work",
+          "why": "Ships the Lando fixes sooner and keeps the Compose PR focused"
+        }
+      ],
+      "text": "Are the Lando recipe gaps found by the parallel work (a cache: key under config: that the recipe ignores; mysql:8.4 failing to start because of expire_logs_days) fixed in this change or a separate one?",
+      "area": "lando",
+      "id": "Q-019"
+    },
+    {
+      "type": "decision",
+      "tier": "normal",
+      "status": "open",
+      "source": "owner",
+      "grounds": [
+        "14 eval expectation files and 3 scaffolds hardcode Lando commands or a .lando.yml",
+        "eval scaffolds copy test/fixtures/projects/* which only carry .lando.yml runners"
+      ],
+      "options": [
+        {
+          "key": "subset",
+          "label": "A representative subset (new Compose skill, roots-debugging, testing-wp, acorn-stack, tailwind-vite-assets) gets a Compose variant; the rest stays on Lando with runner-neutral graders",
+          "why": "Covers every runner-sensitive path without doubling eval cost",
+          "recommended": true
+        },
+        {
+          "key": "all",
+          "label": "Every eval runs on both runners",
+          "why": "Full coverage at roughly twice the eval cost"
+        },
+        {
+          "key": "compose-only",
+          "label": "Move every eval to Compose",
+          "why": "Follows the direction, but leaves Lando untested while it is still supported"
+        }
+      ],
+      "text": "Which evals run against both runners?",
+      "area": "evals",
+      "id": "Q-020"
+    },
+    {
+      "type": "fact",
+      "tier": "high",
+      "status": "open",
+      "source": "discovery",
+      "grounds": [
+        "needed to choose between running bin/ scripts on the host and running the binaries directly inside the container"
+      ],
+      "options": [],
+      "text": "Which environment signals reliably tell the detector it runs inside a devcontainer, a Codespace, or a cloud agent session (variable names and values)?",
+      "area": "cloud",
+      "id": "Q-021"
+    },
+    {
+      "type": "fact",
+      "tier": "high",
+      "status": "open",
+      "source": "discovery",
+      "grounds": [
+        "README.md:21 hooks and the detector need Node.js 20+"
+      ],
+      "options": [],
+      "text": "Is Node.js 20+ available where the hooks run in a cloud agent session (Ubuntu 24.04 VM) and in the wp-kit devcontainer image?",
+      "area": "cloud",
+      "id": "Q-022"
+    },
+    {
+      "type": "fact",
+      "tier": "high",
+      "status": "open",
+      "source": "discovery",
+      "grounds": [
+        "bin/wp must call docker compose exec from the host but wp directly inside the container"
+      ],
+      "options": [],
+      "text": "In VS Code devcontainers and Codespaces, does the agent's shell run inside the app container (no docker CLI) or on a host with Docker, and how do the wp-kit bin/ scripts behave in each case?",
+      "area": "integration",
+      "id": "Q-023"
+    },
+    {
+      "type": "fact",
+      "tier": "high",
+      "status": "open",
+      "source": "discovery",
+      "grounds": [
+        "wp-kit feat/docker-dev-environment has no Compose files yet; the older templates/.devcontainer/docker-compose.yml.hbs uses services app, web, db, redis"
+      ],
+      "options": [],
+      "text": "Which file names and locations does wp-kit generate for the Compose environment (compose file name, .devcontainer layout, service names for PHP, web, database, cache, node, mail) and which bin/ scripts exist?",
+      "area": "integration",
+      "id": "Q-024"
+    },
+    {
+      "type": "fact",
+      "tier": "normal",
+      "status": "open",
+      "source": "discovery",
+      "grounds": [
+        "skills/lando-wp/references/wsl2.md covers the Lando CA; nothing equivalent exists for Compose"
+      ],
+      "options": [],
+      "text": "How does the Compose environment serve HTTPS locally (certificate authority, host names such as *.localhost or a project domain) and how is the CA trusted on WSL2 and Windows browsers?",
+      "area": "compose-skill",
+      "id": "Q-025"
+    },
+    {
+      "type": "fact",
+      "tier": "high",
+      "status": "open",
+      "source": "discovery",
+      "grounds": [
+        "hooks/protect-files.mjs:88 auth.json is denied; Composer auth must come from COMPOSER_AUTH or a proxy-injected secret"
+      ],
+      "options": [],
+      "text": "Which network hosts must a cloud agent session allowlist for a wp-kit project (package registries, plugin marketplace, docs hosts, container registries) and which secrets arrive as proxy-injected network secrets (for example private Composer repositories)?",
+      "area": "cloud",
+      "id": "Q-026"
+    },
+    {
+      "type": "fact",
+      "tier": "normal",
+      "status": "open",
+      "source": "discovery",
+      "grounds": [
+        "parallel work: mysql:8.4 failed to start with the installed recipe because of expire_logs_days"
+      ],
+      "options": [],
+      "text": "Does the Lando mysql service at the installed recipe version write expire_logs_days into its my.cnf, which MySQL 8.4 removed, and what override fixes it?",
+      "area": "lando",
+      "id": "Q-027"
+    }
+  ]
+}

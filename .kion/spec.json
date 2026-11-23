@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "path": "docs/specs/2026-11-22-kivo-wise-compose-runner-design.md",
+  "items": [
+    {
+      "status": "draft",
+      "decisions": [],
+      "out_of_scope": [],
+      "review": [],
+      "reopened": [],
+      "title": "Overview",
+      "id": "S-1"
+    },
+    {
+      "status": "draft",
+      "decisions": [],
+      "out_of_scope": [],
+      "review": [],
+      "reopened": [],
+      "title": "Detection",
+      "id": "S-2"
+    },
+    {
+      "status": "draft",
+      "decisions": [],
+      "out_of_scope": [],
+      "review": [],
+      "reopened": [],
+      "title": "Runner map",
+      "id": "S-3"
+    },
+    {
+      "status": "draft",
+      "decisions": [],
+      "out_of_scope": [],
+      "review": [],
+      "reopened": [],
+      "title": "Skills affected",
+      "id": "S-4"
+    },
+    {
+      "status": "draft",
+      "decisions": [],
+      "out_of_scope": [],
+      "review": [],
+      "reopened": [],
+      "title": "New Compose skill",
+      "id": "S-5"
+    },
+    {
+      "status": "draft",
+      "decisions": [],
+      "out_of_scope": [],
+      "review": [],
+      "reopened": [],
+      "title": "Cloud sessions and Codespaces",
+      "id": "S-6"
+    },
+    {
+      "status": "draft",
+      "decisions": [],
+      "out_of_scope": [],
+      "review": [],
+      "reopened": [],
+      "title": "Tests and evals",
+      "id": "S-7"
+    },
+    {
+      "status": "draft",
+      "decisions": [],
+      "out_of_scope": [],
+      "review": [],
+      "reopened": [],
+      "title": "Migration",
+      "id": "S-8"
+    }
+  ]
+}

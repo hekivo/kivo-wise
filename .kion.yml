@@ -1,0 +1,24 @@
+# kivo-kion project configuration
+project:
+  slug: kivo-wise-compose-runner
+  language:
+    records: en-US
+    chat: pt-BR
+stack: generic
+paths:
+  specs: docs/specs
+  plans: docs/plans
+  decisions_log: docs/specs/decisions.md
+ids:
+  rule_prefix: BR
+judgments:
+  provider: none
+legacy:
+  path: null
+names:
+  prefixes: [kivo-wise]
+scanner:
+  allowed_emails: []
+  own_names: []
+preflight:
+  commands: {}
