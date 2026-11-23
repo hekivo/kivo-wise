@@ -12,6 +12,7 @@ Skills are folders under `skills/<name>/` with a `SKILL.md`. Claude loads one wh
 | `roots-debugging` | Triage of a broken page, Acorn boot, Blade, ACF, Livewire or asset problem |
 | `roots-reviewing` | A convention audit of a diff with a fixed report |
 | `lando-wp` | Lando command semantics: `lando wp`, rebuild, env files, WSL2 issues |
+| `compose-wp` | Docker Compose `bin/` scripts: `bin/wp`, up vs restart vs rebuild, TLS on `*.localhost`, devcontainers and cloud agent sessions |
 | `docs-brain` | Looking up official documentation in a versioned corpus |
 | `acorn-stack` | Providers, composers, Blade components, config, boot per profile |
 | `acorn-scaffolding` | New blocks, post types, field groups, providers, commands |

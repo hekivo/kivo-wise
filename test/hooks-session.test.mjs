@@ -112,7 +112,7 @@ test('the sage-compose context length is pinned under MAX_CONTEXT_CHARS (AC-02-1
     KIVO_WISE_NO_CACHE: '1', KIVO_WISE_DETECTOR: join(FIXTURES, 'detector-sage-compose.mjs'),
   });
   assert.equal(text, golden.hookSpecificOutput.additionalContext);
-  assert.equal(text.length, 1073, 'a wording change in the Compose context is a visible diff');
+  assert.equal(text.length, 1085, 'a wording change in the Compose context is a visible diff');
   assert.ok(text.length <= 1500);
   const runnerLine = text.split('\n').find((l) => l.startsWith('runner: '));
   assert.equal(runnerLine, 'runner: compose · wp=bin/wp · acorn=bin/wp acorn · composer=bin/composer · node=bin/npm · test=bin/test · lint=bin/mago · cache=bin/flush · logs=bin/logs');

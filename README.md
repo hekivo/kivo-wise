@@ -59,6 +59,7 @@ Other assistants are covered in [Cursor, Codex and Copilot](#cursor-codex-and-co
 | `roots-debugging` | Triage a broken page, boot error or stale cache |
 | `roots-reviewing` | Convention audit of a diff before the merge request |
 | `lando-wp` | Lando command semantics and common failures |
+| `compose-wp` | Docker Compose `bin/` commands, lifecycle and common failures |
 | `docs-brain` | Look up official docs in a versioned corpus |
 | `acorn-stack` | Providers, composers, Blade, config and boot per profile |
 | `acorn-scaffolding` | New blocks, post types, field groups, providers, commands |

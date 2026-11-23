@@ -36,6 +36,9 @@
     {"id": "lando-1", "expected": "lando-wp", "profile": "sage-theme", "text": "I changed the php version in .lando.yml. Do I need lando restart or lando rebuild?"},
     {"id": "lando-2", "expected": "lando-wp", "profile": null, "text": "mysite.lndo.site doesn't resolve on WSL2 and Chrome says the certificate is untrusted."},
     {"id": "lando-3", "expected": "lando-wp", "profile": "acorn-mu-plugin", "text": "Import this production dump into my local Lando database and turn on Xdebug so I can step through the save flow."},
+    {"id": "compose-1", "expected": "compose-wp", "profile": "sage-theme", "text": "I added an environment variable to compose.yaml for the app service. Do I need docker compose restart, up -d or a rebuild before bin/wp sees it?"},
+    {"id": "compose-2", "expected": "compose-wp", "profile": "acorn-mu-plugin", "text": "Chrome on Windows says the certificate for https://acme.localhost is not trusted. The project runs with docker compose inside WSL2."},
+    {"id": "compose-3", "expected": "compose-wp", "profile": "radicle-app", "text": "In the editor devcontainer, bin/wp fails with 'docker: command not found'. It worked yesterday on my laptop."},
 
     {"id": "dbg-1", "expected": "roots-debugging", "profile": "acorn-mu-plugin", "text": "Since yesterday's deploy, Livewire forms on staging throw 419 and a RangeError in the console. Locally everything works."},
     {"id": "dbg-2", "expected": "roots-debugging", "profile": "sage-theme", "text": "I edited a Blade partial and pushed it but production still shows the old markup. Is it OPcache, compiled views or Cloudflare?"},

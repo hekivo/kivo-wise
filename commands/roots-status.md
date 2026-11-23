@@ -12,7 +12,7 @@ Reports what the plugin detected about this project: layout, profile, app path, 
    `node scripts/detect-roots-project.mjs --format=text`
    Add `--path=$ARGUMENTS` when the user passed a project path.
 2. If more detail is needed (full runner table, services, misplaced env file), run the same script with the default `--format=json` and read `apps`, `active`, `runtime` and `warnings`.
-3. Run the runner's health command only if the runner is `lando` or `ddev`: the project's status/info command (Lando: `lando info`), trimmed to service name and status.
+3. Run the runner's health command only if the runner is `lando`, `compose` or `ddev`, trimmed to service name and status: Lando `lando info`; Compose `docker compose ps` from the project root (columns service and status, including the health state); DDEV: its status command.
 
 ## Output format (at most 20 lines)
 
@@ -25,7 +25,7 @@ Flag file: <.roots-stack.json contents or "none">
 WordPress <x> | PHP <x> | Acorn <x> | ACF Composer / Livewire / Poet <x or "absent">
 
 ### Runner
-<lando | ddev | none>: wp=<cmd> acorn=<cmd> composer=<cmd> node=<cmd> test=<cmd> cache=<cmd>
+<lando | compose | ddev | none>: wp=<cmd> acorn=<cmd> composer=<cmd> node=<cmd> test=<cmd> cache=<cmd>
 Services: <name: up/down>
 
 ### Warnings

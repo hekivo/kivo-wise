@@ -28,12 +28,13 @@ For installation and setup, see the [README](../../README.md).
 | Review a diff before the merge request | `roots-reviewing` |
 | Look up official documentation | `docs-brain` |
 | Run a command in Lando | `lando-wp` |
+| Run a command through the Compose `bin/` scripts | `compose-wp` |
 
 ## Reference
 
 | Page | What it covers |
 |---|---|
-| [skills.md](skills.md) | The 22 skills and the third-party skills |
+| [skills.md](skills.md) | The 23 skills and the third-party skills |
 | [agents.md](agents.md) | The four read-only agents |
 | [commands.md](commands.md) | `/roots-detect` and `/roots-status` |
 | [hooks.md](hooks.md) | What each hook does and how to debug it |
