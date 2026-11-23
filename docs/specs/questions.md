@@ -23,11 +23,12 @@
 - **Q-011** [decision · answered · D-011] How is the Lando skill handled now that a Compose environment skill is needed?
 - **Q-016** [decision · answered · D-016] Where does docs-brain get its documentation corpus in cloud sessions and Codespaces, where the local corpus checkout does not exist?
 - **Q-018** [decision · answered · D-018] Is the Compose runner support released as a minor or a major version of kivo-wise?
-- **Q-021** [fact · open] Which environment signals reliably tell the detector it runs inside a devcontainer, a Codespace, or a cloud agent session (variable names and values)?
-- **Q-022** [fact · open] Is Node.js 20+ available where the hooks run in a cloud agent session (Ubuntu 24.04 VM) and in the wp-kit devcontainer image?
-- **Q-023** [fact · open] In VS Code devcontainers and Codespaces, does the agent's shell run inside the app container (no docker CLI) or on a host with Docker, and how do the wp-kit bin/ scripts behave in each case?
-- **Q-024** [fact · open] Which file names and locations does wp-kit generate for the Compose environment (compose file name, .devcontainer layout, service names for PHP, web, database, cache, node, mail) and which bin/ scripts exist?
-- **Q-026** [fact · open] Which network hosts must a cloud agent session allowlist for a wp-kit project (package registries, plugin marketplace, docs hosts, container registries) and which secrets arrive as proxy-injected network secrets (for example private Composer repositories)?
+- **Q-021** [fact · answered] Which environment signals reliably tell the detector it runs inside a devcontainer, a Codespace, or a cloud agent session (variable names and values)?
+- **Q-022** [fact · answered] Is Node.js 20+ available where the hooks run in a cloud agent session (Ubuntu 24.04 VM) and in the wp-kit devcontainer image?
+- **Q-023** [fact · answered] In VS Code devcontainers and Codespaces, does the agent's shell run inside the app container (no docker CLI) or on a host with Docker, and how do the wp-kit bin/ scripts behave in each case?
+- **Q-024** [fact · answered] Which file names and locations does wp-kit generate for the Compose environment (compose file name, .devcontainer layout, service names for PHP, web, database, cache, node, mail) and which bin/ scripts exist?
+- **Q-026** [fact · answered] Which network hosts must a cloud agent session allowlist for a wp-kit project (package registries, plugin marketplace, docs hosts, container registries) and which secrets arrive as proxy-injected network secrets (for example private Composer repositories)?
+- **Q-028** [decision · open] Hosted cloud sessions do not add marketplaces declared in repository settings (survey Q-026), so D-015 alone does not bring kivo-wise into them, and the pinned skill copy of wp-kit D-019 carries skills but not the kivo-wise hooks (session context, protect-files). How do cloud sessions get the kivo-wise hooks?
 
 ## Normal
 
@@ -35,5 +36,5 @@
 - **Q-017** [decision · answered · D-017] Should a Docker Compose and devcontainer documentation source be added to the corpus (kivo-wisdom) as part of this work?
 - **Q-019** [decision · answered · D-019] Are the Lando recipe gaps found by the parallel work (a cache: key under config: that the recipe ignores; mysql:8.4 failing to start because of expire_logs_days) fixed in this change or a separate one?
 - **Q-020** [decision · answered · D-020] Which evals run against both runners?
-- **Q-025** [fact · open] How does the Compose environment serve HTTPS locally (certificate authority, host names such as *.localhost or a project domain) and how is the CA trusted on WSL2 and Windows browsers?
-- **Q-027** [fact · open] Does the Lando mysql service at the installed recipe version write expire_logs_days into its my.cnf, which MySQL 8.4 removed, and what override fixes it?
+- **Q-025** [fact · answered] How does the Compose environment serve HTTPS locally (certificate authority, host names such as *.localhost or a project domain) and how is the CA trusted on WSL2 and Windows browsers?
+- **Q-027** [fact · answered] Does the Lando mysql service at the installed recipe version write expire_logs_days into its my.cnf, which MySQL 8.4 removed, and what override fixes it?

@@ -561,7 +561,7 @@
     {
       "type": "fact",
       "tier": "high",
-      "status": "open",
+      "status": "answered",
       "source": "discovery",
       "grounds": [
         "needed to choose between running bin/ scripts on the host and running the binaries directly inside the container"
@@ -569,12 +569,18 @@
       "options": [],
       "text": "Which environment signals reliably tell the detector it runs inside a devcontainer, a Codespace, or a cloud agent session (variable names and values)?",
       "area": "cloud",
-      "id": "Q-021"
+      "id": "Q-021",
+      "survey": {
+        "reads": "cloud environments and hooks docs; GitHub Codespaces default environment variables; Dev Containers conventions",
+        "where": "public documentation + local corpus claude-code/current/docs/en/hooks.md:429 | evidence: https://code.claude.com/docs/en/cloud-environments (CLAUDE_CODE_REMOTE check in the SessionStart install example); https://docs.github.com/en/codespaces/developing-in-a-codespace/default-environment-variables-for-your-codespace; corpus claude-code hooks.md:429",
+        "production": false,
+        "result": "Cloud agent session: CLAUDE_CODE_REMOTE=true (documented: set in remote web environments, never set locally; CLAUDE_CODE_REMOTE_SESSION_ID also present). Codespaces: CODESPACES=true (documented 'always true while in a codespace'), plus CODESPACE_NAME and GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN. Editor devcontainer: REMOTE_CONTAINERS=true is set by one editor's Dev Containers extension only and is undocumented; other editors do not set it. /.dockerenv marks any Docker container but not which one. No reliable documented generic devcontainer signal exists, so the wp-kit devcontainer.json should set an explicit containerEnv marker (contract item). Status: documented; cloud probe pending (dev/probes/environment-probe.sh) (values must be confirmed in a live cloud session and a Codespace)."
+      }
     },
     {
       "type": "fact",
       "tier": "high",
-      "status": "open",
+      "status": "answered",
       "source": "discovery",
       "grounds": [
         "README.md:21 hooks and the detector need Node.js 20+"
@@ -582,12 +588,18 @@
       "options": [],
       "text": "Is Node.js 20+ available where the hooks run in a cloud agent session (Ubuntu 24.04 VM) and in the wp-kit devcontainer image?",
       "area": "cloud",
-      "id": "Q-022"
+      "id": "Q-022",
+      "survey": {
+        "reads": "cloud environments doc (installed tools); devcontainers base image and node feature READMEs; wp-kit D-022",
+        "where": "public documentation | evidence: https://code.claude.com/docs/en/cloud-environments#installed-tools; https://github.com/devcontainers/images/blob/main/src/base-ubuntu/README.md; https://github.com/devcontainers/features/blob/main/src/node/README.md; wt-wp-kit .kion/decisions.json D-022",
+        "production": false,
+        "result": "Cloud VM: Node.js 20, 21 and 22 at /opt/node20..22, 22 on PATH by default (documented), so hooks (Node 20+) run. wp-kit devcontainer (D-022: devcontainers base image + docker-in-docker feature): mcr.microsoft.com/devcontainers/base:ubuntu24.04 ships no Node.js; Node comes only from the feature ghcr.io/devcontainers/features/node (default version lts). The wp-kit devcontainer must add the node feature for kivo-wise hooks to run in Codespaces and editor devcontainers. Status: documented; cloud probe pending (dev/probes/environment-probe.sh)."
+      }
     },
     {
       "type": "fact",
       "tier": "high",
-      "status": "open",
+      "status": "answered",
       "source": "discovery",
       "grounds": [
         "bin/wp must call docker compose exec from the host but wp directly inside the container"
@@ -595,12 +607,18 @@
       "options": [],
       "text": "In VS Code devcontainers and Codespaces, does the agent's shell run inside the app container (no docker CLI) or on a host with Docker, and how do the wp-kit bin/ scripts behave in each case?",
       "area": "integration",
-      "id": "Q-023"
+      "id": "Q-023",
+      "survey": {
+        "reads": "wp-kit decisions D-022 and spec sections 3 and 4",
+        "where": "wp-kit worktree docs/specs/2026-11-22-wp-kit-docker-design.md:159-172,211-217 | evidence: wt-wp-kit .kion/decisions.json D-022; wt-wp-kit docs/specs/2026-11-22-wp-kit-docker-design.md:159-172",
+        "production": false,
+        "result": "Decided in wp-kit D-022: the editor and Codespaces attach to a workspace container (devcontainers base image + docker-in-docker) that runs the same root compose.yaml, so the agent shell is NOT inside the app container and has the docker CLI. bin/* always run docker compose exec (with -T when stdin is not a TTY) and never run tools on the host (wp-kit spec 3, Proposal there). In a cloud session the shell runs on the VM with Docker. So in all three places runners stay bin/...; the only in-container case left is a developer who attaches to the app container by hand or a legacy wp-kit devcontainer (attach-to-app, .devcontainer/docker-compose.yml), where docker is absent."
+      }
     },
     {
       "type": "fact",
       "tier": "high",
-      "status": "open",
+      "status": "answered",
       "source": "discovery",
       "grounds": [
         "wp-kit feat/docker-dev-environment has no Compose files yet; the older templates/.devcontainer/docker-compose.yml.hbs uses services app, web, db, redis"
@@ -608,12 +626,18 @@
       "options": [],
       "text": "Which file names and locations does wp-kit generate for the Compose environment (compose file name, .devcontainer layout, service names for PHP, web, database, cache, node, mail) and which bin/ scripts exist?",
       "area": "integration",
-      "id": "Q-024"
+      "id": "Q-024",
+      "survey": {
+        "reads": "wp-kit spec sections 2-4 and decisions D-004, D-009, D-011, D-013, D-019, D-022",
+        "where": "wt-wp-kit docs/specs/2026-11-22-wp-kit-docker-design.md:74-87,107-121,159-172,211-217 | evidence: wt-wp-kit docs/specs/2026-11-22-wp-kit-docker-design.md:74-87; wt-wp-kit docs/specs/2026-11-22-wp-kit-docker-design.md:159-172; wt-wp-kit .kion/decisions.json D-004 D-009 D-022",
+        "production": false,
+        "result": "One root compose.yaml (D-009); .devcontainer/devcontainer.json only points at it (no Compose file under .devcontainer/). Services: app (PHP-FPM + nginx in one serversideup image, WP-CLI, Composer), db (mysql:8.4), cache (valkey), proxy (caddy), node, mail (mailpit). Personal override compose.override.yaml, gitignored. bin/ (all source bin/_lib.sh and call docker compose exec): setup, up, down, info, logs, shell, wp, php, composer, npm, node, dev, build, flush, reset-deps, db, db-import, db-export, seed, test, stan, mago, e2e, xdebug, trust-cert; modules add more (theme-lint). The environment is named kivo-wp (owner note on wp-kit D-004). The script set and the exact contract marker are still Proposal in wp-kit; the service names are Requirement there."
+      }
     },
     {
       "type": "fact",
       "tier": "normal",
-      "status": "open",
+      "status": "answered",
       "source": "discovery",
       "grounds": [
         "skills/lando-wp/references/wsl2.md covers the Lando CA; nothing equivalent exists for Compose"
@@ -621,12 +645,18 @@
       "options": [],
       "text": "How does the Compose environment serve HTTPS locally (certificate authority, host names such as *.localhost or a project domain) and how is the CA trusted on WSL2 and Windows browsers?",
       "area": "compose-skill",
-      "id": "Q-025"
+      "id": "Q-025",
+      "survey": {
+        "reads": "wp-kit D-012, D-013 and spec Networking; kivo-wise lando-wp wsl2.md",
+        "where": "wt-wp-kit docs/specs/2026-11-22-wp-kit-docker-design.md:107-121; skills/lando-wp/references/wsl2.md | evidence: wt-wp-kit .kion/decisions.json D-012 D-013; wt-wp-kit docs/specs/2026-11-22-wp-kit-docker-design.md:107-121,219-229; skills/lando-wp/references/wsl2.md (Certificates)",
+        "production": false,
+        "result": "HTTPS through the per-project Caddy proxy with 'tls internal' (D-012) on https://<project>.localhost, vite.<project>.localhost and mail.<project>.localhost; host ports from .env (HTTPS_PORT default 443) and bin/setup picks a free port when 443 is busy (D-013). *.localhost resolves to loopback without a hosts entry. bin/trust-cert exports Caddy's root CA (kept in the caddy-data volume) and prints the per-OS trust command; on WSL2 the Windows browsers need the CA imported into the Windows Root store (certutil -addstore -f ROOT <file> from an elevated prompt, reading the file through \\\\wsl.localhost\\<distro>\\...), Firefox needs security.enterprise_roots.enabled; WSL localhost forwarding makes https://<project>.localhost:<port> reachable from Windows. In Codespaces TLS is terminated by the forwarded URL (*.app.github.dev), not Caddy."
+      }
     },
     {
       "type": "fact",
       "tier": "high",
-      "status": "open",
+      "status": "answered",
       "source": "discovery",
       "grounds": [
         "hooks/protect-files.mjs:88 auth.json is denied; Composer auth must come from COMPOSER_AUTH or a proxy-injected secret"
@@ -634,12 +664,18 @@
       "options": [],
       "text": "Which network hosts must a cloud agent session allowlist for a wp-kit project (package registries, plugin marketplace, docs hosts, container registries) and which secrets arrive as proxy-injected network secrets (for example private Composer repositories)?",
       "area": "cloud",
-      "id": "Q-026"
+      "id": "Q-026",
+      "survey": {
+        "reads": "cloud environments doc: default allowed domains, network secrets, what is available; wp-kit spec 4 allowlist and D-014",
+        "where": "public documentation; wt-wp-kit spec section 4 | evidence: https://code.claude.com/docs/en/cloud-environments#default-allowed-domains; https://code.claude.com/docs/en/cloud-environments#add-network-secrets; https://code.claude.com/docs/en/cloud-environments (What's available in cloud sessions table); wt-wp-kit .kion/decisions.json D-014 D-019",
+        "production": false,
+        "result": "Default allowlist (Limited + Allow package managers) already covers github.com, raw/objects.githubusercontent.com, registry-1.docker.io, auth.docker.io, production.cloudflare.docker.com, ghcr.io, mcr.microsoft.com, packagist.org, repo.packagist.org, registry.npmjs.org, Ubuntu archives, nodejs.org. Not on it and needed by a wp-kit project: wpackagist.org, api.wordpress.org, downloads.wordpress.org, connect.advancedcustomfields.com (ACF Pro), pkg-containers.githubusercontent.com (ghcr blob downloads), plus docs hosts for the corpus fallback (developer.wordpress.org, roots.io, docs.docker.com, containers.dev). Network secrets: the agent proxy attaches the secret to requests for the listed hosts after they leave the VM; it never enters the VM; never attached to GitHub, the Anthropic API or public registries (registry.npmjs.org etc.). ACF Pro Composer access is the one secret (wp-kit D-014: network secret for connect.advancedcustomfields.com; Username and password type). Environment variables are readable by every user: no secret there. Marketplaces declared in a repository's settings (extraKnownMarketplaces) are NOT added in Anthropic-hosted cloud sessions; committed .claude/skills|agents|commands, hooks in .claude/settings.json and .mcp.json are. Status: documented; cloud probe pending (dev/probes/environment-probe.sh) for the non-default hosts and the Composer basic-auth behaviour through the proxy."
+      }
     },
     {
       "type": "fact",
       "tier": "normal",
-      "status": "open",
+      "status": "answered",
       "source": "discovery",
       "grounds": [
         "parallel work: mysql:8.4 failed to start with the installed recipe because of expire_logs_days"
@@ -647,7 +683,46 @@
       "options": [],
       "text": "Does the Lando mysql service at the installed recipe version write expire_logs_days into its my.cnf, which MySQL 8.4 removed, and what override fixes it?",
       "area": "lando",
-      "id": "Q-027"
+      "id": "Q-027",
+      "survey": {
+        "reads": "installed Lando wordpress recipe config files and the upstream recipe corpus",
+        "where": "~/.lando/config/wordpress/mysql8.cnf; corpus lando-wordpress/main/_source/examples/wordpress-mysql84/README.md.md; builders/wordpress.js.md:81-95 | evidence: ~/.lando/config/wordpress/mysql8.cnf:51; corpus lando-wordpress/main/_source/examples/wordpress-mysql84/README.md.md:79-81; corpus lando-wordpress/main/_source/builders/wordpress.js.md:81-95",
+        "production": false,
+        "result": "Yes. With Lando v3.26.9 the wordpress recipe's default database config ~/.lando/config/wordpress/mysql8.cnf (marker LANDOWORDPRESSMYSQL8CNF, used for every mysql:8.x) sets 'expire_logs_days = 10' at line 51; MySQL 8.4 removed that variable, so mysqld aborts on the unknown option and the database service never becomes healthy. Upstream lando/wordpress main (6d07797, 2026-10-15) fixed it: its wordpress-mysql84 example asserts binlog_expire_logs_seconds=864000 instead of the removed expire_logs_days, and the mysql:8 alias resolves to 8.4 there. Fixes: (a) database: mysql:8.0; (b) config.config.database pointing at a project file — the builder uses it INSTEAD of the default (getServiceConfig only falls back to defaultFiles when the key is absent), so it must be a full copy of mysql8.cnf with expire_logs_days replaced by binlog_expire_logs_seconds = 864000; (c) a Lando release that bundles the fixed recipe."
+      }
+    },
+    {
+      "type": "decision",
+      "tier": "high",
+      "status": "open",
+      "source": "discovery",
+      "grounds": [
+        "survey Q-026: cloud-environments doc, What is available in cloud sessions: marketplaces in .claude/settings.json are not added; committed .claude/skills, settings hooks and .mcp.json are",
+        "D-015 repo-settings",
+        "wp-kit D-019 vendor-pinned-sync (skills only)",
+        "hooks/hooks.json registers SessionStart, PreToolUse, PostToolUse, UserPromptSubmit from the plugin root"
+      ],
+      "options": [
+        {
+          "key": "vendor-hooks",
+          "label": "wp-kit skill sync also copies the kivo-wise hook scripts and detector into the repository and registers them in the committed settings file",
+          "why": "Same context and guards in cloud sessions as locally; one more synced folder to keep pinned",
+          "recommended": true
+        },
+        {
+          "key": "skills-only",
+          "label": "Cloud sessions run with the vendored skills only; skills fall back to roots-triage for runner facts",
+          "why": "No extra files, but no session context and no protect-files guard in cloud sessions"
+        },
+        {
+          "key": "managed-settings",
+          "label": "Enable the plugin through organization server-managed settings, which cloud sessions fetch",
+          "why": "No repository files and applies to every repository of the organization; needs an organization admin, and whether cloud sessions add a marketplace declared there is not verified"
+        }
+      ],
+      "text": "Hosted cloud sessions do not add marketplaces declared in repository settings (survey Q-026), so D-015 alone does not bring kivo-wise into them, and the pinned skill copy of wp-kit D-019 carries skills but not the kivo-wise hooks (session context, protect-files). How do cloud sessions get the kivo-wise hooks?",
+      "area": "cloud",
+      "id": "Q-028"
     }
   ]
 }
