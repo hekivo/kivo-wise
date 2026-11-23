@@ -4,7 +4,7 @@
     {
       "type": "decision",
       "tier": "pivot",
-      "status": "open",
+      "status": "answered",
       "source": "catalog:delivery-model",
       "grounds": [],
       "options": [
@@ -23,12 +23,13 @@
       ],
       "text": "How do changes reach the main line: straight to trunk, short-lived branches, or pull requests with review? Who merges?",
       "area": "process",
-      "id": "Q-001"
+      "id": "Q-001",
+      "decision": "D-001"
     },
     {
       "type": "decision",
       "tier": "pivot",
-      "status": "open",
+      "status": "answered",
       "source": "catalog:data-strategy",
       "grounds": [],
       "options": [
@@ -43,12 +44,13 @@
       ],
       "text": "Does the new system start from a copy of production data, or from a clean database filled by a staged importer that reads the legacy?",
       "area": "data",
-      "id": "Q-002"
+      "id": "Q-002",
+      "decision": "D-002"
     },
     {
       "type": "decision",
       "tier": "pivot",
-      "status": "open",
+      "status": "answered",
       "source": "catalog:id-preservation",
       "grounds": [],
       "options": [
@@ -63,12 +65,13 @@
       ],
       "text": "Must record ids (orders, customers, products) be preserved from the legacy, or can integrations adapt to new ids?",
       "area": "data",
-      "id": "Q-003"
+      "id": "Q-003",
+      "decision": "D-003"
     },
     {
       "type": "decision",
       "tier": "pivot",
-      "status": "open",
+      "status": "answered",
       "source": "catalog:environments",
       "grounds": [],
       "options": [
@@ -87,12 +90,13 @@
       ],
       "text": "Which environments exist (local, staging, production), and where do tests and content entry happen?",
       "area": "infra",
-      "id": "Q-004"
+      "id": "Q-004",
+      "decision": "D-004"
     },
     {
       "type": "decision",
       "tier": "pivot",
-      "status": "open",
+      "status": "answered",
       "source": "catalog:integration-contracts",
       "grounds": [],
       "options": [
@@ -107,12 +111,13 @@
       ],
       "text": "For each external integration, do we propose the correct contract and ask the other side to adapt, or replicate the legacy behaviour?",
       "area": "integrations",
-      "id": "Q-005"
+      "id": "Q-005",
+      "decision": "D-005"
     },
     {
       "type": "decision",
       "tier": "pivot",
-      "status": "open",
+      "status": "answered",
       "source": "catalog:secrets-and-production",
       "grounds": [],
       "options": [
@@ -127,12 +132,13 @@
       ],
       "text": "What is the policy for secrets and production access: no hardcoded secrets, secret-manager references only, production reads authorized one by one?",
       "area": "security",
-      "id": "Q-006"
+      "id": "Q-006",
+      "decision": "D-006"
     },
     {
       "type": "decision",
       "tier": "pivot",
-      "status": "open",
+      "status": "answered",
       "source": "catalog:external-workers",
       "grounds": [],
       "options": [
@@ -147,12 +153,13 @@
       ],
       "text": "May external workers or third-party services (other AI providers, judgment services) receive project code or data?",
       "area": "process",
-      "id": "Q-007"
+      "id": "Q-007",
+      "decision": "D-007"
     },
     {
       "type": "decision",
       "tier": "high",
-      "status": "open",
+      "status": "answered",
       "source": "owner",
       "grounds": [
         "scripts/detect-roots-project.mjs:768-776 runner is lando|ddev|none",
@@ -179,12 +186,13 @@
       ],
       "text": "Which runner id does the detector publish for the native Docker Compose environment with bin/ scripts (runtime.runner and the .roots-stack.json runner key)?",
       "area": "detector",
-      "id": "Q-008"
+      "id": "Q-008",
+      "decision": "D-008"
     },
     {
       "type": "decision",
       "tier": "high",
-      "status": "open",
+      "status": "answered",
       "source": "owner",
       "grounds": [
         "scripts/detect-roots-project.mjs:770 Lando is checked first and wins over DDEV",
@@ -210,12 +218,13 @@
       ],
       "text": "When a project has both a Landofile and a Compose environment (migration period), which runner wins when .roots-stack.json does not say?",
       "area": "detector",
-      "id": "Q-009"
+      "id": "Q-009",
+      "decision": "D-009"
     },
     {
       "type": "decision",
       "tier": "high",
-      "status": "open",
+      "status": "answered",
       "source": "owner",
       "grounds": [
         "scripts/detect-roots-project.mjs:775 flag.runner differs -> warning only",
@@ -236,12 +245,13 @@
       ],
       "text": "Should the runner key in .roots-stack.json become an override that wins over detection (today it only produces a drift warning)?",
       "area": "detector",
-      "id": "Q-010"
+      "id": "Q-010",
+      "decision": "D-010"
     },
     {
       "type": "decision",
       "tier": "high",
-      "status": "open",
+      "status": "answered",
       "source": "owner",
       "grounds": [
         "skills/lando-wp (110-line SKILL.md + 5 references, 404 lines) is Lando-specific end to end",
@@ -268,12 +278,13 @@
       ],
       "text": "How is the Lando skill handled now that a Compose environment skill is needed?",
       "area": "skills",
-      "id": "Q-011"
+      "id": "Q-011",
+      "decision": "D-011"
     },
     {
       "type": "decision",
       "tier": "pivot",
-      "status": "open",
+      "status": "answered",
       "source": "owner",
       "grounds": [
         "wp-kit generates the Compose environment (parallel effort, not merged yet)",
@@ -299,12 +310,13 @@
       ],
       "text": "Who owns the contract of the bin/ scripts (names, service names, behaviour inside the container), and how does kivo-wise read it?",
       "area": "integration",
-      "id": "Q-012"
+      "id": "Q-012",
+      "decision": "D-012"
     },
     {
       "type": "decision",
       "tier": "normal",
-      "status": "open",
+      "status": "answered",
       "source": "owner",
       "grounds": [
         "hooks/session-start.mjs:63-72 prints the runner commands verbatim and commandsLine tells the agent to copy them exactly",
@@ -330,12 +342,13 @@
       ],
       "text": "Which form do the runner commands take on the session runner line for the Compose runner?",
       "area": "hooks",
-      "id": "Q-013"
+      "id": "Q-013",
+      "decision": "D-013"
     },
     {
       "type": "decision",
       "tier": "pivot",
-      "status": "open",
+      "status": "answered",
       "source": "owner",
       "grounds": [
         "docs/guide/troubleshooting.md:10-37 Lando's mount is broken on Docker Engine 28+ (supported range below 28)",
@@ -361,12 +374,13 @@
       ],
       "text": "What is Lando's support horizon in kivo-wise once the Compose runner ships?",
       "area": "migration",
-      "id": "Q-014"
+      "id": "Q-014",
+      "decision": "D-014"
     },
     {
       "type": "decision",
       "tier": "pivot",
-      "status": "open",
+      "status": "answered",
       "source": "owner",
       "grounds": [
         "cloud sessions do not read the user's home configuration; plugins must be declared in repository settings",
@@ -392,12 +406,13 @@
       ],
       "text": "How do projects get kivo-wise in cloud agent sessions, which read only repository files and not the user's home configuration?",
       "area": "cloud",
-      "id": "Q-015"
+      "id": "Q-015",
+      "decision": "D-015"
     },
     {
       "type": "decision",
       "tier": "high",
-      "status": "open",
+      "status": "answered",
       "source": "owner",
       "grounds": [
         "hooks/session-start.mjs:74-86 reads the corpus roots from .docs-brain.json or the flag; the default corpus lives in the user's home",
@@ -423,12 +438,13 @@
       ],
       "text": "Where does docs-brain get its documentation corpus in cloud sessions and Codespaces, where the local corpus checkout does not exist?",
       "area": "cloud",
-      "id": "Q-016"
+      "id": "Q-016",
+      "decision": "D-016"
     },
     {
       "type": "decision",
       "tier": "normal",
-      "status": "open",
+      "status": "answered",
       "source": "owner",
       "grounds": [
         "kivo-wisdom sources.yaml:227-243 carries lando-core and lando-setup; no Docker Compose or devcontainer source"
@@ -453,12 +469,13 @@
       ],
       "text": "Should a Docker Compose and devcontainer documentation source be added to the corpus (kivo-wisdom) as part of this work?",
       "area": "docs-brain",
-      "id": "Q-017"
+      "id": "Q-017",
+      "decision": "D-017"
     },
     {
       "type": "decision",
       "tier": "high",
-      "status": "open",
+      "status": "answered",
       "source": "owner",
       "grounds": [
         "runtime.runner gains a new enum value and runtime gains a new block; runtime.lando stays",
@@ -479,12 +496,13 @@
       ],
       "text": "Is the Compose runner support released as a minor or a major version of kivo-wise?",
       "area": "release",
-      "id": "Q-018"
+      "id": "Q-018",
+      "decision": "D-018"
     },
     {
       "type": "decision",
       "tier": "normal",
-      "status": "open",
+      "status": "answered",
       "source": "owner",
       "grounds": [
         "skills/lando-wp/references/wordpress-recipe.md:23 already says unknown keys under config: such as cache: are ignored, but the detector does not warn about it",
@@ -505,12 +523,13 @@
       ],
       "text": "Are the Lando recipe gaps found by the parallel work (a cache: key under config: that the recipe ignores; mysql:8.4 failing to start because of expire_logs_days) fixed in this change or a separate one?",
       "area": "lando",
-      "id": "Q-019"
+      "id": "Q-019",
+      "decision": "D-019"
     },
     {
       "type": "decision",
       "tier": "normal",
-      "status": "open",
+      "status": "answered",
       "source": "owner",
       "grounds": [
         "14 eval expectation files and 3 scaffolds hardcode Lando commands or a .lando.yml",
@@ -536,7 +555,8 @@
       ],
       "text": "Which evals run against both runners?",
       "area": "evals",
-      "id": "Q-020"
+      "id": "Q-020",
+      "decision": "D-020"
     },
     {
       "type": "fact",

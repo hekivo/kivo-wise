@@ -4,25 +4,25 @@
 
 ## Pivot
 
-- **Q-001** [decision · open] How do changes reach the main line: straight to trunk, short-lived branches, or pull requests with review? Who merges?
-- **Q-002** [decision · open] Does the new system start from a copy of production data, or from a clean database filled by a staged importer that reads the legacy?
-- **Q-003** [decision · open] Must record ids (orders, customers, products) be preserved from the legacy, or can integrations adapt to new ids?
-- **Q-004** [decision · open] Which environments exist (local, staging, production), and where do tests and content entry happen?
-- **Q-005** [decision · open] For each external integration, do we propose the correct contract and ask the other side to adapt, or replicate the legacy behaviour?
-- **Q-006** [decision · open] What is the policy for secrets and production access: no hardcoded secrets, secret-manager references only, production reads authorized one by one?
-- **Q-007** [decision · open] May external workers or third-party services (other AI providers, judgment services) receive project code or data?
-- **Q-012** [decision · open] Who owns the contract of the bin/ scripts (names, service names, behaviour inside the container), and how does kivo-wise read it?
-- **Q-014** [decision · open] What is Lando's support horizon in kivo-wise once the Compose runner ships?
-- **Q-015** [decision · open] How do projects get kivo-wise in cloud agent sessions, which read only repository files and not the user's home configuration?
+- **Q-001** [decision · answered · D-001] How do changes reach the main line: straight to trunk, short-lived branches, or pull requests with review? Who merges?
+- **Q-002** [decision · answered · D-002] Does the new system start from a copy of production data, or from a clean database filled by a staged importer that reads the legacy?
+- **Q-003** [decision · answered · D-003] Must record ids (orders, customers, products) be preserved from the legacy, or can integrations adapt to new ids?
+- **Q-004** [decision · answered · D-004] Which environments exist (local, staging, production), and where do tests and content entry happen?
+- **Q-005** [decision · answered · D-005] For each external integration, do we propose the correct contract and ask the other side to adapt, or replicate the legacy behaviour?
+- **Q-006** [decision · answered · D-006] What is the policy for secrets and production access: no hardcoded secrets, secret-manager references only, production reads authorized one by one?
+- **Q-007** [decision · answered · D-007] May external workers or third-party services (other AI providers, judgment services) receive project code or data?
+- **Q-012** [decision · answered · D-012] Who owns the contract of the bin/ scripts (names, service names, behaviour inside the container), and how does kivo-wise read it?
+- **Q-014** [decision · answered · D-014] What is Lando's support horizon in kivo-wise once the Compose runner ships?
+- **Q-015** [decision · answered · D-015] How do projects get kivo-wise in cloud agent sessions, which read only repository files and not the user's home configuration?
 
 ## High
 
-- **Q-008** [decision · open] Which runner id does the detector publish for the native Docker Compose environment with bin/ scripts (runtime.runner and the .roots-stack.json runner key)?
-- **Q-009** [decision · open] When a project has both a Landofile and a Compose environment (migration period), which runner wins when .roots-stack.json does not say?
-- **Q-010** [decision · open] Should the runner key in .roots-stack.json become an override that wins over detection (today it only produces a drift warning)?
-- **Q-011** [decision · open] How is the Lando skill handled now that a Compose environment skill is needed?
-- **Q-016** [decision · open] Where does docs-brain get its documentation corpus in cloud sessions and Codespaces, where the local corpus checkout does not exist?
-- **Q-018** [decision · open] Is the Compose runner support released as a minor or a major version of kivo-wise?
+- **Q-008** [decision · answered · D-008] Which runner id does the detector publish for the native Docker Compose environment with bin/ scripts (runtime.runner and the .roots-stack.json runner key)?
+- **Q-009** [decision · answered · D-009] When a project has both a Landofile and a Compose environment (migration period), which runner wins when .roots-stack.json does not say?
+- **Q-010** [decision · answered · D-010] Should the runner key in .roots-stack.json become an override that wins over detection (today it only produces a drift warning)?
+- **Q-011** [decision · answered · D-011] How is the Lando skill handled now that a Compose environment skill is needed?
+- **Q-016** [decision · answered · D-016] Where does docs-brain get its documentation corpus in cloud sessions and Codespaces, where the local corpus checkout does not exist?
+- **Q-018** [decision · answered · D-018] Is the Compose runner support released as a minor or a major version of kivo-wise?
 - **Q-021** [fact · open] Which environment signals reliably tell the detector it runs inside a devcontainer, a Codespace, or a cloud agent session (variable names and values)?
 - **Q-022** [fact · open] Is Node.js 20+ available where the hooks run in a cloud agent session (Ubuntu 24.04 VM) and in the wp-kit devcontainer image?
 - **Q-023** [fact · open] In VS Code devcontainers and Codespaces, does the agent's shell run inside the app container (no docker CLI) or on a host with Docker, and how do the wp-kit bin/ scripts behave in each case?
@@ -31,9 +31,9 @@
 
 ## Normal
 
-- **Q-013** [decision · open] Which form do the runner commands take on the session runner line for the Compose runner?
-- **Q-017** [decision · open] Should a Docker Compose and devcontainer documentation source be added to the corpus (kivo-wisdom) as part of this work?
-- **Q-019** [decision · open] Are the Lando recipe gaps found by the parallel work (a cache: key under config: that the recipe ignores; mysql:8.4 failing to start because of expire_logs_days) fixed in this change or a separate one?
-- **Q-020** [decision · open] Which evals run against both runners?
+- **Q-013** [decision · answered · D-013] Which form do the runner commands take on the session runner line for the Compose runner?
+- **Q-017** [decision · answered · D-017] Should a Docker Compose and devcontainer documentation source be added to the corpus (kivo-wisdom) as part of this work?
+- **Q-019** [decision · answered · D-019] Are the Lando recipe gaps found by the parallel work (a cache: key under config: that the recipe ignores; mysql:8.4 failing to start because of expire_logs_days) fixed in this change or a separate one?
+- **Q-020** [decision · answered · D-020] Which evals run against both runners?
 - **Q-025** [fact · open] How does the Compose environment serve HTTPS locally (certificate authority, host names such as *.localhost or a project domain) and how is the CA trusted on WSL2 and Windows browsers?
 - **Q-027** [fact · open] Does the Lando mysql service at the installed recipe version write expire_logs_days into its my.cnf, which MySQL 8.4 removed, and what override fixes it?

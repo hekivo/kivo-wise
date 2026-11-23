@@ -1,0 +1,225 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "D-001",
+      "question": "Q-001",
+      "date": "2026-11-22",
+      "choice": "pull-requests",
+      "owner_words": "Escolhido no quadro de decisões: Pull requests with review — nota: You do the merges by yourself. — confirmação 2026-11-22: Só nos repos de ferramenta",
+      "rationale": "",
+      "reconfirmed": true,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-002",
+      "question": "Q-002",
+      "date": "2026-11-22",
+      "choice": "clean-import",
+      "owner_words": "Escolhido no quadro de decisões: Clean database + staged importer",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-003",
+      "question": "Q-003",
+      "date": "2026-11-22",
+      "choice": "preserve",
+      "owner_words": "Escolhido no quadro de decisões: Preserve legacy ids",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-004",
+      "question": "Q-004",
+      "date": "2026-11-22",
+      "choice": "full",
+      "owner_words": "Escolhido no quadro de decisões: Local + staging + production pipeline",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-005",
+      "question": "Q-005",
+      "date": "2026-11-22",
+      "choice": "propose-correct",
+      "owner_words": "Escolhido no quadro de decisões: Propose the correct contract",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-006",
+      "question": "Q-006",
+      "date": "2026-11-22",
+      "choice": "strict",
+      "owner_words": "Escolhido no quadro de decisões: Secret manager only; per-read production authorization",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-007",
+      "question": "Q-007",
+      "date": "2026-11-22",
+      "choice": "approved-list",
+      "owner_words": "Escolhido no quadro de decisões: Only an approved list, with recorded consent",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-008",
+      "question": "Q-008",
+      "date": "2026-11-22",
+      "choice": "compose",
+      "owner_words": "Escolhido no quadro de decisões: compose (runtime.compose block; bin/ scripts are how commands are reached)",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-009",
+      "question": "Q-009",
+      "date": "2026-11-22",
+      "choice": "compose-first",
+      "owner_words": "Escolhido no quadro de decisões: Compose with bin/ scripts wins; warn that a Landofile is still present",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-010",
+      "question": "Q-010",
+      "date": "2026-11-22",
+      "choice": "override",
+      "owner_words": "Escolhido no quadro de decisões: Yes: flag.runner wins; detection still runs and warns on drift",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-011",
+      "question": "Q-011",
+      "date": "2026-11-22",
+      "choice": "sibling",
+      "owner_words": "Escolhido no quadro de decisões: Keep lando-wp unchanged and add a sibling compose-wp skill; the router picks by runtime.runner",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-012",
+      "question": "Q-012",
+      "date": "2026-11-22",
+      "choice": "wp-kit-contract",
+      "owner_words": "Escolhido no quadro de decisões: wp-kit publishes a versioned bin/ contract; kivo-wise detects it and also parses the Compose file for services",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-013",
+      "question": "Q-013",
+      "date": "2026-11-22",
+      "choice": "relative-bin",
+      "owner_words": "Escolhido no quadro de decisões: bin/wp, bin/wp acorn, bin/composer, bin/npm, with the rule that they run from the project root",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-014",
+      "question": "Q-014",
+      "date": "2026-11-22",
+      "choice": "maintenance",
+      "owner_words": "Escolhido no quadro de decisões: Maintenance mode: Lando stays detected and documented, fixes only, no new Lando-only content; removal decided later",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-015",
+      "question": "Q-015",
+      "date": "2026-11-22",
+      "choice": "repo-settings",
+      "owner_words": "Escolhido no quadro de decisões: wp-kit-generated projects commit the marketplace and enabled-plugins entries in the repository's agent settings",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-016",
+      "question": "Q-016",
+      "date": "2026-11-22",
+      "choice": "web-fallback",
+      "owner_words": "Escolhido no quadro de decisões: Report 'corpus unavailable' on the session line and fall back to allowlisted official documentation hosts",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-017",
+      "question": "Q-017",
+      "date": "2026-11-22",
+      "choice": "add-both",
+      "owner_words": "Escolhido no quadro de decisões: Yes: Docker Compose manual and the devcontainer specification, in a separate kivo-wisdom change",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-018",
+      "question": "Q-018",
+      "date": "2026-11-22",
+      "choice": "minor",
+      "owner_words": "Escolhido no quadro de decisões: Minor (additive: new enum value and new runtime block, nothing removed)",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-019",
+      "question": "Q-019",
+      "date": "2026-11-22",
+      "choice": "same-change",
+      "owner_words": "Escolhido no quadro de decisões: Same change: detector warnings for both, recipe reference and failure-modes rows corrected",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-020",
+      "question": "Q-020",
+      "date": "2026-11-22",
+      "choice": "subset",
+      "owner_words": "Escolhido no quadro de decisões: A representative subset (new Compose skill, roots-debugging, testing-wp, acorn-stack, tailwind-vite-assets) gets a Compose variant; the rest stays on Lando with runner-neutral graders",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    }
+  ]
+}
