@@ -30,5 +30,8 @@ test('release-please knows the package', () => {
   const cfg = readJson(join(ROOT, '.release-please-config.json'));
   assert.ok(cfg.packages['plugins/kivo-rebuild']);
   assert.ok(cfg.packages['.']['exclude-paths'].includes('plugins/kivo-rebuild'));
-  assert.equal(readJson(join(ROOT, '.release-please-manifest.json'))['plugins/kivo-rebuild'], '0.1.0');
+  // The released version moves with every release pull request: compare it with the plugin
+  // manifest that release-please bumps in the same change instead of pinning a literal.
+  const version = readJson(join(PLUGIN, '.claude-plugin', 'plugin.json')).version;
+  assert.equal(readJson(join(ROOT, '.release-please-manifest.json'))['plugins/kivo-rebuild'], version);
 });
