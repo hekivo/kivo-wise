@@ -12,7 +12,8 @@ Phase 1, batch C; sub-plan `docs/plans/2026-11-22-compose-runner/phase-1/03.md`.
 | Component 02: merge group checks passed, merge commit 4981526 / pull request marked merged | 00:43:30 (commit) / 00:44:22 |
 | Branch opened (worktree from `origin/main` 4981526) | 2026-11-23 00:44:53 |
 | First push | 2026-11-23 00:53:00 |
-| Pull request opened | see the pull request; the merge time is in the final report of the phase |
+| Pull request opened (#62) | 2026-11-23 00:54:39 |
+| Merged | not recordable inside its own pull request; reported with the release |
 
 Per component, branch open to merge:
 
