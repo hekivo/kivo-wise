@@ -20,7 +20,7 @@ Writes `features.json`: one item per behavior the legacy site gives to visitors,
 2. A run folder.
 3. Optional: a local database clone name and how to query it read only.
 4. `references/wordpress-areas.md` for the areas and what to look for in each.
-5. The kivo-rebuild plugin root (two levels above this skill's folder).
+5. The kivo-rebuild plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-rebuild/` folder beside the skill folders).
 
 ## Procedure
 

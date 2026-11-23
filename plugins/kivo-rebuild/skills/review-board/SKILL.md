@@ -21,7 +21,7 @@ A self-contained `index.html` with the template groups, the URLs to decide and t
 1. A run with `inventory.json`; `templates.json`, `features.json` and `parity.json` when they exist.
 2. Optional: a hosting option for a single HTML page with a shared store, so several reviewers see each other's marks.
 3. For issues: `gh` signed in, and the repository as `<owner>/<name>`.
-4. The kivo-rebuild plugin root (two levels above this skill's folder).
+4. The kivo-rebuild plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-rebuild/` folder beside the skill folders).
 
 ## Procedure
 

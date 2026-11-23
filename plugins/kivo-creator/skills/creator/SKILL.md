@@ -19,7 +19,7 @@ Arguments: `<figma.com URL | file.html | https URL>` or `--run=.creator/<run>` t
 
 1. A source (Figma frame URL with `node-id`, an `.html` file or an `http(s)` URL), or an existing run folder.
 2. The target stack: `.roots-stack.json` at the project root. If it is missing, run kivo-wise `/roots-detect --write` first (or ask the person).
-3. The kivo-creator plugin root (two levels above this skill's folder).
+3. The kivo-creator plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-creator/` folder beside the skill folders).
 
 ## Procedure
 

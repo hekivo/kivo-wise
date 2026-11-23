@@ -18,7 +18,7 @@ Read a Figma frame into neutral section specs. The MCP output is a reference to 
 
 1. The frame URL with `node-id` (a page link without it is ambiguous: ask for the frame).
 2. The Figma MCP tools in this session. Their names end in `get_metadata`, `get_design_context`, `get_variable_defs`, `get_screenshot` and `get_code_connect_map`; the prefix depends on how the server was connected.
-3. The target project root with `.roots-stack.json`, and the kivo-creator plugin root (two levels above this skill's folder).
+3. The target project root with `.roots-stack.json`, and the kivo-creator plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-creator/` folder beside the skill folders).
 4. Optional: `FIGMA_TOKEN` (a Figma personal access token) exported in the shell. **Without it, reference images cannot be fetched**: the specs are still written, but the pixel diff has nothing to compare against.
 
 ## Procedure

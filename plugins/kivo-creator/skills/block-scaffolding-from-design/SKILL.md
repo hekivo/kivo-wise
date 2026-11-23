@@ -21,7 +21,7 @@ Runner placeholders (`{{runner.wp}}`, `{{runner.acorn}}`, `{{runner.cache}}`) co
 
 1. `.creator/<run>/match-plan.json` that passes `match.mjs --check`.
 2. The project root and its runner (session context).
-3. The kivo-creator plugin root (two levels above this skill's folder).
+3. The kivo-creator plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-creator/` folder beside the skill folders).
 
 ## Procedure
 

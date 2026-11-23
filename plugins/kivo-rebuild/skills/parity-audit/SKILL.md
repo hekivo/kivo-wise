@@ -20,7 +20,7 @@ Writes `parity.json`: for each feature in `features.json`, a class (`done`, `par
 1. `features.json` for the run.
 2. The new project's path (the project root) and, when present, its plan and decision files.
 3. `references/classes.md`: the classes, the priority rules and the evidence each class needs.
-4. The kivo-rebuild plugin root (two levels above this skill's folder).
+4. The kivo-rebuild plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-rebuild/` folder beside the skill folders).
 
 ## Procedure
 

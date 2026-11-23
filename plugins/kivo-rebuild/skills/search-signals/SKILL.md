@@ -20,7 +20,7 @@ Writes `signals.json` for the run: per path, Search Console `clicks`, `impressio
 1. A run (from `site-survey`).
 2. One of: `gsc.property` in the config (`sc-domain:<domain>` or the URL prefix) with a readable service account; MCP rows saved to a CSV; or the person's Search Console export (Performance > Pages > Export > Download CSV, the Pages file, 16 months).
 3. For GA4: `ga4.property_id` in the config.
-4. The kivo-rebuild plugin root (two levels above this skill's folder).
+4. The kivo-rebuild plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-rebuild/` folder beside the skill folders).
 
 ## Procedure
 

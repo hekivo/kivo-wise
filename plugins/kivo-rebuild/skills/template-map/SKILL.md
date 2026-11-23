@@ -19,7 +19,7 @@ Writes `templates.json`: one group per distinct template with the URL count, the
 
 1. A run with `inventory.json`.
 2. `.roots-stack.json` (kivo-wise `/roots-detect --write`) and the theme's `resources/views`, to name the real template files.
-3. The kivo-rebuild plugin root (two levels above this skill's folder).
+3. The kivo-rebuild plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-rebuild/` folder beside the skill folders).
 
 ## Procedure
 

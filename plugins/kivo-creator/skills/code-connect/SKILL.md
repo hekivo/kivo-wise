@@ -19,7 +19,7 @@ Mapped components make matching deterministic: a section whose Figma component i
 
 1. A Figma file or frame URL.
 2. The Figma MCP tools in this session (names ending in `get_metadata`, `get_code_connect_map`, `send_code_connect_mappings`).
-3. The target project root and the kivo-creator plugin root (two levels above this skill's folder).
+3. The target project root and the kivo-creator plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-creator/` folder beside the skill folders).
 
 ## Procedure
 
