@@ -84,7 +84,7 @@ test('devcontainer-and-cloud.md states the S-6 facts (AC-03-4)', () => {
 
 test('routing sends Compose projects to compose-wp and keeps lando-wp (AC-03-5)', () => {
   const keywords = JSON.parse(read('skills', 'roots-router', 'references', 'keywords.json'));
-  assert.deepEqual(keywords['compose-wp'], ['compose.yaml', 'docker compose', 'devcontainer', 'bin/wp', 'codespace', 'kivo-wp', 'compose-wp']);
+  assert.deepEqual(keywords['compose-wp'], ['compose.yaml', 'docker compose', 'devcontainer', 'bin/wp', 'codespace', 'kivo-wp', 'kivowp.dev', 'bin/router', 'compose-wp']);
   assert.deepEqual(keywords['lando-wp'], ['lando', '.lando.yml', 'landofile', 'lndo.site', 'xdebug', 'db-import', 'db-export', 'lando-wp']);
   const routing = JSON.parse(read('skills', 'roots-router', 'references', 'routing.json'));
   assert.ok(routing.routes.some((r) => r.skill === 'compose-wp'));
@@ -132,4 +132,47 @@ test('evals/compose-wp copies the compose-bin fixture and grades runner-neutrall
 test('lando-wp is unchanged by the Compose work (D-011)', () => {
   const lando = read('skills', 'lando-wp', 'SKILL.md');
   assert.ok(!/docker compose|compose\.yaml|bin\/wp|compose-wp/i.test(lando), 'lando-wp has no Compose content');
+});
+
+// kivo-wp contract 2 (wp-kit 6.1 global router), component 04.
+const refs = Object.fromEntries(REFERENCES.map((r) => [r, read('skills', 'compose-wp', 'references', r)]));
+
+test('the free-port search belongs to contract 1 only (AC-04-5)', () => {
+  for (const [name, text] of [['SKILL.md', skill], ...Object.entries(refs)]) {
+    for (const line of text.split('\n').filter((l) => /picks a free port/.test(l))) {
+      assert.match(line, /Contract 1/, `${name}: "picks a free port" outside a contract 1 row: ${line}`);
+    }
+  }
+});
+
+test('contract 2 facts are in the skill and its references (AC-04-5)', () => {
+  const failures = section(skill, 'Failure modes');
+  for (const needle of ['lando poweroff', 'DNS rebinding', 'KIVO_WP_HOST']) assert.ok(failures.includes(needle), `failure modes mention ${needle}`);
+  assert.ok(section(skill, 'Inputs required').includes('runtime.compose.router'));
+  assert.ok(skill.includes('bin/router'));
+  const tls = refs['tls-and-hosts.md'];
+  for (const needle of ['## Contract 1', '## Contract 2', 'kivo-wp-router', '`https://<host>.<domain>`', 'vite-<host>', 'mail-<host>', 'KIVO_WP_DOMAIN', 'host-gateway', 'bin/router status', 'machine-local CA', 'HSTS']) {
+    assert.ok(tls.includes(needle), `tls-and-hosts.md mentions ${needle}`);
+  }
+  assert.ok(refs['bin-scripts.md'].includes('| `bin/router` | contract 2 only'));
+  assert.ok(refs['compose-file.md'].includes('external: true'));
+  assert.ok(refs['devcontainer-and-cloud.md'].includes('`codespaces` | none'));
+});
+
+test('testing-wp and tailwind-vite-assets give router host names without a port (AC-04-5)', () => {
+  const playwright = read('skills', 'testing-wp', 'references', 'playwright.md');
+  assert.match(playwright, /\| 2 \(global router\) \| `https:\/\/<host>\.<domain>` \(default domain `kivowp\.dev`\), never with a port/);
+  const dev = read('skills', 'tailwind-vite-assets', 'references', 'dev-server.md');
+  assert.match(dev, /`vite-<host>\.<domain>`/);
+  assert.match(dev, /clientPort: 443/);
+});
+
+test('contract 2 terms route to compose-wp (AC-04-6)', () => {
+  const keywords = JSON.parse(read('skills', 'roots-router', 'references', 'keywords.json'));
+  const routing = JSON.parse(read('skills', 'roots-router', 'references', 'routing.json'));
+  const intent = routing.intents.find((i) => i.skill === 'compose-wp');
+  for (const term of ['kivowp.dev', 'bin/router']) {
+    assert.ok(keywords['compose-wp'].includes(term), `keywords.json has ${term}`);
+    assert.ok(intent.match.includes(term), `routing.json intent has ${term}`);
+  }
 });

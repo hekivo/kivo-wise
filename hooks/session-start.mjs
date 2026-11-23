@@ -73,6 +73,27 @@ export function runnerLine(detection) {
   return `runner: ${runner} · ${parts.join(' · ')}`;
 }
 
+/**
+ * How the kivo-wp contract serves the site, so answers do not mix the two TLS setups: contract 1
+ * has a per-project Caddy proxy on *.localhost with a port chosen by bin/setup; contract 2 has the
+ * global router and port-free host names. Null without a known contract or on another runner.
+ */
+export function composeLine(detection) {
+  const runtime = detection.runtime || {};
+  const compose = runtime.compose;
+  const version = compose && compose.contract && compose.contract.name === 'kivo-wp' ? compose.contract.version : null;
+  if (runtime.runner !== 'compose' || !version) return null;
+  if (version === 1) {
+    return 'compose: kivo-wp contract 1 · TLS by the proxy service (Caddy, *.localhost); the site URL and its port come from bin/info';
+  }
+  if (version === 2) {
+    const router = compose.router || {};
+    return `compose: kivo-wp contract 2 · TLS by the global router ${router.container || 'kivo-wp-router'} ` +
+      `(network ${router.network || 'kivo-wp'}, no proxy service); the site URL https://<host>.<domain> has no port and comes from bin/info`;
+  }
+  return null;
+}
+
 export function corpusRoots(cwd, detection) {
   const brain = loadJson(join(cwd, '.docs-brain.json'));
   if (brain && Array.isArray(brain.roots) && brain.roots.length) return brain.roots.map(String);
@@ -175,6 +196,7 @@ export function buildContext(cwd, detection, routingFile = ROUTING_FILE) {
   const head = [
     profileLine(detection),
     runnerLine(detection),
+    composeLine(detection),
     rulesLine(cwd, detection),
     commandsLine(detection),
     warningsLine(detection),

@@ -1,0 +1,65 @@
+# kivo-wp environment, contract 2 (fixture): no proxy service, the global router routes by labels
+name: sage-router
+
+x-kivo-wp:
+  contract: 2
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .docker/app/Dockerfile
+    image: kivo-wp/app:8.4
+    depends_on:
+      - db
+      - cache
+    volumes:
+      - .:/var/www/html
+    networks:
+      default:
+        aliases:
+          - web
+      kivo-wp:
+    labels:
+      - "dev.hekivo.environment=kivo-wp"
+      - "traefik.enable=true"
+      - "traefik.docker.network=kivo-wp"
+      - "traefik.http.routers.${KIVO_WP_HOST:-sage-router}-site.rule=Host(`${KIVO_WP_HOST:-sage-router}.${KIVO_WP_DOMAIN:-kivowp.dev}`)"
+      - "traefik.http.routers.${KIVO_WP_HOST:-sage-router}-site.entrypoints=websecure"
+      - "traefik.http.routers.${KIVO_WP_HOST:-sage-router}-site.tls=true"
+      - "traefik.http.services.${KIVO_WP_HOST:-sage-router}-site.loadbalancer.server.port=8080"
+    extra_hosts:
+      - "${KIVO_WP_HOST:-sage-router}.${KIVO_WP_DOMAIN:-kivowp.dev}:host-gateway"
+      - "mail-${KIVO_WP_HOST:-sage-router}.${KIVO_WP_DOMAIN:-kivowp.dev}:host-gateway"
+      - "vite-${KIVO_WP_HOST:-sage-router}.${KIVO_WP_DOMAIN:-kivowp.dev}:host-gateway"
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: wordpress
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+  cache:
+    image: valkey/valkey:8
+  node:
+    image: node:22
+    working_dir: /var/www/html
+    networks:
+      - default
+      - kivo-wp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.${KIVO_WP_HOST:-sage-router}-vite.loadbalancer.server.port=5173"
+  mail:
+    image: axllent/mailpit
+    networks:
+      default:
+        aliases:
+          - smtp
+      kivo-wp:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.${KIVO_WP_HOST:-sage-router}-mail.loadbalancer.server.port=8025"
+
+networks:
+  kivo-wp:
+    external: true

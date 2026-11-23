@@ -112,10 +112,23 @@ test('the sage-compose context length is pinned under MAX_CONTEXT_CHARS (AC-02-1
     KIVO_WISE_NO_CACHE: '1', KIVO_WISE_DETECTOR: join(FIXTURES, 'detector-sage-compose.mjs'),
   });
   assert.equal(text, golden.hookSpecificOutput.additionalContext);
-  assert.equal(text.length, 1085, 'a wording change in the Compose context is a visible diff');
+  assert.equal(text.length, 1207, 'a wording change in the Compose context is a visible diff');
   assert.ok(text.length <= 1500);
   const runnerLine = text.split('\n').find((l) => l.startsWith('runner: '));
   assert.equal(runnerLine, 'runner: compose · wp=bin/wp · acorn=bin/wp acorn · composer=bin/composer · node=bin/npm · test=bin/test · lint=bin/mago · cache=bin/flush · logs=bin/logs');
+});
+
+test('the compose line names the TLS setup of each kivo-wp contract (AC-04-4)', () => {
+  const line = (detector) => sessionStart(join(FIXTURES, 'projects', 'compose'), {
+    KIVO_WISE_NO_CACHE: '1', KIVO_WISE_DETECTOR: join(FIXTURES, detector),
+  }).split('\n').find((l) => l.startsWith('compose: '));
+  assert.equal(line('detector-sage-compose.mjs'),
+    'compose: kivo-wp contract 1 · TLS by the proxy service (Caddy, *.localhost); the site URL and its port come from bin/info');
+  assert.equal(line('detector-sage-compose-router.mjs'),
+    'compose: kivo-wp contract 2 · TLS by the global router kivo-wp-router (network kivo-wp, no proxy service); the site URL https://<host>.<domain> has no port and comes from bin/info');
+  assert.equal(line('detector-mu-plugin.mjs'), undefined, 'no compose line on Lando');
+  const golden = JSON.parse(readFileSync(join(ROOT, 'test', 'hooks', 'session-start', 'sage-compose-router', 'expected-stdout.json'), 'utf8'));
+  assert.ok(golden.hookSpecificOutput.additionalContext.length <= 1500);
 });
 
 test('Lando commands rule has no project-root clause (AC-02-1)', () => {

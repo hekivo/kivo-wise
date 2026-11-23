@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# flush: clear the object cache, Acorn caches and rewrites.
+set -euo pipefail
+"$(dirname "$0")/wp" cache flush
+"$(dirname "$0")/wp" acorn optimize:clear

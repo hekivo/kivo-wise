@@ -1,0 +1,1 @@
+{"session_id":"s","cwd":"{{FIXTURES}}/projects/compose","hook_event_name":"UserPromptSubmit","prompt":"acme.kivowp.dev does not open after bin/setup said port 443 is in use"}

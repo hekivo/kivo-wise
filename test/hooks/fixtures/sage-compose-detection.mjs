@@ -1,6 +1,6 @@
 // Detection of the compose-bin fixture (test/fixtures/projects/compose-bin) as the component 01
 // detector prints it with docker on PATH; the session kind is set by the caller.
-export function sageComposeDetection(root, session = { kind: 'local', dockerCli: true }) {
+export function sageComposeDetection(root, session = { kind: 'local', dockerCli: true }, contract = 1) {
   const detection = {
     "tool": {
       "name": "detect-roots-project",
@@ -50,6 +50,7 @@ export function sageComposeDetection(root, session = { kind: 'local', dockerCli:
           "name": "kivo-wp",
           "version": 1
         },
+        "router": null,
         "devcontainer": ".devcontainer/devcontainer.json",
         "services": {
           "php": "app",
@@ -98,6 +99,14 @@ export function sageComposeDetection(root, session = { kind: 'local', dockerCli:
   };
   detection.root = root;
   detection.runtime.session = session;
+  if (contract === 2) {
+    // The compose-router fixture: no proxy service, the global router, bin/router.
+    const c = detection.runtime.compose;
+    c.contract.version = 2;
+    c.router = { container: 'kivo-wp-router', network: 'kivo-wp', networkDeclared: true };
+    c.services.proxy = null;
+    c.bin = [...c.bin, 'router'].sort();
+  }
   return detection;
 }
 

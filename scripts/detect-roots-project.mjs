@@ -52,10 +52,14 @@ const LANDO_FILES = ['.lando.base.yml', '.lando.dist.yml', '.lando.upstream.yml'
 export const COMPOSE_FILES = ['compose.yaml', 'compose.yml', 'docker-compose.yaml', 'docker-compose.yml'];
 export const COMPOSE_OVERRIDE_FILES = ['compose.override.yaml', 'compose.override.yml', 'docker-compose.override.yml'];
 export const RUNNER_IDS = ['lando', 'compose', 'ddev', 'none'];
-// kivo-wp contract version 1 (wp-kit): Compose service name -> roles.
+// kivo-wp contracts (wp-kit): Compose service name -> roles. Version 2 drops the per-project
+// Caddy proxy: TLS moves to one global router per machine, outside the project.
 const KIVO_WP_CONTRACT = {
   1: { app: ['php', 'web'], db: ['database'], cache: ['cache'], node: ['node'], proxy: ['proxy'], mail: ['mail'] },
+  2: { app: ['php', 'web'], db: ['database'], cache: ['cache'], node: ['node'], mail: ['mail'] },
 };
+// The global router of contract 2 and the external network its routed services join (wp-kit D-034, D-037).
+export const KIVO_WP_ROUTER = { container: 'kivo-wp-router', network: 'kivo-wp' };
 const COMPOSE_ROLES = ['php', 'web', 'database', 'cache', 'node', 'proxy', 'mail'];
 const BIN_LIBRARY = '_lib.sh';
 const BIN_SIGNATURE_BYTES = 4096;
@@ -924,9 +928,19 @@ export function detectCompose(root, env, notes) {
     roles = rolesFromImages(services, notes);
   }
 
+  let router = null;
+  if (contract && contract.version === 2) {
+    if ('proxy' in services) notes.push('compose: contract 2 has no proxy service; "proxy" is ignored (the router is the external kivo-wp-router)');
+    const networks = doc.networks && typeof doc.networks === 'object' && !Array.isArray(doc.networks) ? doc.networks : {};
+    const networkDeclared = KIVO_WP_ROUTER.network in networks;
+    if (!networkDeclared) notes.push(`compose: contract 2 but no ${KIVO_WP_ROUTER.network} network declared; routed services cannot reach the router`);
+    router = { ...KIVO_WP_ROUTER, networkDeclared };
+  }
+
   return {
     files,
     contract,
+    router,
     devcontainer: existsSync(join(root, '.devcontainer', 'devcontainer.json')) ? '.devcontainer/devcontainer.json' : null,
     services: roles,
     bin: scanBin(root, notes),
@@ -1131,7 +1145,7 @@ function runtimeLabel(runtime) {
   if (runtime.runner === 'lando') return `lando webroot ${runtime.lando?.webroot ?? '.'}`;
   if (runtime.runner === 'compose' && runtime.compose) {
     const c = runtime.compose;
-    return `compose ${c.files[0]}${c.contract ? ` (contract ${c.contract.name} v${c.contract.version})` : ''}`;
+    return `compose ${c.files[0]}${c.contract ? ` (contract ${c.contract.name} v${c.contract.version}${c.router ? `, router ${c.router.container}` : ''})` : ''}`;
   }
   return `runner ${runtime.runner}`;
 }
