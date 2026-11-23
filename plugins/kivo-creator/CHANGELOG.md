@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0](https://github.com/hekivo/kivo-wise/compare/kivo-creator-v0.1.0...kivo-creator-v0.2.0) (2026-11-23)
+
+
+### Features
+
+* **hooks:** compose runner context, session-aware cache and override guard ([4981526](https://github.com/hekivo/kivo-wise/commit/4981526159fa865ce40555857217d95f346bae53))
+* **hooks:** compose runner context, session-aware cache and override guard ([68aa303](https://github.com/hekivo/kivo-wise/commit/68aa303820c55f0727ead15de1e368d48f736a71))
+
 ## 0.1.0 (2026-10-19)
 
 

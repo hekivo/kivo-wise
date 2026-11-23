@@ -1,5 +1,58 @@
 # Changelog
 
+## [3.2.0](https://github.com/hekivo/kivo-wise/compare/kivo-wise-v3.1.0...kivo-wise-v3.2.0) (2026-11-23)
+
+
+### Features
+
+* **detect:** detect the kivo-wp Compose environment and its bin/ runner ([a82bf13](https://github.com/hekivo/kivo-wise/commit/a82bf138d954664ea972ff7857137ae5f41b8b1a))
+* **detect:** detect the kivo-wp Compose environment and its bin/ runner ([991ae6c](https://github.com/hekivo/kivo-wise/commit/991ae6c67cec270ac7e40b46edd8efd320fc8f05))
+* **hooks:** compose runner context, session-aware cache and override guard ([4981526](https://github.com/hekivo/kivo-wise/commit/4981526159fa865ce40555857217d95f346bae53))
+* **hooks:** compose runner context, session-aware cache and override guard ([68aa303](https://github.com/hekivo/kivo-wise/commit/68aa303820c55f0727ead15de1e368d48f736a71))
+* kivo-rebuild slice 1 (connect, survey, parity) ([84be1e2](https://github.com/hekivo/kivo-wise/commit/84be1e2d725b6a1f53b708d99661102d67e834f0))
+* **rebuild:** connect detects tools and tests read access per source ([d3994b1](https://github.com/hekivo/kivo-wise/commit/d3994b105e80cc5bc7c180a91ccbbe69fef6d0bd))
+* **rebuild:** export inventory, redirects and parity outside the state dir ([58c76dd](https://github.com/hekivo/kivo-wise/commit/58c76dd3dc64984f337c4911100fa2790183e6af))
+* **rebuild:** fragment merge and kion bridge ([37e8f3a](https://github.com/hekivo/kivo-wise/commit/37e8f3abd66f04e1912d0c62f98b1af9c500fa8b))
+* **rebuild:** hashed setup plan with stepwise apply and scoped google tokens ([5401664](https://github.com/hekivo/kivo-wise/commit/54016647f39b00c4bac5d0f55adc00b396d19cbb))
+* **rebuild:** inventory rules engine with ordered proposals ([b821d6c](https://github.com/hekivo/kivo-wise/commit/b821d6c1190f9568bf6fd735d11f46e411841371))
+* **rebuild:** resumable http check with access-gate and error-rate stops ([cc04ff1](https://github.com/hekivo/kivo-wise/commit/cc04ff152c1acd57fce9d8fac203c7a55f99d170))
+* **rebuild:** review board with embedded data and marks import ([9012fd6](https://github.com/hekivo/kivo-wise/commit/9012fd6fc886d142574c395688025ae4956c8afe))
+* **rebuild:** scaffold kivo-rebuild plugin in the marketplace ([49a0902](https://github.com/hekivo/kivo-wise/commit/49a090290d730b47dfa7aeac952c42b70f54a27a))
+* **rebuild:** search console and ga4 signals from api or csv ([aba10e9](https://github.com/hekivo/kivo-wise/commit/aba10e94ed05c4295654f7c72fe4e450fd3de8c6))
+* **rebuild:** sitemap crawl with typed urls ([8c3f394](https://github.com/hekivo/kivo-wise/commit/8c3f3943a2945ccc99d255cf8789827ef3727794))
+* **rebuild:** skills, references and agents for survey and parity ([486cfd8](https://github.com/hekivo/kivo-wise/commit/486cfd833720d9bcb9b41b101d64ebc7c7f3e64b))
+* **rebuild:** state, schemas and validator ([2deeabb](https://github.com/hekivo/kivo-wise/commit/2deeabb9c6268ba1e18a41e498fcd13e2721edaa))
+* **rebuild:** template groups from inventory types and paths ([eca4f0c](https://github.com/hekivo/kivo-wise/commit/eca4f0c3f2dfe5a82828c2dc9fbe494b8f599e25))
+* **rebuild:** template issue drafts filed through gh ([e53b753](https://github.com/hekivo/kivo-wise/commit/e53b7535f7c35f9ccbe07414df73cfaf181df68b))
+* **skills:** add compose-wp and route by runner ([3ba0ce0](https://github.com/hekivo/kivo-wise/commit/3ba0ce0c3168406254406f877af423ab60584d27))
+* **skills:** add compose-wp and route by runner ([772a125](https://github.com/hekivo/kivo-wise/commit/772a12585388bb6d4499e7f966a4d3c0130edf2e))
+
+
+### Bug Fixes
+
+* **rebuild:** check search-only urls so their rules can fire ([43837f3](https://github.com/hekivo/kivo-wise/commit/43837f37c24a5d5e180a0a245187d63a9586897e))
+* **test:** compare release versions with the plugin manifests ([5ab01d7](https://github.com/hekivo/kivo-wise/commit/5ab01d79ede55fc9675267fea995eef75567ebcb))
+* **test:** compare release versions with the plugin manifests ([26285ed](https://github.com/hekivo/kivo-wise/commit/26285edf76c5bcc6f0aafcb5d315184d965eba40))
+
+
+### Documentation
+
+* **decisions:** record the owner's answers from the decisions board ([4d68bc1](https://github.com/hekivo/kivo-wise/commit/4d68bc1f7d68871fb0c65df419a16f63906ea52e))
+* mark the spec approved and record plan decisions ([d93e574](https://github.com/hekivo/kivo-wise/commit/d93e5744eb658067c965bfd92bd5c19b7fe10ba5))
+* plan Docker Compose bin runner support ([079581c](https://github.com/hekivo/kivo-wise/commit/079581cb21e1342429cfc87d3b3767b8b3f81af8))
+* plan kivo-wp Compose runner support ([a62287e](https://github.com/hekivo/kivo-wise/commit/a62287e07192891415cbe3090a4e8599d13f0782))
+* **plan:** component plan for the Compose runner, phase 1 sub-plans ([61fe3cb](https://github.com/hekivo/kivo-wise/commit/61fe3cbc1e8be00dea29046d0f8d1c1303b4e6d4))
+* **plan:** kivo-rebuild slice 1 implementation plan ([146572c](https://github.com/hekivo/kivo-wise/commit/146572c5a4a0c91522e5900ac89b1f73ea4e64e9))
+* **rebuild:** readme, agnosticism test ([db4db88](https://github.com/hekivo/kivo-wise/commit/db4db8878a7aec9922fc676a419467684462ca15))
+* **spec:** kivo-rebuild slice 1 design (connect, survey, parity) ([5c15c32](https://github.com/hekivo/kivo-wise/commit/5c15c32ae0bd2c9e7bfcb2547819a0931ef6d1e8))
+* **spec:** record the owner's section approvals ([8a217d9](https://github.com/hekivo/kivo-wise/commit/8a217d9925d1406f5d0e0911de11b62662642d8d))
+* **spec:** revise the Compose runner design with the owner's decisions ([c9729bc](https://github.com/hekivo/kivo-wise/commit/c9729bc9e317625e4a6c4016a2fd89c8fb38130a))
+* **study:** record the component 01 implementation notes ([f8d07c8](https://github.com/hekivo/kivo-wise/commit/f8d07c82bbfff760448ae369d589177a05aadc9f))
+* **study:** record the component 01 pull request time ([acbe913](https://github.com/hekivo/kivo-wise/commit/acbe9138f1121eaf777289d21b77f4ea5f1f7b69))
+* **study:** record the component 02 implementation notes ([4e293af](https://github.com/hekivo/kivo-wise/commit/4e293af1e20f015d7eec8867e5f4773a8a638208))
+* **study:** record the component 03 implementation notes and the phase timeline ([a1c8264](https://github.com/hekivo/kivo-wise/commit/a1c8264d1ef357a106b66a239cf00608a9682bac))
+* **study:** record the component 03 pull request time ([13e6a5b](https://github.com/hekivo/kivo-wise/commit/13e6a5bf2a6efabcb919aae429acc5e62ef38de1))
+
 ## [3.1.0](https://github.com/hekivo/kivo-wise/compare/kivo-wise-v3.0.0...kivo-wise-v3.1.0) (2026-10-19)
 
 

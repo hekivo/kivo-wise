@@ -1,11 +1,27 @@
 {
   "name": "kivo-rebuild",
   "description": "Rebuild an existing WordPress site on the Roots stack: connect search and measurement sources, survey the live site into a decided URL inventory, audit legacy features against the new project, review it on a shared board",
-  "version": "0.1.0",
-  "author": { "name": "hekivo", "url": "https://github.com/hekivo" },
+  "version": "0.2.0",
+  "author": {
+    "name": "hekivo",
+    "url": "https://github.com/hekivo"
+  },
   "homepage": "https://github.com/hekivo/kivo-wise/tree/main/plugins/kivo-rebuild",
   "repository": "https://github.com/hekivo/kivo-wise",
   "license": "MIT",
-  "keywords": ["wordpress", "roots", "migration", "rebuild", "seo", "search-console", "ga4", "tag-manager", "parity", "url-inventory"],
-  "dependencies": ["kivo-wise"]
+  "keywords": [
+    "wordpress",
+    "roots",
+    "migration",
+    "rebuild",
+    "seo",
+    "search-console",
+    "ga4",
+    "tag-manager",
+    "parity",
+    "url-inventory"
+  ],
+  "dependencies": [
+    "kivo-wise"
+  ]
 }
