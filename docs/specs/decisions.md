@@ -182,3 +182,12 @@
 - **Status:** active
 
 > Escolhido no quadro de decisões: A representative subset (new Compose skill, roots-debugging, testing-wp, acorn-stack, tailwind-vite-assets) gets a Compose variant; the rest stays on Lando with runner-neutral graders
+
+## D-021 — Hosted cloud sessions do not add marketplaces declared in repository settings (survey Q-026), so D-015 alone does not bring kivo-wise into them, and the pinned skill copy of wp-kit D-019 carries skills but not the kivo-wise hooks (session context, protect-files). How do cloud sessions get the kivo-wise hooks?
+
+- **Date:** 2026-11-22
+- **Question:** Q-028
+- **Choice:** wp-kit skill sync also copies the kivo-wise hook scripts and detector into the repository and registers them in the committed settings file (`vendor-hooks`)
+- **Status:** active
+
+> Escolhido no quadro de aprovação: wp-kit skill sync also copies the kivo-wise hook scripts and detector into the repository and registers them in the committed settings file

@@ -28,7 +28,7 @@
 - **Q-023** [fact · answered] In VS Code devcontainers and Codespaces, does the agent's shell run inside the app container (no docker CLI) or on a host with Docker, and how do the wp-kit bin/ scripts behave in each case?
 - **Q-024** [fact · answered] Which file names and locations does wp-kit generate for the Compose environment (compose file name, .devcontainer layout, service names for PHP, web, database, cache, node, mail) and which bin/ scripts exist?
 - **Q-026** [fact · answered] Which network hosts must a cloud agent session allowlist for a wp-kit project (package registries, plugin marketplace, docs hosts, container registries) and which secrets arrive as proxy-injected network secrets (for example private Composer repositories)?
-- **Q-028** [decision · open] Hosted cloud sessions do not add marketplaces declared in repository settings (survey Q-026), so D-015 alone does not bring kivo-wise into them, and the pinned skill copy of wp-kit D-019 carries skills but not the kivo-wise hooks (session context, protect-files). How do cloud sessions get the kivo-wise hooks?
+- **Q-028** [decision · answered · D-021] Hosted cloud sessions do not add marketplaces declared in repository settings (survey Q-026), so D-015 alone does not bring kivo-wise into them, and the pinned skill copy of wp-kit D-019 carries skills but not the kivo-wise hooks (session context, protect-files). How do cloud sessions get the kivo-wise hooks?
 
 ## Normal
 

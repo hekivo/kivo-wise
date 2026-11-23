@@ -220,6 +220,17 @@
       "reconfirmed": false,
       "status": "active",
       "adr": "none"
+    },
+    {
+      "id": "D-021",
+      "question": "Q-028",
+      "date": "2026-11-22",
+      "choice": "vendor-hooks",
+      "owner_words": "Escolhido no quadro de aprovação: wp-kit skill sync also copies the kivo-wise hook scripts and detector into the repository and registers them in the committed settings file",
+      "rationale": "",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
     }
   ]
 }

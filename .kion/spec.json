@@ -3,7 +3,7 @@
   "path": "docs/specs/2026-11-22-kivo-wise-compose-runner-design.md",
   "items": [
     {
-      "status": "draft",
+      "status": "approved",
       "decisions": [
         "D-001",
         "D-005",
@@ -26,10 +26,11 @@
       ],
       "reopened": [],
       "title": "Overview",
-      "id": "S-1"
+      "id": "S-1",
+      "approved_on": "2026-11-22"
     },
     {
-      "status": "draft",
+      "status": "approved",
       "decisions": [
         "D-008",
         "D-009",
@@ -79,10 +80,11 @@
       ],
       "reopened": [],
       "title": "Detection",
-      "id": "S-2"
+      "id": "S-2",
+      "approved_on": "2026-11-22"
     },
     {
-      "status": "draft",
+      "status": "approved",
       "decisions": [
         "D-005",
         "D-006",
@@ -124,10 +126,11 @@
       ],
       "reopened": [],
       "title": "Runner map",
-      "id": "S-3"
+      "id": "S-3",
+      "approved_on": "2026-11-22"
     },
     {
-      "status": "draft",
+      "status": "approved",
       "decisions": [
         "D-011",
         "D-014",
@@ -152,10 +155,11 @@
       ],
       "reopened": [],
       "title": "Skills affected",
-      "id": "S-4"
+      "id": "S-4",
+      "approved_on": "2026-11-22"
     },
     {
-      "status": "draft",
+      "status": "approved",
       "decisions": [
         "D-011",
         "D-012",
@@ -179,15 +183,17 @@
       ],
       "reopened": [],
       "title": "New Compose skill",
-      "id": "S-5"
+      "id": "S-5",
+      "approved_on": "2026-11-22"
     },
     {
-      "status": "draft",
+      "status": "approved",
       "decisions": [
         "D-006",
         "D-007",
         "D-015",
-        "D-016"
+        "D-016",
+        "D-021"
       ],
       "out_of_scope": [],
       "review": [
@@ -212,10 +218,11 @@
       ],
       "reopened": [],
       "title": "Cloud sessions and Codespaces",
-      "id": "S-6"
+      "id": "S-6",
+      "approved_on": "2026-11-22"
     },
     {
-      "status": "draft",
+      "status": "approved",
       "decisions": [
         "D-009",
         "D-010",
@@ -233,10 +240,11 @@
       ],
       "reopened": [],
       "title": "Tests and evals",
-      "id": "S-7"
+      "id": "S-7",
+      "approved_on": "2026-11-22"
     },
     {
-      "status": "draft",
+      "status": "approved",
       "decisions": [
         "D-009",
         "D-010",
@@ -255,7 +263,8 @@
       ],
       "reopened": [],
       "title": "Migration",
-      "id": "S-8"
+      "id": "S-8",
+      "approved_on": "2026-11-22"
     }
   ]
 }

@@ -694,7 +694,7 @@
     {
       "type": "decision",
       "tier": "high",
-      "status": "open",
+      "status": "answered",
       "source": "discovery",
       "grounds": [
         "survey Q-026: cloud-environments doc, What is available in cloud sessions: marketplaces in .claude/settings.json are not added; committed .claude/skills, settings hooks and .mcp.json are",
@@ -722,7 +722,8 @@
       ],
       "text": "Hosted cloud sessions do not add marketplaces declared in repository settings (survey Q-026), so D-015 alone does not bring kivo-wise into them, and the pinned skill copy of wp-kit D-019 carries skills but not the kivo-wise hooks (session context, protect-files). How do cloud sessions get the kivo-wise hooks?",
       "area": "cloud",
-      "id": "Q-028"
+      "id": "Q-028",
+      "decision": "D-021"
     }
   ]
 }
