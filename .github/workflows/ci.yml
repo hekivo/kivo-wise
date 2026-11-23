@@ -5,6 +5,8 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # The main ruleset requires these checks; the merge queue runs them on its merge group.
+  merge_group:
 
 jobs:
   validate:

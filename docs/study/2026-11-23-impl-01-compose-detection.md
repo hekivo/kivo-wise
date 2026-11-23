@@ -47,6 +47,15 @@ These follow from the spec text and are not new decisions; they are listed so a 
    so the detector tests inject `opts.env` (an empty `PATH`, or a temporary directory holding a fake
    `docker`) to stay deterministic on machines with or without Docker.
 
+4. **The merge queue cannot wait on checks that never run in it.** `ci.yml` listened to `push` and
+   `pull_request` only. Once its checks become required on the `main` ruleset (owner rule, after this
+   component), every queue entry would wait for checks that are never reported on the merge group. The
+   workflow gains a `merge_group` trigger in this pull request so the next components can merge.
+5. **The release pull request has no checks.** release-please opens it with the workflow token, and
+   events caused by that token do not start workflows, so `chore: release main` (#58) reports no checks.
+   With required checks it needs a person-triggered event (close and reopen, or a push) before it can be
+   queued.
+
 ## Improvements found
 
 - The sub-plan could state the `_lib.sh` rule and the shape of `services` (all keys, nullable); both
