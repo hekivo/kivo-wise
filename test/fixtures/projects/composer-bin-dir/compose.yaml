@@ -1,0 +1,5 @@
+services:
+  wordpress:
+    image: serversideup/php:8.4-fpm-nginx
+  db:
+    image: mysql:8.0

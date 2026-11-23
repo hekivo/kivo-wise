@@ -1,0 +1,21 @@
+x-kivo-wp:
+  contract: 1
+
+x-env: &env
+  WP_ENV: development
+  DB_HOST: db
+
+x-image: &php-image kivo-wp/app:8.4
+
+services:
+  app:
+    image: kivo-wp/app:8.4
+    environment:
+      <<: *env
+      EXTRA: "1"
+    labels:
+      tier: *php-image
+  db:
+    image: mysql:8.4
+    environment: &db-env
+      MYSQL_DATABASE: wordpress

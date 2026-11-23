@@ -41,10 +41,20 @@
     "runtime": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["runner", "lando", "runners"],
+      "required": ["runner", "lando", "compose", "session", "runners"],
       "properties": {
-        "runner": { "enum": ["lando", "ddev", "none"] },
+        "runner": { "enum": ["lando", "compose", "ddev", "none"] },
         "lando": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/lando" }] },
+        "compose": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/compose" }] },
+        "session": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "dockerCli"],
+          "properties": {
+            "kind": { "enum": ["local", "cloud", "codespaces", "devcontainer"] },
+            "dockerCli": { "type": "boolean" }
+          }
+        },
         "runners": { "type": "object", "additionalProperties": { "type": ["string", "null"] } }
       }
     },
@@ -70,6 +80,45 @@
     "truncated": { "type": "boolean" }
   },
   "$defs": {
+    "compose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["files", "contract", "devcontainer", "services", "bin", "parseErrors"],
+      "properties": {
+        "files": { "type": "array", "items": { "type": "string" } },
+        "contract": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "version"],
+              "properties": {
+                "name": { "const": "kivo-wp" },
+                "version": { "type": "integer" }
+              }
+            }
+          ]
+        },
+        "devcontainer": { "type": ["string", "null"] },
+        "services": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["php", "web", "database", "cache", "node", "proxy", "mail"],
+          "properties": {
+            "php": { "type": ["string", "null"] },
+            "web": { "type": ["string", "null"] },
+            "database": { "type": ["string", "null"] },
+            "cache": { "type": ["string", "null"] },
+            "node": { "type": ["string", "null"] },
+            "proxy": { "type": ["string", "null"] },
+            "mail": { "type": ["string", "null"] }
+          }
+        },
+        "bin": { "type": "array", "items": { "type": "string" } },
+        "parseErrors": { "type": "array", "items": { "type": "string" } }
+      }
+    },
     "app": {
       "type": "object",
       "additionalProperties": false,

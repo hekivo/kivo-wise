@@ -1,11 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync, mkdtempSync, mkdirSync, writeFileSync, cpSync, rmSync, chmodSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { detect, formatText, parseYamlSubset } from '../scripts/detect-roots-project.mjs';
+import { detect, formatText, parseYamlSubset, sessionKind, RUNNER_CANDIDATES } from '../scripts/detect-roots-project.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
@@ -210,10 +211,15 @@ test('mu-plugin-inferred-basepath: warns when a plugin app has no base path and 
   assert.ok(r.warnings.some((w) => /ACORN_BASEPATH/.test(w) && /acme/.test(w)), r.warnings.join('\n'));
 });
 
+const PRE_COMPOSE_FIXTURES = ['composer-mu-plugin', 'sage-theme', 'bedrock-plain', 'bedrock-sage', 'radicle', 'plain-wp', 'flag-override', 'mu-plugin-inferred-basepath'];
+const COMPOSE_FIXTURES = ['compose-bin', 'compose-no-contract', 'compose-anchors', 'composer-bin-dir', 'compose-no-bin', 'compose-and-lando', 'devcontainer-legacy', 'flag-runner-override', 'flag-runner-missing-env'];
+
 test('every fixture validates against triage.schema.json', () => {
-  for (const name of ['composer-mu-plugin', 'sage-theme', 'bedrock-plain', 'bedrock-sage', 'radicle', 'plain-wp', 'flag-override', 'mu-plugin-inferred-basepath']) {
-    const errors = validate(SCHEMA, run(name));
-    assert.deepEqual(errors, [], `${name}: ${errors.join('; ')}`);
+  for (const name of [...PRE_COMPOSE_FIXTURES, ...COMPOSE_FIXTURES]) {
+    for (const env of [{ PATH: '' }, { PATH: process.env.PATH, CODESPACES: 'true' }]) {
+      const errors = validate(SCHEMA, detect(fixture(name), { env }));
+      assert.deepEqual(errors, [], `${name}: ${errors.join('; ')}`);
+    }
   }
 });
 
@@ -316,5 +322,305 @@ test('large real-world projects: big composer.lock, configurator deep in app/, n
     assert.equal(new Set(labels).size, labels.length, versionsLine);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Docker Compose runner (spec S-2, S-3; component 01)
+// ---------------------------------------------------------------------------
+
+const DOCKER_DIR = mkdtempSync(join(tmpdir(), 'kivo-docker-'));
+writeFileSync(join(DOCKER_DIR, 'docker'), '#!/bin/sh\nexit 0\n');
+chmodSync(join(DOCKER_DIR, 'docker'), 0o755);
+process.on('exit', () => rmSync(DOCKER_DIR, { recursive: true, force: true }));
+const WITH_DOCKER = { PATH: DOCKER_DIR };
+const NO_DOCKER = { PATH: '' };
+const runEnv = (name, env = WITH_DOCKER) => detect(fixture(name), { env });
+
+function withTmp(fn) {
+  const tmp = mkdtempSync(join(tmpdir(), 'kivo-compose-'));
+  try { return fn(tmp); } finally { rmSync(tmp, { recursive: true, force: true }); }
+}
+
+const KIVO_WP_COMPOSE = {
+  files: ['compose.yaml', 'compose.override.yaml'],
+  contract: { name: 'kivo-wp', version: 1 },
+  devcontainer: '.devcontainer/devcontainer.json',
+  services: { php: 'app', web: 'app', database: 'db', cache: 'cache', node: 'node', proxy: 'proxy', mail: 'mail' },
+  bin: ['build', 'composer', 'dev', 'flush', 'logs', 'mago', 'npm', 'test', 'wp'],
+  parseErrors: [],
+};
+
+test('compose-bin fixture scripts keep their executable bit', () => {
+  for (const name of ['_lib.sh', ...KIVO_WP_COMPOSE.bin]) {
+    const mode = statSync(join(fixture('compose-bin'), 'bin', name)).mode;
+    assert.ok(process.platform === 'win32' || (mode & 0o111) !== 0, `bin/${name} lost its executable bit (git update-index --chmod=+x)`);
+  }
+});
+
+test('compose-bin: kivo-wp contract 1 gives runner compose and the S-2 runtime.compose block (AC-01-1)', () => {
+  const r = runEnv('compose-bin');
+  assert.equal(r.runtime.runner, 'compose');
+  assert.deepEqual(r.runtime.compose, KIVO_WP_COMPOSE);
+  assert.deepEqual(r.runtime.session, { kind: 'local', dockerCli: true });
+  assert.equal(r.runtime.lando, null);
+  assert.deepEqual(r.warnings, []);
+});
+
+test('compose-bin: the runner map equals the S-3 kivo-wp column (AC-01-8)', () => {
+  assert.deepEqual(runEnv('compose-bin').runtime.runners, {
+    wp: 'bin/wp', acorn: 'bin/wp acorn', composer: 'bin/composer', node: 'bin/npm', test: 'bin/test', lint: 'bin/mago',
+    cache: 'bin/flush', build: 'bin/build', dev: 'bin/dev', login: null, logs: 'bin/logs',
+  });
+});
+
+test('Compose files resolve in Compose order and every override is listed (AC-01-1)', () => withTmp((tmp) => {
+  writeFileSync(join(tmp, 'docker-compose.yml'), 'services:\n  app:\n    image: php:8.4-fpm\n');
+  writeFileSync(join(tmp, 'compose.yml'), 'services:\n  app:\n    image: php:8.4-fpm\n');
+  writeFileSync(join(tmp, 'docker-compose.override.yml'), 'services:\n  app:\n    environment:\n      A: "1"\n');
+  writeFileSync(join(tmp, 'compose.override.yml'), 'services:\n  db:\n    image: mysql:8.4\n');
+  const c = detect(tmp, { env: WITH_DOCKER }).runtime.compose;
+  assert.deepEqual(c.files, ['compose.yml', 'compose.override.yml', 'docker-compose.override.yml']);
+  assert.equal(c.services.database, 'db', 'services from an override are read');
+}));
+
+test('the shared candidate constant drives both runners (AC-01-8)', () => {
+  assert.deepEqual(RUNNER_CANDIDATES.lint, ['pint-check', 'pint', 'phpcs', 'mago', 'lint']);
+  const src = readFileSync(join(ROOT, 'scripts', 'detect-roots-project.mjs'), 'utf8');
+  assert.ok(!/pickTool\(t, \[/.test(src), 'the Lando branch has no inline candidate lists');
+});
+
+test('compose-no-bin: docker compose exec -T forms and the no bin/ warning (AC-01-3, AC-01-8)', () => {
+  const r = runEnv('compose-no-bin');
+  assert.equal(r.runtime.runner, 'compose');
+  assert.deepEqual(r.runtime.runners, {
+    wp: 'docker compose exec -T app wp', acorn: 'docker compose exec -T app wp acorn', composer: 'docker compose exec -T app composer',
+    node: null, test: null, lint: null, cache: null, build: null, dev: null, login: null, logs: null,
+  });
+  assert.deepEqual(r.warnings, ['compose: no bin/ scripts; commands use docker compose exec app']);
+});
+
+test('formatText prints the Compose file and contract where it prints the Lando webroot (AC-01-8)', () => {
+  assert.equal(formatText(runEnv('compose-bin')).split('\n')[0], 'unknown · sage-theme @ . · App\\ · none · none blocks · compose compose.yaml (contract kivo-wp v1)');
+  assert.equal(formatText(runEnv('compose-no-contract')).split('\n')[0], 'unknown · sage-theme @ . · App\\ · none · none blocks · compose compose.yaml');
+  assert.equal(
+    formatText(runEnv('compose-no-bin')).split('\n').find((l) => l.startsWith('runners:')),
+    'runners: wp=docker compose exec -T app wp · acorn=docker compose exec -T app wp acorn · composer=docker compose exec -T app composer',
+  );
+  assert.equal(
+    formatText(runEnv('compose-bin')).split('\n').find((l) => l.startsWith('runners:')),
+    'runners: wp=bin/wp · acorn=bin/wp acorn · composer=bin/composer · node=bin/npm · test=bin/test · lint=bin/mago · cache=bin/flush · build=bin/build · dev=bin/dev · logs=bin/logs',
+  );
+});
+
+test('logs falls back to docker compose logs, one name when web and php are the same service (AC-01-8)', () => {
+  assert.equal(runEnv('compose-and-lando').runtime.runners.logs, 'docker compose logs -f app');
+  withTmp((tmp) => {
+    cpSync(join(fixture('compose-bin'), 'bin'), join(tmp, 'bin'), { recursive: true });
+    rmSync(join(tmp, 'bin', 'logs'));
+    writeFileSync(join(tmp, 'compose.yaml'), 'services:\n  php:\n    image: php:8.4-fpm\n  web:\n    image: nginx:1.27\n');
+    const r = detect(tmp, { env: WITH_DOCKER });
+    assert.equal(r.runtime.runners.logs, 'docker compose logs -f web php');
+    assert.equal(r.runtime.runners.acorn, null, 'no Acorn app, no bin/acorn: no acorn runner');
+  });
+});
+
+test('compose-no-contract: roles come from images; a Dockerfile service without a contract name is left out (AC-01-2)', () => {
+  const r = runEnv('compose-no-contract');
+  assert.equal(r.runtime.compose.contract, null);
+  assert.deepEqual(r.runtime.compose.services, { php: 'php', web: 'web', database: 'database', cache: 'redis', node: 'assets', proxy: 'edge', mail: 'mailhog' });
+  assert.ok(r.notes.includes('compose: service "worker" is built from a Dockerfile and has no image; its role is not inferred'), r.notes.join('\n'));
+});
+
+test('without a contract, fpm-nginx images and a Dockerfile-built contract name are matched (AC-01-2)', () => withTmp((tmp) => {
+  writeFileSync(join(tmp, 'compose.yaml'), [
+    'services:',
+    '  site:',
+    '    image: serversideup/php:8.4-fpm-nginx',
+    '  front:',
+    '    image: caddy:2',
+    '  db:',
+    '    image: mysql:8.4',
+    '  cache:',
+    '    image: valkey/valkey:8',
+    '  mail:',
+    '    image: axllent/mailpit:latest',
+    '',
+  ].join('\n'));
+  assert.deepEqual(detect(tmp, { env: WITH_DOCKER }).runtime.compose.services,
+    { php: 'site', web: 'site', database: 'db', cache: 'cache', node: null, proxy: 'front', mail: 'mail' });
+  writeFileSync(join(tmp, 'compose.yaml'), 'services:\n  app:\n    build: .\n  node:\n    build: ./node\n');
+  const c = detect(tmp, { env: WITH_DOCKER }).runtime.compose;
+  assert.equal(c.services.php, 'app');
+  assert.equal(c.services.web, 'app');
+  assert.equal(c.services.node, 'node');
+}));
+
+test('an unknown higher contract version falls back to image roles with a note (AC-01-1)', () => withTmp((tmp) => {
+  writeFileSync(join(tmp, 'compose.yaml'), 'x-kivo-wp:\n  contract: 2\nservices:\n  app:\n    image: php:8.4-fpm\n');
+  const r = detect(tmp, { env: WITH_DOCKER });
+  assert.deepEqual(r.runtime.compose.contract, { name: 'kivo-wp', version: 2 });
+  assert.equal(r.runtime.compose.services.php, 'app');
+  assert.equal(r.runtime.compose.services.web, null, 'contract 2 roles are not assumed');
+  assert.ok(r.notes.includes('unknown kivo-wp contract 2; reading what exists'));
+  writeFileSync(join(tmp, 'compose.yaml'), 'x-kivo-wp: { contract: 1 }\nservices:\n  app:\n    image: php:8.4-fpm\n');
+  const flow = detect(tmp, { env: WITH_DOCKER });
+  assert.equal(flow.runtime.compose.contract, null, 'a flow map is not read');
+  assert.ok(flow.notes.some((n) => /x-kivo-wp is not a block map/.test(n)));
+}));
+
+test('devcontainer-legacy: a Compose file only under .devcontainer/ is not a runner (AC-01-3)', () => {
+  const r = runEnv('devcontainer-legacy');
+  assert.equal(r.runtime.runner, 'none');
+  assert.equal(r.runtime.compose, null);
+  assert.ok(r.notes.includes('.devcontainer/docker-compose.yml: editor-attached Compose stack; not used as the runner'));
+});
+
+test('bin/ scripts without a root Compose file give runner none and a warning (AC-01-3)', () => withTmp((tmp) => {
+  cpSync(join(fixture('compose-bin'), 'bin'), join(tmp, 'bin'), { recursive: true });
+  const r = detect(tmp, { env: WITH_DOCKER });
+  assert.equal(r.runtime.runner, 'none');
+  assert.ok(r.warnings.includes('bin/ scripts found but no Compose file; runner none'), r.warnings.join('\n'));
+}));
+
+test('composer-bin-dir: vendor binaries in bin/ are ignored with one note per file (AC-01-3)', () => {
+  const r = runEnv('composer-bin-dir');
+  assert.equal(r.runtime.runner, 'compose');
+  assert.deepEqual(r.runtime.compose.bin, []);
+  for (const name of ['README.txt', 'phpunit', 'pint']) {
+    assert.ok(r.notes.some((n) => n.startsWith(`bin/${name}: not a Compose bin/ script`)), `note for bin/${name}`);
+  }
+  assert.deepEqual(r.warnings, ['compose: no bin/ scripts; commands use docker compose exec wordpress']);
+});
+
+test('compose-and-lando: Compose wins, the D-009 warning, runtime.lando still filled (AC-01-4)', () => {
+  const r = runEnv('compose-and-lando');
+  assert.equal(r.runtime.runner, 'compose');
+  assert.equal(r.runtime.lando.name, 'legacy');
+  assert.deepEqual(r.runtime.lando.files, ['.lando.yml']);
+  assert.deepEqual(r.warnings, ['Landofile still present; runner compose chosen (set runner in .roots-stack.json to override)']);
+  assert.equal(r.runtime.runners.wp, 'bin/wp');
+});
+
+test('flag-runner-override: a valid flag whose environment exists wins, drift warning stays (AC-01-5)', () => {
+  const r = runEnv('flag-runner-override');
+  assert.equal(r.runtime.runner, 'lando');
+  assert.equal(r.runtime.runners.wp, 'lando wp');
+  assert.ok(r.runtime.compose, 'runtime.compose is still reported');
+  assert.deepEqual(r.warnings, ['.roots-stack.json: runner "lando" differs from the detected compose']);
+});
+
+test('flag-runner-missing-env: a flag without its environment keeps the detected runner (AC-01-5)', () => {
+  const r = runEnv('flag-runner-missing-env');
+  assert.equal(r.runtime.runner, 'lando');
+  assert.ok(r.warnings.includes('.roots-stack.json: runner "compose" set but no compose environment found; using lando'), r.warnings.join('\n'));
+  assert.ok(r.warnings.includes('.roots-stack.json: runner "compose" differs from the detected lando'));
+});
+
+test('an unknown flag runner is ignored with the S-2 warning (AC-01-5)', () => withTmp((tmp) => {
+  cpSync(fixture('compose-bin'), tmp, { recursive: true });
+  writeFileSync(join(tmp, '.roots-stack.json'), '{ "runner": "docker" }\n');
+  const r = detect(tmp, { env: WITH_DOCKER });
+  assert.equal(r.flag.runner, null);
+  assert.equal(r.runtime.runner, 'compose');
+  assert.deepEqual(r.warnings, ['.roots-stack.json: runner "docker" is not one of lando, compose, ddev, none']);
+  writeFileSync(join(tmp, '.roots-stack.json'), '{ "runner": "none" }\n');
+  const none = detect(tmp, { env: WITH_DOCKER });
+  assert.equal(none.runtime.runner, 'none', 'none always exists');
+  assert.equal(none.runtime.runners.wp, 'wp');
+}));
+
+test('YAML subset: anchor-only values, merge keys and aliases (AC-01-6)', () => {
+  const skipped = [];
+  const doc = parseYamlSubset(readFileSync(join(fixture('compose-anchors'), 'compose.yaml'), 'utf8'), { skipped });
+  assert.deepEqual(doc['x-env'], { WP_ENV: 'development', DB_HOST: 'db' }, 'the block under an anchor-only value is read');
+  assert.equal(doc['x-image'], 'kivo-wp/app:8.4', 'an anchored scalar keeps its value');
+  assert.deepEqual(doc.services.app.environment, { EXTRA: '1' }, 'the merge key is skipped, not resolved');
+  assert.deepEqual(doc.services.app.labels, {}, 'the alias value is skipped');
+  assert.deepEqual(doc.services.db.environment, { MYSQL_DATABASE: 'wordpress' });
+  assert.equal(Number(doc['x-kivo-wp'].contract), 1);
+  assert.deepEqual(skipped.map((s) => s.kind), ['merge', 'alias']);
+  const listed = [];
+  assert.deepEqual(parseYamlSubset('a:\n  - one\n  - *two\n  - name: x\n    <<: *base\n', { skipped: listed }).a, ['one', { name: 'x' }]);
+  assert.equal(listed.length, 2);
+});
+
+test('compose-anchors: the detector never throws and notes every skipped merge key and alias (AC-01-6)', () => {
+  const r = runEnv('compose-anchors');
+  assert.deepEqual(r.runtime.compose.parseErrors, []);
+  assert.deepEqual(r.runtime.compose.contract, { name: 'kivo-wp', version: 1 });
+  assert.deepEqual(r.notes.filter((n) => n.startsWith('compose.yaml: line')), [
+    'compose.yaml: line 14: merge key "<<: *env" skipped (aliases are not resolved)',
+    'compose.yaml: line 17: alias "tier: *php-image" skipped (aliases are not resolved)',
+  ]);
+});
+
+test('unparseable Compose files, include and extends produce notes, never a crash (AC-01-6)', () => withTmp((tmp) => {
+  writeFileSync(join(tmp, 'compose.yaml'), 'include:\n  - other.yaml\nservices:\n  app:\n    extends:\n      file: base.yaml\n      service: php\n    image: php:8.4-fpm\n');
+  writeFileSync(join(tmp, 'compose.override.yaml'), 'services:\n  app:\n      bad: indentation\n    worse: here\n');
+  const r = detect(tmp, { env: WITH_DOCKER });
+  assert.equal(r.runtime.runner, 'compose');
+  assert.equal(r.runtime.compose.parseErrors.length, 1);
+  assert.match(r.runtime.compose.parseErrors[0], /^compose\.override\.yaml: /);
+  assert.ok(r.notes.some((n) => /could not parse compose\.override\.yaml/.test(n)));
+  assert.ok(r.notes.includes('compose: include is not followed; services from included files are not read'));
+  assert.ok(r.notes.includes('compose: service "app" uses extends, which is not followed'));
+  assert.equal(r.runtime.compose.services.php, 'app');
+}));
+
+test('COMPOSE_FILE is reported in a note and not followed', () => {
+  const r = detect(fixture('compose-bin'), { env: { ...WITH_DOCKER, COMPOSE_FILE: 'other.yaml' } });
+  assert.deepEqual(r.runtime.compose.files, KIVO_WP_COMPOSE.files);
+  assert.ok(r.notes.some((n) => /COMPOSE_FILE is set/.test(n)));
+});
+
+test('runtime.session follows the S-2 signal order from an injected env (AC-01-7)', () => {
+  const cases = [
+    [{ CLAUDE_CODE_REMOTE: 'true', CODESPACES: 'true' }, 'cloud'],
+    [{ CODESPACES: 'true', REMOTE_CONTAINERS: 'true' }, 'codespaces'],
+    [{ KIVO_WP_CONTEXT: 'devcontainer' }, 'devcontainer'],
+    [{ REMOTE_CONTAINERS: 'true' }, 'devcontainer'],
+    [{ CLAUDE_CODE_REMOTE: '1', CODESPACES: 'false' }, 'local'],
+    [{}, 'local'],
+  ];
+  for (const [env, kind] of cases) {
+    assert.equal(sessionKind(env), kind, JSON.stringify(env));
+    assert.equal(detect(fixture('compose-bin'), { env: { ...env, ...WITH_DOCKER } }).runtime.session.kind, kind);
+  }
+  assert.equal(detect(fixture('sage-theme'), { env: { CODESPACES: 'true', PATH: '' } }).runtime.session.kind, 'codespaces', 'present for every runner');
+  assert.equal(detect('/nonexistent/path/for/kivo-wise', { env: { CODESPACES: 'true' } }).runtime.session.kind, 'codespaces');
+});
+
+test('runtime.session.dockerCli comes from a PATH scan; without docker the compose runner warns (AC-01-7)', () => {
+  assert.equal(runEnv('compose-bin', WITH_DOCKER).runtime.session.dockerCli, true);
+  const r = runEnv('compose-bin', NO_DOCKER);
+  assert.equal(r.runtime.session.dockerCli, false);
+  assert.deepEqual(r.warnings, ['docker CLI not found: bin/ scripts need Docker; open the project in the workspace container, not the app container']);
+  assert.ok(!runEnv('sage-theme', NO_DOCKER).warnings.some((w) => /docker CLI/.test(w)), 'only the compose runner needs docker');
+  withTmp((tmp) => {
+    writeFileSync(join(tmp, 'docker'), '#!/bin/sh\n');
+    chmodSync(join(tmp, 'docker'), 0o644);
+    assert.equal(detect(fixture('compose-bin'), { env: { PATH: tmp } }).runtime.session.dockerCli, process.platform === 'win32', 'a non-executable docker file does not count');
+  });
+});
+
+test('the detector spawns no process', () => {
+  const src = readFileSync(join(ROOT, 'scripts', 'detect-roots-project.mjs'), 'utf8');
+  assert.ok(!/child_process/.test(src), 'detect-roots-project.mjs must not import child_process');
+});
+
+test('no regression: pre-existing fixtures keep runner, runners, lando and warnings from main (AC-01-9)', () => {
+  const baseline = JSON.parse(readFileSync(join(__dirname, 'fixtures', 'detector-baseline-main.json'), 'utf8'));
+  assert.deepEqual(Object.keys(baseline).sort(), [...PRE_COMPOSE_FIXTURES].sort());
+  for (const name of PRE_COMPOSE_FIXTURES) {
+    for (const env of [NO_DOCKER, WITH_DOCKER, { ...WITH_DOCKER, CODESPACES: 'true' }]) {
+      const r = detect(fixture(name), { env });
+      assert.deepEqual(
+        { runner: r.runtime.runner, runners: r.runtime.runners, lando: r.runtime.lando, warnings: r.warnings },
+        baseline[name],
+        name,
+      );
+      assert.equal(r.runtime.compose, null, `${name}: runtime.compose is null`);
+    }
   }
 });

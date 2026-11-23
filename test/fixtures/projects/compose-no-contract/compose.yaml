@@ -1,0 +1,18 @@
+# Compose file without the kivo-wp contract: roles come from images.
+services:
+  php:
+    image: php:8.4-fpm
+  web:
+    image: nginx:1.27-alpine
+  edge:
+    image: caddy:2
+  database:
+    image: mariadb:11
+  redis:
+    image: redis:7
+  assets:
+    image: node:22-bookworm
+  mailhog:
+    image: mailhog/mailhog
+  worker:
+    build: ./docker/worker

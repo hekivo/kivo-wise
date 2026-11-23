@@ -1,0 +1,34 @@
+# kivo-wp environment (fixture)
+name: sage-compose
+
+x-kivo-wp:
+  contract: 1
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .docker/app/Dockerfile
+    image: kivo-wp/app:8.4
+    depends_on:
+      - db
+      - cache
+    volumes:
+      - .:/var/www/html
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: wordpress
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+  cache:
+    image: valkey/valkey:8
+  node:
+    image: node:22
+    working_dir: /var/www/html
+  proxy:
+    image: caddy:2
+    ports:
+      - "443:443"
+  mail:
+    image: axllent/mailpit

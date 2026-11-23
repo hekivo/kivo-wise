@@ -1,0 +1,334 @@
+{
+  "composer-mu-plugin": {
+    "runner": "lando",
+    "runners": {
+      "wp": "lando wp",
+      "acorn": "lando wp acorn",
+      "composer": "lando composer",
+      "node": "lando yarn",
+      "test": "lando phpunit",
+      "lint": "lando pint-check",
+      "cache": "lando cache-clear",
+      "build": null,
+      "dev": null,
+      "login": "lando login",
+      "logs": "lando logs -s appserver -s appserver_nginx"
+    },
+    "lando": {
+      "files": [
+        ".lando.yml"
+      ],
+      "name": "demo",
+      "recipe": "wordpress",
+      "webroot": ".",
+      "php": "8.4",
+      "via": "nginx",
+      "database": "mysql",
+      "xdebug": true,
+      "composerVersion": null,
+      "configFiles": {
+        "php": "./server/php/php.ini"
+      },
+      "webService": "appserver_nginx",
+      "envFile": [],
+      "misplacedEnvFile": true,
+      "excludes": [],
+      "services": {
+        "appserver": {
+          "type": null,
+          "image": null,
+          "ports": []
+        },
+        "redis": {
+          "type": "redis:6",
+          "image": null,
+          "ports": []
+        },
+        "appserver_nginx": {
+          "type": "nginx",
+          "image": null,
+          "ports": []
+        },
+        "database": {
+          "type": "mysql",
+          "image": null,
+          "ports": []
+        }
+      },
+      "tooling": {
+        "yarn": {
+          "service": "appserver",
+          "cmd": "yarn",
+          "dir": null,
+          "description": null
+        },
+        "pint-check": {
+          "service": "appserver",
+          "cmd": "pint --test wp-content/mu-plugins/acme-core",
+          "dir": null,
+          "description": "Check code style without fixing"
+        },
+        "cache-clear": {
+          "service": "appserver",
+          "cmd": "bash scripts/clear-cache.sh",
+          "dir": "/app",
+          "description": null
+        },
+        "phpunit": {
+          "service": "appserver",
+          "cmd": "php /app/vendor/bin/phpunit --configuration /app/wp-content/mu-plugins/acme-core/phpunit.xml.dist",
+          "dir": null,
+          "description": null
+        },
+        "build:fast": {
+          "service": "appserver",
+          "cmd": "bash scripts/build-all.sh --skip-install",
+          "dir": null,
+          "description": null
+        },
+        "login": {
+          "service": "appserver",
+          "cmd": "wp plugin is-active wp-cli-login-server || wp login install --activate --yes; wp login as admin",
+          "dir": null,
+          "description": null
+        }
+      },
+      "events": [
+        "pre-start",
+        "post-start"
+      ],
+      "proxy": {},
+      "parseErrors": []
+    },
+    "warnings": [
+      ".lando.yml: config.env_file is ignored by Lando; env_file belongs at the top level",
+      "wp-content/mu-plugins/acme-core: resources/views outside the theme with roots/acorn 6.2.0 and WordPress 7.1.3; WordPress >= 7.1.2 rejects template paths outside the theme unless Acorn restores them (6.3.0 ships that filter), verify how views are rendered"
+    ]
+  },
+  "sage-theme": {
+    "runner": "none",
+    "runners": {
+      "wp": "wp",
+      "acorn": "wp acorn",
+      "composer": "composer",
+      "node": null,
+      "test": null,
+      "lint": null,
+      "cache": null,
+      "build": null,
+      "dev": null,
+      "login": null,
+      "logs": null
+    },
+    "lando": null,
+    "warnings": [
+      "No Lando configuration found (.lando.yml): wp, composer and node commands would run on the host"
+    ]
+  },
+  "bedrock-plain": {
+    "runner": "none",
+    "runners": {
+      "wp": "wp",
+      "acorn": null,
+      "composer": "composer",
+      "node": null,
+      "test": null,
+      "lint": null,
+      "cache": null,
+      "build": null,
+      "dev": null,
+      "login": null,
+      "logs": null
+    },
+    "lando": null,
+    "warnings": [
+      "No Lando configuration found (.lando.yml): wp, composer and node commands would run on the host"
+    ]
+  },
+  "bedrock-sage": {
+    "runner": "none",
+    "runners": {
+      "wp": "wp",
+      "acorn": "wp acorn",
+      "composer": "composer",
+      "node": null,
+      "test": null,
+      "lint": null,
+      "cache": null,
+      "build": null,
+      "dev": null,
+      "login": null,
+      "logs": null
+    },
+    "lando": null,
+    "warnings": [
+      "No Lando configuration found (.lando.yml): wp, composer and node commands would run on the host"
+    ]
+  },
+  "radicle": {
+    "runner": "lando",
+    "runners": {
+      "wp": "lando wp",
+      "acorn": "lando acorn",
+      "composer": "lando composer",
+      "node": "lando npm",
+      "test": "lando pest",
+      "lint": null,
+      "cache": "lando flush",
+      "build": null,
+      "dev": null,
+      "login": null,
+      "logs": "lando logs -s appserver -s appserver_nginx"
+    },
+    "lando": {
+      "files": [
+        ".lando.yml"
+      ],
+      "name": "radicle-demo",
+      "recipe": "wordpress",
+      "webroot": "public",
+      "php": "8.4",
+      "via": "nginx",
+      "database": "mariadb",
+      "xdebug": true,
+      "composerVersion": false,
+      "configFiles": {},
+      "webService": "appserver_nginx",
+      "envFile": [
+        ".env",
+        ".env.lando"
+      ],
+      "misplacedEnvFile": false,
+      "excludes": [
+        "vendor",
+        "node_modules"
+      ],
+      "services": {
+        "appserver": {
+          "type": null,
+          "image": null,
+          "ports": []
+        },
+        "assets": {
+          "type": "node:22",
+          "image": "node:24-bookworm",
+          "ports": [
+            "5180:5180"
+          ]
+        },
+        "database": {
+          "type": "mariadb:11.4",
+          "image": null,
+          "ports": []
+        },
+        "redis": {
+          "type": "redis:7",
+          "image": null,
+          "ports": []
+        },
+        "appserver_nginx": {
+          "type": "nginx",
+          "image": null,
+          "ports": []
+        }
+      },
+      "tooling": {
+        "npm": {
+          "service": "assets",
+          "cmd": "npm",
+          "dir": null,
+          "description": null
+        },
+        "vite": {
+          "service": "assets",
+          "cmd": "npm run dev",
+          "dir": null,
+          "description": "Start Vite with hot reload"
+        },
+        "acorn": {
+          "service": "appserver",
+          "cmd": "wp acorn",
+          "dir": null,
+          "description": null
+        },
+        "flush": {
+          "service": "appserver",
+          "cmd": "wp cache flush && wp acorn optimize:clear && wp rewrite flush && redis-cli FLUSHALL",
+          "dir": "/app",
+          "description": "Clear WordPress, Acorn and Redis caches"
+        },
+        "pest": {
+          "service": "appserver",
+          "cmd": "vendor/bin/pest",
+          "dir": "/app",
+          "description": "Run tests with Pest"
+        }
+      },
+      "events": [],
+      "proxy": {},
+      "parseErrors": []
+    },
+    "warnings": []
+  },
+  "plain-wp": {
+    "runner": "none",
+    "runners": {
+      "wp": "wp",
+      "acorn": null,
+      "composer": "composer",
+      "node": null,
+      "test": null,
+      "lint": null,
+      "cache": null,
+      "build": null,
+      "dev": null,
+      "login": null,
+      "logs": null
+    },
+    "lando": null,
+    "warnings": [
+      "No Lando configuration found (.lando.yml): wp, composer and node commands would run on the host"
+    ]
+  },
+  "flag-override": {
+    "runner": "none",
+    "runners": {
+      "wp": "wp",
+      "acorn": "wp acorn",
+      "composer": "composer",
+      "node": null,
+      "test": null,
+      "lint": null,
+      "cache": null,
+      "build": null,
+      "dev": null,
+      "login": null,
+      "logs": null
+    },
+    "lando": null,
+    "warnings": [
+      "No Lando configuration found (.lando.yml): wp, composer and node commands would run on the host"
+    ]
+  },
+  "mu-plugin-inferred-basepath": {
+    "runner": "none",
+    "runners": {
+      "wp": "wp",
+      "acorn": "wp acorn",
+      "composer": "composer",
+      "node": null,
+      "test": null,
+      "lint": null,
+      "cache": null,
+      "build": null,
+      "dev": null,
+      "login": null,
+      "logs": null
+    },
+    "lando": null,
+    "warnings": [
+      "No Lando configuration found (.lando.yml): wp, composer and node commands would run on the host",
+      "wp-content/mu-plugins/acme-core: Acorn boots without ACORN_BASEPATH, Application::configure($path) or withPaths() while theme acme has composer.json; Acorn would infer the theme as the base path"
+    ]
+  }
+}
