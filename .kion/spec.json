@@ -1,0 +1,272 @@
+{
+  "version": 1,
+  "path": "docs/specs/2026-11-22-kivo-wise-compose-runner-design.md",
+  "items": [
+    {
+      "status": "approved",
+      "decisions": [
+        "D-001",
+        "D-005",
+        "D-012",
+        "D-014",
+        "D-018",
+        "D-022",
+        "D-023"
+      ],
+      "out_of_scope": [
+        "D-002",
+        "D-003",
+        "D-004"
+      ],
+      "review": [
+        {
+          "by": "manual-review",
+          "finding": "The delivery rule must reflect D-001 exactly: the agent merges only in tooling repositories and only when checks are green, and pull requests are complete units.",
+          "verdict": "accepted",
+          "evidence": "decisions.json D-001 owner words (merges by the agent, confirmed only for tooling repositories) and the owner rule on complete pull requests; spec S-1 Delivery"
+        }
+      ],
+      "reopened": [],
+      "title": "Overview",
+      "id": "S-1",
+      "approved_on": "2026-11-22"
+    },
+    {
+      "status": "approved",
+      "decisions": [
+        "D-008",
+        "D-009",
+        "D-010",
+        "D-012",
+        "D-018",
+        "D-019"
+      ],
+      "out_of_scope": [],
+      "review": [
+        {
+          "by": "manual-review",
+          "finding": "The proposed contract marker x-kivo-wp: { contract: 1 } is a flow map; parseYamlSubset returns it as the string \"{ contract: 1 }\" and returns scalars as strings, so the contract would never be read.",
+          "verdict": "accepted",
+          "evidence": "parseYamlSubset('x-kivo-wp: { contract: 1 }') returns {\"x-kivo-wp\":\"{ contract: 1 }\"}; scripts/detect-roots-project.mjs:137-150 scalar() handles only [..] flow lists; spec S-2 now uses a block map and Number()"
+        },
+        {
+          "by": "manual-review",
+          "finding": "Compose files commonly use anchors and merge keys (x-env: &env, <<: *env); parseYamlSubset throws 'unexpected indentation' on the first anchor, so the whole Compose file is lost and the contract, services and override are not read.",
+          "verdict": "accepted",
+          "evidence": "parseYamlSubset('x-env: &env\\n  A: 1') throws 'unexpected indentation at line 2' (scripts/detect-roots-project.mjs:186-201); spec S-2 adds the anchor and merge-key rules and S-7 a compose-anchors fixture"
+        },
+        {
+          "by": "manual-review",
+          "finding": "The ignored-key warning as an allowlist (any key outside the seven documented ones) would raise false warnings: the wordpress builder also reads build, build_root, run_root and composer from config.",
+          "verdict": "accepted",
+          "evidence": "corpus lando-wordpress/main/_source/builders/wordpress.js.md:40-55 getServices() reads options.build_root, options.build, options.composer, options.run_root; the S-2 row is now a denylist (cache, extra_php_extensions, env_file)"
+        },
+        {
+          "by": "manual-review",
+          "finding": "The MySQL 8.4 warning should also fire for the bare mysql:8 alias, because the alias may resolve to 8.4.",
+          "verdict": "rejected-with-evidence",
+          "evidence": "corpus lando-wordpress/main/_source/examples/wordpress-mysql84/README.md.md:36,62-64,79-81: mysql:8 resolves to 8.4 in the upstream recipe that already uses binlog_expire_logs_seconds; the broken default is the installed recipe file mysql8.cnf:51 and there is no evidence of the alias paired with it; the warning also checks the recipe file"
+        },
+        {
+          "by": "manual-review",
+          "finding": "The detector result is cached for 10 minutes in <project>/.kivo-wise/context.json; once it depends on environment signals (runtime.session), a detection cached on the host is reused in a devcontainer on the same checkout and reports the wrong session.",
+          "verdict": "accepted",
+          "evidence": "hooks/lib.mjs:22 CACHE_TTL_MS and hooks/lib.mjs:103-110 readCache keys only on root and age; spec S-2 stores session.kind in the cache entry and drops mismatches; S-7 adds a cache test"
+        },
+        {
+          "by": "manual-review",
+          "finding": "The flag override guard (D-010) could disagree with kivo-creator, which reads flag.runner before the detector result.",
+          "verdict": "accepted",
+          "evidence": "plugins/kivo-creator/scripts/lib/stack.mjs:39 runner: flag?.runner ?? detection?.runtime?.runner; spec S-4 adds a row to read detection.runtime.runner first"
+        }
+      ],
+      "reopened": [],
+      "title": "Detection",
+      "id": "S-2",
+      "approved_on": "2026-11-22"
+    },
+    {
+      "status": "approved",
+      "decisions": [
+        "D-005",
+        "D-006",
+        "D-012",
+        "D-013"
+      ],
+      "out_of_scope": [],
+      "review": [
+        {
+          "by": "manual-review",
+          "finding": "The raw fallback logs command repeats the service name when php and web are the same service (the wp-kit app service serves both).",
+          "verdict": "accepted",
+          "evidence": "wp-kit design section 2 Services: app is PHP-FPM and nginx in one image; the S-3 logs row now dedupes"
+        },
+        {
+          "by": "manual-review",
+          "finding": "A literal .gitignore match misses the common form /compose.override.yaml and negated lines.",
+          "verdict": "accepted",
+          "evidence": "hooks/protect-files.mjs:90 matches .lando.local.yml by basename only; spec S-3 trims a leading slash and skips comments and ! negations"
+        },
+        {
+          "by": "manual-review",
+          "finding": "Check that the Compose runner line fits the session budget and matches the keys the hook prints.",
+          "verdict": "accepted",
+          "evidence": "hooks/session-start.mjs:15 MAX_CONTEXT_CHARS=1500 and :29 RUNNER_KEYS wp,acorn,composer,node,test,lint,cache,logs; the Compose line measures 153 chars against 180 for the equivalent Lando line; S-3 example uses the printed keys"
+        },
+        {
+          "by": "manual-review",
+          "finding": "Confirm the detector does not read .env today, so publishing no site URL is not a regression.",
+          "verdict": "accepted",
+          "evidence": "no .env read in scripts/detect-roots-project.mjs; only hooks/protect-files.mjs:83-85 handles .env (deny); spec S-3 Site URL paragraph"
+        },
+        {
+          "by": "manual-review",
+          "finding": "Generated projects leave the hook cache folder .kivo-wise/ untracked.",
+          "verdict": "accepted",
+          "evidence": "a Hekivo project workspace where the hooks ran shows .kivo-wise/ as untracked in git status; this repository ignores it (.gitignore:2); spec S-3 request 6 to wp-kit"
+        }
+      ],
+      "reopened": [],
+      "title": "Runner map",
+      "id": "S-3",
+      "approved_on": "2026-11-22"
+    },
+    {
+      "status": "approved",
+      "decisions": [
+        "D-011",
+        "D-014",
+        "D-016",
+        "D-017",
+        "D-019"
+      ],
+      "out_of_scope": [],
+      "review": [
+        {
+          "by": "manual-review",
+          "finding": "Codespaces bypasses Caddy (TLS on the forwarded URL), so HMR through vite.<project>.localhost does not apply there.",
+          "verdict": "accepted",
+          "evidence": "wp-kit design section 4 Codespaces (TLS terminated on the forwarded URL); spec S-4 tailwind-vite-assets row"
+        },
+        {
+          "by": "manual-review",
+          "finding": "roots-status runs a health command only for lando or ddev, and roots-detect writes the runner enum without compose.",
+          "verdict": "accepted",
+          "evidence": "commands/roots-status.md:15 and commands/roots-detect.md:21; already covered by the S-4 table row (INV-026), no spec change"
+        }
+      ],
+      "reopened": [],
+      "title": "Skills affected",
+      "id": "S-4",
+      "approved_on": "2026-11-22"
+    },
+    {
+      "status": "approved",
+      "decisions": [
+        "D-011",
+        "D-012",
+        "D-013",
+        "D-017"
+      ],
+      "out_of_scope": [],
+      "review": [
+        {
+          "by": "manual-review",
+          "finding": "curl -kI as the verification step hides the TLS failure the check should catch.",
+          "verdict": "accepted",
+          "evidence": "wp-kit D-012 bin/trust-cert; spec S-5 Verification now uses curl -I after bin/trust-cert"
+        },
+        {
+          "by": "manual-review",
+          "finding": "bin/setup has place-specific flags (--cloud, --ci) in wp-kit; the skill must pick them from the session kind, not always run bare bin/setup.",
+          "verdict": "accepted",
+          "evidence": "wp-kit design section 3 One-command onboarding, flags --ci, --cloud, --fresh (Proposal there); spec S-5 step 2"
+        }
+      ],
+      "reopened": [],
+      "title": "New Compose skill",
+      "id": "S-5",
+      "approved_on": "2026-11-22"
+    },
+    {
+      "status": "approved",
+      "decisions": [
+        "D-006",
+        "D-007",
+        "D-015",
+        "D-016",
+        "D-021"
+      ],
+      "out_of_scope": [],
+      "review": [
+        {
+          "by": "manual-review",
+          "finding": "D-015 (marketplace entries committed in repository settings) does not reach hosted cloud sessions, and the pinned skill copy of wp-kit D-019 carries skills but not the kivo-wise hooks.",
+          "verdict": "accepted",
+          "evidence": "https://code.claude.com/docs/en/cloud-environments (What is available in cloud sessions: repository marketplaces are not added in hosted environments); hooks/hooks.json registers SessionStart, UserPromptSubmit, PreToolUse, PostToolUse; new owner question Q-028; spec S-6 Plugin availability"
+        },
+        {
+          "by": "manual-review",
+          "finding": "The corpus-unavailable line should also apply in editor devcontainers, where the home corpus is equally absent, and when configured roots point at missing folders.",
+          "verdict": "accepted",
+          "evidence": "hooks/session-start.mjs:74-95 corpusRoots and rulesLine print configured roots without checking they exist; spec S-6 Corpus condition"
+        },
+        {
+          "by": "manual-review",
+          "finding": "Node.js for the hooks is assumed available in devcontainers.",
+          "verdict": "accepted",
+          "evidence": "https://github.com/devcontainers/images/blob/main/src/base-ubuntu/README.md (no Node.js); https://github.com/devcontainers/features/blob/main/src/node/README.md (default lts); spec S-3 request 4 and S-6"
+        }
+      ],
+      "reopened": [],
+      "title": "Cloud sessions and Codespaces",
+      "id": "S-6",
+      "approved_on": "2026-11-22"
+    },
+    {
+      "status": "approved",
+      "decisions": [
+        "D-009",
+        "D-010",
+        "D-019",
+        "D-020"
+      ],
+      "out_of_scope": [],
+      "review": [
+        {
+          "by": "manual-review",
+          "finding": "The MySQL fixture needs a way to point the recipe-file lookup away from the developer's home directory.",
+          "verdict": "accepted",
+          "evidence": "spec S-2 opts.landoConfigDir and the S-7 lando-mysql-84 fixture"
+        }
+      ],
+      "reopened": [],
+      "title": "Tests and evals",
+      "id": "S-7",
+      "approved_on": "2026-11-22"
+    },
+    {
+      "status": "approved",
+      "decisions": [
+        "D-009",
+        "D-010",
+        "D-014",
+        "D-018",
+        "D-019"
+      ],
+      "out_of_scope": [],
+      "review": [
+        {
+          "by": "manual-review",
+          "finding": "lando db-export writes a gzip file; bin/db-import may not accept it.",
+          "verdict": "accepted",
+          "evidence": "corpus lando-wordpress/main/_source/builders/wordpress.js.md:129-140 db-export tooling; spec S-8 step 3"
+        }
+      ],
+      "reopened": [],
+      "title": "Migration",
+      "id": "S-8",
+      "approved_on": "2026-11-22"
+    }
+  ]
+}

@@ -1,0 +1,503 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "verdict": "rebuild",
+      "risk": [
+        "contract-change"
+      ],
+      "raises": [
+        "Q-008",
+        "Q-009",
+        "Q-010"
+      ],
+      "area": "detector",
+      "kind": "runtime-detection",
+      "name": "Runner detection order",
+      "source": "scripts/detect-roots-project.mjs:767-776",
+      "evidence": "LANDO_FILES first, then .ddev/config.yaml, else none; flag.runner only warns",
+      "id": "INV-001"
+    },
+    {
+      "verdict": "keep",
+      "risk": [],
+      "raises": [
+        "Q-014"
+      ],
+      "area": "detector",
+      "kind": "runtime-detection",
+      "name": "Landofile parser (parseLando)",
+      "source": "scripts/detect-roots-project.mjs:542-613",
+      "evidence": "merged Landofile chain, services, tooling, env_file, webService",
+      "id": "INV-002"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [
+        "contract-change"
+      ],
+      "raises": [
+        "Q-012",
+        "Q-013"
+      ],
+      "area": "detector",
+      "kind": "runner-map",
+      "name": "buildRunners runner map",
+      "source": "scripts/detect-roots-project.mjs:624-651",
+      "evidence": "lando and ddev branches; fallback warning names .lando.yml",
+      "id": "INV-003"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-019",
+        "Q-027"
+      ],
+      "area": "detector",
+      "kind": "warning",
+      "name": "Lando config warnings (misplaced env_file only)",
+      "source": "scripts/detect-roots-project.mjs:774",
+      "evidence": "no warning for cache: under config: or for mysql:8.4",
+      "id": "INV-004"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-008"
+      ],
+      "area": "detector",
+      "kind": "output",
+      "name": "Text format runner column",
+      "source": "scripts/detect-roots-project.mjs:813-835",
+      "evidence": "'lando webroot <x>' else 'runner <id>'",
+      "id": "INV-005"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-008",
+        "Q-010"
+      ],
+      "area": "detector",
+      "kind": "flag",
+      "name": ".roots-stack.json runner key",
+      "source": "scripts/detect-roots-project.mjs:671-690",
+      "evidence": "runner read as free string; no enum check",
+      "id": "INV-006"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [
+        "contract-change"
+      ],
+      "raises": [
+        "Q-008",
+        "Q-018"
+      ],
+      "area": "detector",
+      "kind": "schema",
+      "name": "Triage schema runtime block",
+      "source": "skills/roots-triage/references/triage.schema.json:44-47,106",
+      "evidence": "runner enum lando|ddev|none; required lando key",
+      "id": "INV-007"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-013"
+      ],
+      "area": "hooks",
+      "kind": "session-context",
+      "name": "Session-start runner line and commands rule",
+      "source": "hooks/session-start.mjs:63-115",
+      "evidence": "'runner: none detected (no .lando.yml or .ddev)'; commandsLine example from runners",
+      "id": "INV-008"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-016"
+      ],
+      "area": "hooks",
+      "kind": "session-context",
+      "name": "Corpus roots line",
+      "source": "hooks/session-start.mjs:74-93",
+      "evidence": "corpus from .docs-brain.json or flag; home-directory default absent in cloud",
+      "id": "INV-009"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-012"
+      ],
+      "area": "hooks",
+      "kind": "guard",
+      "name": "protect-files Lando override deny",
+      "source": "hooks/protect-files.mjs:90-92,105",
+      "evidence": ".lando.local.yml denied; no Compose override equivalent",
+      "id": "INV-010"
+    },
+    {
+      "verdict": "keep",
+      "risk": [],
+      "raises": [],
+      "area": "hooks",
+      "kind": "reminder",
+      "name": "post-edit cache reminder",
+      "source": "hooks/post-edit-reminder.mjs:18-23",
+      "evidence": "uses runners.cache or <acorn> optimize:clear; runner-neutral already",
+      "id": "INV-011"
+    },
+    {
+      "verdict": "keep",
+      "risk": [],
+      "raises": [],
+      "area": "hooks",
+      "kind": "helper",
+      "name": "runners() helper",
+      "source": "hooks/lib.mjs:183-192",
+      "evidence": "reads runtime.runners or legacy runtime.lando.runners",
+      "id": "INV-012"
+    },
+    {
+      "verdict": "keep",
+      "risk": [],
+      "raises": [
+        "Q-011",
+        "Q-014",
+        "Q-019"
+      ],
+      "area": "skills",
+      "kind": "skill",
+      "name": "lando-wp",
+      "source": "skills/lando-wp/SKILL.md (110 lines) + references/{cli-semantics,failure-modes,landofile,wordpress-recipe,wsl2}.md",
+      "evidence": "156 Lando mentions; whole skill is Lando-specific",
+      "id": "INV-013"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-011",
+        "Q-012",
+        "Q-025"
+      ],
+      "area": "skills",
+      "kind": "skill",
+      "name": "Compose environment skill (new)",
+      "source": "none yet",
+      "evidence": "no skill covers services, TLS, bin/ tooling, logs or failure modes for Compose",
+      "id": "INV-014"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-008",
+        "Q-010"
+      ],
+      "area": "skills",
+      "kind": "skill",
+      "name": "roots-triage",
+      "source": "skills/roots-triage/SKILL.md:15,18,23,54,60,66-69,88,90; references/output-fields.md:17-56",
+      "evidence": "runner enum, Landofile inputs, runner: none row names .lando.yml",
+      "id": "INV-015"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-011"
+      ],
+      "area": "skills",
+      "kind": "routing",
+      "name": "roots-router routing and keywords",
+      "source": "skills/roots-router/references/routing.json:49-50,334-349; keywords.json:14; decision-tree.md:39,54; SKILL.md:15",
+      "evidence": "only lando-wp handles 'how to run a command'",
+      "id": "INV-016"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-011"
+      ],
+      "area": "skills",
+      "kind": "skill",
+      "name": "roots-debugging",
+      "source": "skills/roots-debugging/SKILL.md:10,44,51,92; references/cache-layers.md:15; references/symptoms.md:54",
+      "evidence": "OPcache fix is 'lando restart'; logs hand over to lando-wp",
+      "id": "INV-017"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-025"
+      ],
+      "area": "skills",
+      "kind": "skill",
+      "name": "testing-wp",
+      "source": "skills/testing-wp/SKILL.md:10,42,92; references/playwright.md:24",
+      "evidence": "Lando defaults; headed runs use *.lndo.site",
+      "id": "INV-018"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-016",
+        "Q-017"
+      ],
+      "area": "skills",
+      "kind": "skill",
+      "name": "docs-brain",
+      "source": "skills/docs-brain/SKILL.md:3,12,75",
+      "evidence": "Lando is a corpus source; no Compose/devcontainer source",
+      "id": "INV-019"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-024"
+      ],
+      "area": "skills",
+      "kind": "skill",
+      "name": "tailwind-vite-assets dev server",
+      "source": "skills/tailwind-vite-assets/SKILL.md:37,44,57,92; references/dev-server.md (8 mentions)",
+      "evidence": "HMR port publishing and container networking described for Lando",
+      "id": "INV-020"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-013"
+      ],
+      "area": "skills",
+      "kind": "skill-boilerplate",
+      "name": "Runner placeholder preamble and commands rule in topic skills",
+      "source": "skills/{acf-native,acorn-background,acorn-data,acorn-livewire,acorn-routes-api,acorn-scaffolding,acorn-stack,wp-hooks-lifecycle,wp-security-escaping,wp-performance,wp-phpstan,wp-composer-plugins,wp-abilities-mcp,roots-onboarding,testing-wp,roots-debugging}/SKILL.md line ~10 and the 'Commands:' line",
+      "evidence": "On Lando they default to lando wp ... and example lando wp acorn optimize:clear; the 462 {{runner.*}} placeholders in skills, agents and commands are already runner-neutral",
+      "id": "INV-021"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-024"
+      ],
+      "area": "skills",
+      "kind": "reference",
+      "name": "Redis and logging references",
+      "source": "skills/acorn-background/references/redis-cache.md:18,73; references/logging.md:54",
+      "evidence": "REDIS_HOST is the Lando service name; logs via lando logs",
+      "id": "INV-022"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-013",
+        "Q-023"
+      ],
+      "area": "skills",
+      "kind": "reference",
+      "name": "MCP adapter command split",
+      "source": "skills/wp-abilities-mcp/references/mcp-adapter.md:74-87",
+      "evidence": ".mcp.json command lando + args; Compose needs bin/wp or docker compose exec -T",
+      "id": "INV-023"
+    },
+    {
+      "verdict": "keep",
+      "risk": [],
+      "raises": [],
+      "area": "skills",
+      "kind": "script",
+      "name": "perf_inspect WP_RUNNER",
+      "source": "third-party/wp-performance/scripts/perf_inspect.mjs; skills/wp-performance/SKILL.md:34",
+      "evidence": "WP_RUNNER example is 'lando wp'; works with any runner string",
+      "id": "INV-024"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [],
+      "area": "agents-commands",
+      "kind": "agent",
+      "name": "Agents runner defaults",
+      "source": "agents/{acorn-reviewer,livewire-debugger,roots-architect,tailwind-v4-auditor}.md",
+      "evidence": "'Lando default ...' in the commands bullet",
+      "id": "INV-025"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-008"
+      ],
+      "area": "agents-commands",
+      "kind": "command",
+      "name": "roots-status and roots-detect",
+      "source": "commands/roots-status.md:15,28; commands/roots-detect.md:21",
+      "evidence": "health command only for lando|ddev; flag template enum",
+      "id": "INV-026"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-014"
+      ],
+      "area": "rules",
+      "kind": "agents-md",
+      "name": "AGENTS.md environment rule",
+      "source": "AGENTS.md:7-8 (and generated plugins/kivo-wise/AGENTS.md)",
+      "evidence": "'All wp, composer, artisan, yarn, npm commands run via lando <cmd>'",
+      "id": "INV-027"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-018"
+      ],
+      "area": "manifests",
+      "kind": "manifest",
+      "name": "Plugin manifests and marketplaces",
+      "source": ".claude-plugin/{plugin,marketplace}.json, .codex-plugin/{plugin,marketplace}.json, .cursor-plugin/{plugin,marketplace}.json",
+      "evidence": "description 'runs everything through Lando'; keyword lando",
+      "id": "INV-028"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-014"
+      ],
+      "area": "docs",
+      "kind": "guide",
+      "name": "README and user guide",
+      "source": "README.md:17,21,61,85; docs/guide/{INDEX,commands,hooks,skills,troubleshooting}.md",
+      "evidence": "troubleshooting.md has 19 Lando mentions incl. Docker 28 mount breakage",
+      "id": "INV-029"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-009",
+        "Q-010"
+      ],
+      "area": "tests",
+      "kind": "unit-test",
+      "name": "Detector tests and fixtures",
+      "source": "test/detect-roots-project.test.mjs (22 mentions); test/fixtures/projects/{composer-mu-plugin,radicle}/.lando.yml",
+      "evidence": "no fixture with a Compose file, devcontainer or bin/ scripts",
+      "id": "INV-030"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-013"
+      ],
+      "area": "tests",
+      "kind": "hook-test",
+      "name": "Hook golden outputs",
+      "source": "test/hooks/session-start/{mu-plugin-lando,sage-bedrock-no-runner}; test/hooks/protect-files/lando-local-deny; test/hooks/fixtures/detector-*.mjs; test/integration-session-start.test.mjs",
+      "evidence": "golden runner lines are Lando-only",
+      "id": "INV-031"
+    },
+    {
+      "verdict": "keep",
+      "risk": [],
+      "raises": [
+        "Q-018"
+      ],
+      "area": "tests",
+      "kind": "unit-test",
+      "name": "kivo-creator stack test and fixtures",
+      "source": "test/creator/stack.test.mjs; test/fixtures/creator/projects/*/.roots-stack.json",
+      "evidence": "flag files carry runner lando",
+      "id": "INV-032"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-020"
+      ],
+      "area": "evals",
+      "kind": "eval",
+      "name": "Eval graders and scaffolds",
+      "source": "evals/*/graders/expectations.md (11 files); evals/{acorn-data,agents/acorn-migration,agents/tailwind-v4-auditor}/scaffold.sh",
+      "evidence": "graders require literal 'lando wp acorn ...'; scaffolds write a .lando.yml",
+      "id": "INV-033"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [
+        "Q-011"
+      ],
+      "area": "evals",
+      "kind": "router-prompts",
+      "name": "Router review prompts",
+      "source": "dev/jev-review/prompts.json (6 Lando prompts)",
+      "evidence": "lando-1..3 expect lando-wp; no Compose prompts",
+      "id": "INV-034"
+    },
+    {
+      "verdict": "keep",
+      "risk": [],
+      "raises": [],
+      "area": "generated",
+      "kind": "codex-mirror",
+      "name": "Generated Codex plugin tree",
+      "source": "plugins/kivo-wise/** (44 files mention Lando)",
+      "evidence": "rebuilt by scripts/build-codex-plugin.mjs; never edited by hand",
+      "id": "INV-035"
+    },
+    {
+      "verdict": "keep",
+      "risk": [],
+      "raises": [],
+      "area": "incidental",
+      "kind": "fixture",
+      "name": "Validator fixtures and docs-brain package tests",
+      "source": "scripts/__fixtures__/skills/** (18 files); packages/docs-brain/** (6 files); scripts/validate-skills.mjs usage comment",
+      "evidence": "Lando used as sample text or as a real corpus source; no runner semantics",
+      "id": "INV-036"
+    },
+    {
+      "verdict": "keep",
+      "risk": [],
+      "raises": [],
+      "area": "incidental",
+      "kind": "history",
+      "name": "Historical plans, specs and changelog",
+      "source": "docs/superpowers/**, docs/plans/**, docs/provenance.md, docs/superpowers-sage-expansion-study.md, CHANGELOG.md (23 files)",
+      "evidence": "records of past work; not edited",
+      "id": "INV-037"
+    },
+    {
+      "verdict": "rebuild",
+      "risk": [],
+      "raises": [],
+      "area": "sibling-plugins",
+      "kind": "reference",
+      "name": "kivo-rebuild and kivo-creator runner mentions",
+      "source": "plugins/kivo-rebuild/skills/connect/references/playwright.md; plugins/kivo-creator/skills/block-scaffolding-from-design/SKILL.md ({{runner.*}})",
+      "evidence": "'Lando or DDEV'; placeholders already neutral",
+      "id": "INV-038"
+    }
+  ]
+}
