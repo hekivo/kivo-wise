@@ -191,3 +191,25 @@
 - **Status:** active
 
 > Escolhido no quadro de aprovação: wp-kit skill sync also copies the kivo-wise hook scripts and detector into the repository and registers them in the committed settings file
+
+## D-022 — Who merges the release-please release PR of kivo-wise?
+
+- **Date:** 2026-11-23
+- **Question:** Q-029
+- **Choice:** The agent merges it when all checks are green; only the wp-kit 6.0.0 release stays with the owner (`agent-merges`)
+- **Status:** active
+
+> aprovo pode seguir
+
+Rationale: Owner approved the recommendation: The agent merges it when all checks are green; only the wp-kit 6.0.0 release stays with the owner
+
+## D-023 — One minor release per plan phase?
+
+- **Date:** 2026-11-23
+- **Question:** Q-030
+- **Choice:** Yes, phase 1 ships as its own minor; phases 2 and 3 in later minors (`minor-per-phase`)
+- **Status:** active
+
+> aprovo pode seguir
+
+Rationale: Owner approved the recommendation: Yes, phase 1 ships as its own minor; phases 2 and 3 in later minors

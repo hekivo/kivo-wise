@@ -724,6 +724,52 @@
       "area": "cloud",
       "id": "Q-028",
       "decision": "D-021"
+    },
+    {
+      "type": "decision",
+      "tier": "normal",
+      "status": "answered",
+      "source": "owner",
+      "grounds": [
+        "Plan review 2026-11-23; recommendation presented to the owner"
+      ],
+      "options": [
+        {
+          "key": "agent-merges",
+          "label": "The agent merges it when all checks are green; only the wp-kit 6.0.0 release stays with the owner"
+        },
+        {
+          "key": "other",
+          "label": "Something else"
+        }
+      ],
+      "text": "Who merges the release-please release PR of kivo-wise?",
+      "area": "plan",
+      "id": "Q-029",
+      "decision": "D-022"
+    },
+    {
+      "type": "decision",
+      "tier": "normal",
+      "status": "answered",
+      "source": "owner",
+      "grounds": [
+        "Plan review 2026-11-23; recommendation presented to the owner"
+      ],
+      "options": [
+        {
+          "key": "minor-per-phase",
+          "label": "Yes, phase 1 ships as its own minor; phases 2 and 3 in later minors"
+        },
+        {
+          "key": "other",
+          "label": "Something else"
+        }
+      ],
+      "text": "One minor release per plan phase?",
+      "area": "plan",
+      "id": "Q-030",
+      "decision": "D-023"
     }
   ]
 }

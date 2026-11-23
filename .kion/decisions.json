@@ -231,6 +231,28 @@
       "reconfirmed": false,
       "status": "active",
       "adr": "none"
+    },
+    {
+      "id": "D-022",
+      "question": "Q-029",
+      "date": "2026-11-23",
+      "choice": "agent-merges",
+      "owner_words": "aprovo pode seguir",
+      "rationale": "Owner approved the recommendation: The agent merges it when all checks are green; only the wp-kit 6.0.0 release stays with the owner",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
+    },
+    {
+      "id": "D-023",
+      "question": "Q-030",
+      "date": "2026-11-23",
+      "choice": "minor-per-phase",
+      "owner_words": "aprovo pode seguir",
+      "rationale": "Owner approved the recommendation: Yes, phase 1 ships as its own minor; phases 2 and 3 in later minors",
+      "reconfirmed": false,
+      "status": "active",
+      "adr": "none"
     }
   ]
 }

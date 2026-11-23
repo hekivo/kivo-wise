@@ -1,12 +1,6 @@
 # kivo-wise: Docker Compose `bin/` runner support — design
 
-Status: **draft**. No section is approved. The owner answered every decision question (Q-008 to Q-020
-are `D-008` to `D-020`; the seeded Q-001 to Q-007 are `D-001` to `D-007`), and the facts Q-021 to Q-027
-were answered by read-only surveys. A choice backed by a decision is a **requirement** and cites its
-`D-0NN`. A choice that no decision covers is still marked **Proposal**. Survey facts cite their question
-id (`Q-0NN`); the facts that only a live cloud run can confirm say "documented; cloud probe pending" and
-are checked by `dev/probes/environment-probe.sh`. Inventory ids (`INV-0NN`) point at
-`.kion/inventory.json`, which lists every place that hardcodes Lando today.
+Status: **approved** by the owner on 2026-11-22 (sections S-1 to S-8, recorded in `.kion/spec.json`).
 
 The wp-kit Compose environment is the parallel wp-kit design (`docs/specs/2026-11-22-wp-kit-docker-design.md`
 in wp-kit, with its own decisions, cited here as "wp-kit D-0NN"). Its owner named it **`kivo-wp`**

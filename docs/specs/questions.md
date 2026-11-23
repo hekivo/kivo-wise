@@ -38,3 +38,5 @@
 - **Q-020** [decision · answered · D-020] Which evals run against both runners?
 - **Q-025** [fact · answered] How does the Compose environment serve HTTPS locally (certificate authority, host names such as *.localhost or a project domain) and how is the CA trusted on WSL2 and Windows browsers?
 - **Q-027** [fact · answered] Does the Lando mysql service at the installed recipe version write expire_logs_days into its my.cnf, which MySQL 8.4 removed, and what override fixes it?
+- **Q-029** [decision · answered · D-022] Who merges the release-please release PR of kivo-wise?
+- **Q-030** [decision · answered · D-023] One minor release per plan phase?
