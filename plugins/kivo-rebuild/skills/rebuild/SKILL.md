@@ -20,7 +20,7 @@ Arguments: `<live-url> [--legacy=<path>] [--staging=<url>]` or `--run=<run id>` 
 1. The live site URL (or `live` in `.rebuild/config.json`).
 2. Optional: the legacy code path (needed from step 5), the staging URL and its access reference.
 3. `.roots-stack.json` from kivo-wise (`/roots-detect --write` when missing) for template paths.
-4. The kivo-rebuild plugin root (two levels above this skill's folder). Scripts run as `node <root>/scripts/<name>.mjs --project=.` and take the run id in `--run=<id>`; without it they use the latest run.
+4. The kivo-rebuild plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-rebuild/` folder beside the skill folders). Scripts run as `node <root>/scripts/<name>.mjs --project=.` and take the run id in `--run=<id>`; without it they use the latest run.
 
 ## Procedure
 

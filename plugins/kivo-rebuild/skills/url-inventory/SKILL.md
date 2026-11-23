@@ -20,7 +20,7 @@ Writes `inventory.json`: one row per URL with the live and staging answers, the 
 1. A run with `urls.json`; `signals.json` when available (without it, every URL keeps `clicks` null).
 2. Optional config keys: `import_date` (the date of the data import into the new project, used by rule R07), `rules.disable` (rule ids), `rules.junk_prefixes`, `rules.tag_types` (default `post_tag`), `rules.file_ext`, `redirects_csv`.
 3. `references/decision-rules.md` for the rule table.
-4. The kivo-rebuild plugin root (two levels above this skill's folder).
+4. The kivo-rebuild plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-rebuild/` folder beside the skill folders).
 
 ## Procedure
 

@@ -21,7 +21,7 @@ Builds `urls.json` for a run: every URL the sitemap lists, then the status, redi
 1. `live` in `.rebuild/config.json` (or `--live=<url>`). `staging` when a staging copy exists.
 2. For protected staging: `staging_access.headers_ref` as `op://<vault>/<item>` or `tf-output:<dir>:<output>`. The item holds `CF-Access-Client-Id` and `CF-Access-Client-Secret` fields, or fields labelled `header:<Name>`. Never ask for the values.
 3. Optional `types` in the config to name sitemap types (`{"product": "product"}` maps `product-sitemap.xml`; the default is the file name stem).
-4. The kivo-rebuild plugin root (two levels above this skill's folder).
+4. The kivo-rebuild plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-rebuild/` folder beside the skill folders).
 
 ## Procedure
 

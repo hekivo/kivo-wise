@@ -19,7 +19,7 @@ Tests read access to each source, records the result in `.rebuild/connections.js
 ## Inputs required
 
 1. `.rebuild/config.json` with the ids the sources need (Search Console property, GA4 property id, Tag Manager account and container ids, Cloudflare zone id). The `rebuild` skill writes it; if it is missing, write it first.
-2. The kivo-rebuild plugin root (two levels above this skill's folder).
+2. The kivo-rebuild plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-rebuild/` folder beside the skill folders).
 3. For Google sources: a service account in `gsc.service_account`, `ga4.service_account`, `gtm.service_account` or `setup.service_account` (each falls back as the code does, see the references), and the Token Creator role for the person on it. Without a service account the person's own `gcloud` login is used, which Google often rejects for these APIs because the token lacks their scopes.
 4. For Cloudflare and PageSpeed keys: an env file with `op://` references, run under `op run`. Never export a value in the shell.
 

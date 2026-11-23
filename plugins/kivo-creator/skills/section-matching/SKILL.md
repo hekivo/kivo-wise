@@ -19,7 +19,7 @@ Recognise first, generate last. Each section is matched to a block the project a
 
 1. The run folder `.creator/<run>/` with valid specs.
 2. The project root with `.roots-stack.json`, or the kivo-wise detector JSON passed with `--stack=<file>`.
-3. The kivo-creator plugin root (two levels above this skill's folder).
+3. The kivo-creator plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-creator/` folder beside the skill folders).
 
 ## Procedure
 

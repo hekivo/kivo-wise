@@ -20,7 +20,7 @@ Prove fidelity with numbers. `verify.mjs` produces `fidelity.md`; you fix what i
 1. `.creator/<run>/` with `page.html`, `emitted.json`, specs and references.
 2. The local site URL and runner (session context). Local development only.
 3. Playwright in the project (same as `html-ingest`).
-4. The kivo-creator plugin root (two levels above this skill's folder).
+4. The kivo-creator plugin root (two levels above this skill's folder; in a project copy of the skills, the hidden `.kivo-creator/` folder beside the skill folders).
 
 ## Procedure
 
