@@ -9,7 +9,7 @@ session implemented it from a fresh worktree of `origin/main`. Times are local (
 |---|---|
 | Branch opened (worktree from `origin/main` a62287e) | 2026-11-23 00:22:52 |
 | First push | 2026-11-23 00:31:06 |
-| Pull request opened | see the pull request; recorded in the component 02 notes |
+| Pull request opened (#60) | 2026-11-23 00:32:17 |
 | Merged | recorded in the component 02 notes (a pull request cannot record its own merge) |
 
 ## CI
