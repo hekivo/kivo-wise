@@ -21,7 +21,7 @@ Deterministic classification of a Roots-stack project: run the detector, read it
 
 - The project root (defaults to the working directory; pass `--path=<dir>` otherwise).
 - Read access to `composer.json`, `composer.lock`, `.lando.yml` and companions (`.lando.base.yml`, `.lando.dist.yml`, `.lando.upstream.yml`, `.lando.local.yml`), the root Compose file and its override (`compose.yaml`, `compose.override.yaml`, …), `bin/`, `.devcontainer/devcontainer.json`, `wp-cli.yml`, `.roots-stack.json`, theme `style.css` and plugin headers.
-- The plugin root: the directory that contains `skills/` and `scripts/`. Nothing else; no network, no containers. The detector reads the session kind from environment signals and looks for `docker` on `PATH` by listing directories; it never starts a process.
+- The plugin root: the directory that contains `skills/` and `scripts/`, or, in a project copy of the skills (made by `scripts/sync-project-skills.mjs`), the hidden `.kivo-wise/` folder beside the skill folders. Nothing else; no network, no containers. The detector reads the session kind from environment signals and looks for `docker` on `PATH` by listing directories; it never starts a process.
 
 ## Procedure
 
@@ -32,7 +32,7 @@ Deterministic classification of a Roots-stack project: run the detector, read it
    node scripts/detect-roots-project.mjs --path=/abs/path/to/project --format=text  # compact table
    ```
 
-   Without `--path=` the working directory is the project root. The same file name exists inside this skill folder (`scripts/detect-roots-project.mjs`) as a wrapper that forwards to the plugin-root copy, so the relative path works from either place. The script exits 0 always; absence becomes `null` plus an entry in `notes`.
+   Without `--path=` the working directory is the project root. The same file name exists inside this skill folder (`scripts/detect-roots-project.mjs`) as a wrapper that forwards to the plugin-root copy (the `.kivo-wise/` folder in a project copy, the plugin root otherwise), so the relative path works from either place. The script exits 0 always; absence becomes `null` plus an entry in `notes`.
 
 2. **Read the top level first:** `layout`, `coreDir`, `apps.length`, `active`, `runtime.runner`, `flag`, `warnings`, `truncated`. The shape is fixed by [references/triage.schema.json](references/triage.schema.json); the meaning of every field is in [references/output-fields.md](references/output-fields.md).
 
@@ -91,7 +91,7 @@ Deterministic classification of a Roots-stack project: run the detector, read it
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `detector not found` JSON from the wrapper | The skill wrapper could not find `scripts/detect-roots-project.mjs` at the plugin root | Run the command from the plugin root; check the plugin installation is complete |
+| `detector not found` JSON from the wrapper | The skill wrapper found `scripts/detect-roots-project.mjs` neither in `.kivo-wise/` beside the skill folders nor at the plugin root | Run the command from the plugin root; check the plugin installation is complete, or refresh the project copy with `scripts/sync-project-skills.mjs` |
 | `apps` is empty on a Roots project | The app sits deeper than depth 4, or its `composer.json` does not require `roots/acorn` | Run with `--path=` pointing at the app, or write `.roots-stack.json` |
 | Wrong `active` app (theme chosen over the mu-plugin) | The working directory is inside the theme and no flag exists | Write the flag file; the flag overrides the "contains cwd" rule |
 | `runtime.lando` is `null` although `.lando.yml` exists | The YAML subset parser gave up (see `notes`) | Simplify the construct it names, or read the Landofile by hand for that session |

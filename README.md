@@ -114,7 +114,7 @@ These assistants do not load Claude Code plugins, so copy the skills into the pr
 node /path/to/kivo-wise/scripts/sync-project-skills.mjs --to .agents/skills
 ```
 
-This copies every `skills/<name>/` folder and writes `.agents/skills/GENERATED.md` (plugin version, date, skill and file lists). Third-party GPL skills are skipped unless you pass `--include-gpl`. Run the same command with `--check` in CI to fail when the copy is stale; it prints the missing, changed and extra files. The script never deletes a file that `GENERATED.md` does not list.
+This copies every `skills/<name>/` folder, puts the plugin-root scripts those skills run (the detector and the inventory) in a hidden `.kivo-wise/` folder beside them, and writes `.agents/skills/GENERATED.md` (plugin version, source commit and release tag, skill and file lists; no date, so a refresh from the same source changes nothing). Third-party GPL skills are skipped unless you pass `--include-gpl`. Add `--plugin-root <kivo-wise>/plugins/kivo-creator` (or `plugins/kivo-rebuild`) to copy another plugin of this repository into the same folder: its skills sit beside the kivo-wise ones, its `scripts/` and `schemas/` go to `.kivo-creator/` and its manifest is `GENERATED.kivo-creator.md`; a skill folder that another plugin already copied is refused. Run the same command with `--check` in CI to fail when the copy is stale; it prints the missing, changed and extra files. The script never deletes a file that `GENERATED.md` does not list.
 
 Codex (CLI 0.137 or newer) can also install the plugin directly:
 
