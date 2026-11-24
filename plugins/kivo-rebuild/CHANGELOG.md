@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/hekivo/kivo-wise/compare/kivo-rebuild-v0.2.0...kivo-rebuild-v0.3.0) (2026-11-24)
+
+
+### Features
+
+* **sync:** self-sufficient project copies, --plugin-root and a deterministic manifest ([530b1a4](https://github.com/hekivo/kivo-wise/commit/530b1a4dcc12b1c6e1b5ffb6940b4e396f3ce8b7))
+
+
+### Bug Fixes
+
+* **skills:** name the plugin root of a project copy of the skills ([2043ef6](https://github.com/hekivo/kivo-wise/commit/2043ef6b0b03703c083eb22ad41e53af1d003992))
+
 ## [0.2.0](https://github.com/hekivo/kivo-wise/compare/kivo-rebuild-v0.1.0...kivo-rebuild-v0.2.0) (2026-11-23)
 
 

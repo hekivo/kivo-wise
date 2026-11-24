@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "kivo-wise",
-      "version": "3.2.0",
+      "version": "3.3.0",
       "source": {
         "source": "local",
         "path": "./plugins/kivo-wise"
@@ -18,7 +18,7 @@
     },
     {
       "name": "kivo-creator",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "source": {
         "source": "local",
         "path": "./plugins/kivo-creator"
@@ -30,7 +30,7 @@
     },
     {
       "name": "kivo-rebuild",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "source": {
         "source": "local",
         "path": "./plugins/kivo-rebuild"

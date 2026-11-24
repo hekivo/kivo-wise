@@ -11,7 +11,7 @@
     {
       "name": "kivo-wise",
       "description": "Roots stack (Sage, Acorn, Radicle) skills for AI-assisted WordPress development through Lando.",
-      "version": "3.2.0",
+      "version": "3.3.0",
       "source": {
         "source": "github",
         "repo": "hekivo/kivo-wise",
@@ -25,7 +25,7 @@
     {
       "name": "kivo-creator",
       "description": "Figma and HTML to WordPress on the Roots stack: reuse existing blocks first, scaffold only the gaps, prove fidelity with a pixel diff",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "source": "./plugins/kivo-creator",
       "author": {
         "name": "hekivo",
@@ -35,7 +35,7 @@
     {
       "name": "kivo-rebuild",
       "description": "Rebuild an existing WordPress site on the Roots stack: connect sources, survey the live site, audit parity",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "source": "./plugins/kivo-rebuild",
       "author": {
         "name": "hekivo",
