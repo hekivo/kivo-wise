@@ -212,7 +212,7 @@ test('mu-plugin-inferred-basepath: warns when a plugin app has no base path and 
 });
 
 const PRE_COMPOSE_FIXTURES = ['composer-mu-plugin', 'sage-theme', 'bedrock-plain', 'bedrock-sage', 'radicle', 'plain-wp', 'flag-override', 'mu-plugin-inferred-basepath'];
-const COMPOSE_FIXTURES = ['compose-bin', 'compose-no-contract', 'compose-anchors', 'composer-bin-dir', 'compose-no-bin', 'compose-and-lando', 'devcontainer-legacy', 'flag-runner-override', 'flag-runner-missing-env'];
+const COMPOSE_FIXTURES = ['compose-bin', 'compose-router', 'compose-no-contract', 'compose-anchors', 'composer-bin-dir', 'compose-no-bin', 'compose-and-lando', 'devcontainer-legacy', 'flag-runner-override', 'flag-runner-missing-env'];
 
 test('every fixture validates against triage.schema.json', () => {
   for (const name of [...PRE_COMPOSE_FIXTURES, ...COMPOSE_FIXTURES]) {
@@ -345,6 +345,7 @@ function withTmp(fn) {
 const KIVO_WP_COMPOSE = {
   files: ['compose.yaml', 'compose.override.yaml'],
   contract: { name: 'kivo-wp', version: 1 },
+  router: null,
   devcontainer: '.devcontainer/devcontainer.json',
   services: { php: 'app', web: 'app', database: 'db', cache: 'cache', node: 'node', proxy: 'proxy', mail: 'mail' },
   bin: ['build', 'composer', 'dev', 'flush', 'logs', 'mago', 'npm', 'test', 'wp'],
@@ -457,12 +458,13 @@ test('without a contract, fpm-nginx images and a Dockerfile-built contract name 
 }));
 
 test('an unknown higher contract version falls back to image roles with a note (AC-01-1)', () => withTmp((tmp) => {
-  writeFileSync(join(tmp, 'compose.yaml'), 'x-kivo-wp:\n  contract: 2\nservices:\n  app:\n    image: php:8.4-fpm\n');
+  writeFileSync(join(tmp, 'compose.yaml'), 'x-kivo-wp:\n  contract: 3\nservices:\n  app:\n    image: php:8.4-fpm\n');
   const r = detect(tmp, { env: WITH_DOCKER });
-  assert.deepEqual(r.runtime.compose.contract, { name: 'kivo-wp', version: 2 });
+  assert.deepEqual(r.runtime.compose.contract, { name: 'kivo-wp', version: 3 });
   assert.equal(r.runtime.compose.services.php, 'app');
-  assert.equal(r.runtime.compose.services.web, null, 'contract 2 roles are not assumed');
-  assert.ok(r.notes.includes('unknown kivo-wp contract 2; reading what exists'));
+  assert.equal(r.runtime.compose.services.web, null, 'unknown contract roles are not assumed');
+  assert.equal(r.runtime.compose.router, null);
+  assert.ok(r.notes.includes('unknown kivo-wp contract 3; reading what exists'));
   writeFileSync(join(tmp, 'compose.yaml'), 'x-kivo-wp: { contract: 1 }\nservices:\n  app:\n    image: php:8.4-fpm\n');
   const flow = detect(tmp, { env: WITH_DOCKER });
   assert.equal(flow.runtime.compose.contract, null, 'a flow map is not read');
@@ -623,4 +625,44 @@ test('no regression: pre-existing fixtures keep runner, runners, lando and warni
       assert.equal(r.runtime.compose, null, `${name}: runtime.compose is null`);
     }
   }
+});
+
+const KIVO_WP_ROUTER_COMPOSE = {
+  files: ['compose.yaml', 'compose.override.yaml'],
+  contract: { name: 'kivo-wp', version: 2 },
+  router: { container: 'kivo-wp-router', network: 'kivo-wp', networkDeclared: true },
+  devcontainer: '.devcontainer/devcontainer.json',
+  services: { php: 'app', web: 'app', database: 'db', cache: 'cache', node: 'node', proxy: null, mail: 'mail' },
+  bin: ['build', 'composer', 'dev', 'flush', 'logs', 'mago', 'npm', 'router', 'test', 'wp'],
+  parseErrors: [],
+};
+
+test('compose-router: kivo-wp contract 2 roles, no proxy, the external router (AC-04-1)', () => {
+  const r = runEnv('compose-router');
+  assert.equal(r.runtime.runner, 'compose');
+  assert.deepEqual(r.runtime.compose, KIVO_WP_ROUTER_COMPOSE);
+  assert.deepEqual(r.warnings, []);
+  assert.ok(!r.notes.some((n) => /unknown kivo-wp contract|proxy|kivo-wp network/.test(n)), r.notes.join('; '));
+  assert.deepEqual(r.runtime.runners, runEnv('compose-bin').runtime.runners, 'the runner map does not depend on the contract version');
+  assert.match(formatText(r).split('\n')[0], /compose compose\.yaml \(contract kivo-wp v2, router kivo-wp-router\)$/);
+});
+
+test('contract 2: a leftover proxy service is ignored and a missing kivo-wp network is noted (AC-04-2)', () => withTmp((tmp) => {
+  writeFileSync(join(tmp, 'compose.yaml'), [
+    'x-kivo-wp:', '  contract: 2', 'services:', '  app:', '    image: kivo-wp/app:8.4',
+    '  proxy:', '    image: caddy:2', '    ports:', '      - "443:443"', '',
+  ].join('\n'));
+  const r = detect(tmp, { env: WITH_DOCKER });
+  assert.equal(r.runtime.compose.services.proxy, null);
+  assert.equal(r.runtime.compose.services.php, 'app');
+  assert.deepEqual(r.runtime.compose.router, { container: 'kivo-wp-router', network: 'kivo-wp', networkDeclared: false });
+  assert.ok(r.notes.includes('compose: contract 2 has no proxy service; "proxy" is ignored (the router is the external kivo-wp-router)'));
+  assert.ok(r.notes.includes('compose: contract 2 but no kivo-wp network declared; routed services cannot reach the router'));
+  assert.deepEqual(validate(SCHEMA, r), []);
+}));
+
+test('contract 1 keeps the proxy role and reports no router (AC-04-3)', () => {
+  const c = runEnv('compose-bin').runtime.compose;
+  assert.equal(c.services.proxy, 'proxy');
+  assert.equal(c.router, null);
 });

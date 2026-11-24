@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# logs: follow the app logs.
+set -euo pipefail
+exec docker compose logs -f "${@:-app}"

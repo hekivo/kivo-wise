@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# composer: run in the app service.
+set -euo pipefail
+source "$(dirname "$0")/_lib.sh"
+compose_exec app composer "$@"

@@ -21,7 +21,19 @@ Browsers are installed once per machine: `{{runner.node}} run pw:install` if the
 | One spec | add the spec path |
 | UI mode / headed | on the **host**, from the project folder, not in the container: containers have no display |
 
-Headed runs on the host use the host's Node and browsers, pointed at the same site URL (for Lando, the `*.lndo.site` address). If the project has an environment switch for headed mode, use it (for example a variable read by the config); otherwise pass `--headed`.
+Headed runs on the host use the host's Node and browsers, pointed at the same site URL (for Lando, the `*.lndo.site` address; for Compose, the URL `bin/info` prints, see below). If the project has an environment switch for headed mode, use it (for example a variable read by the config); otherwise pass `--headed`.
+
+## Base URL on Docker Compose (kivo-wp)
+
+The site URL comes from `bin/info`, never from a guess; `bin/e2e` is the project's browser test entry when it exists. Which form it has depends on `runtime.compose.contract.version`:
+
+| Contract | Base URL | Browsers inside a container |
+|---|---|---|
+| 1 (per-project proxy) | `https://<project>.localhost`, with the port `bin/setup` chose when 443 was taken | the project's config maps the host (for example a Chromium `--host-resolver-rules` mapping); keep it |
+| 2 (global router) | `https://<host>.<domain>` (default domain `kivowp.dev`), never with a port | `extra_hosts` in `compose.yaml` maps the three names to `host-gateway`, so no host mapping is needed when that works; keep a mapping the project's config already has, and report a failure instead of adding one |
+| Codespaces (either) | the forwarded URL of the app port | as the project's config says |
+
+A base URL with a port on a contract 2 project is a leftover from contract 1: read `bin/info` again instead of keeping it. Certificates: the browser and Playwright's `request` fixture must trust the certificate (`bin/trust-cert` for a local CA); `ignoreHTTPSErrors` is a diagnostic, not a fix.
 
 ## Spec patterns
 

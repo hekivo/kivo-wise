@@ -83,7 +83,7 @@
     "compose": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["files", "contract", "devcontainer", "services", "bin", "parseErrors"],
+      "required": ["files", "contract", "router", "devcontainer", "services", "bin", "parseErrors"],
       "properties": {
         "files": { "type": "array", "items": { "type": "string" } },
         "contract": {
@@ -96,6 +96,21 @@
               "properties": {
                 "name": { "const": "kivo-wp" },
                 "version": { "type": "integer" }
+              }
+            }
+          ]
+        },
+        "router": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["container", "network", "networkDeclared"],
+              "properties": {
+                "container": { "const": "kivo-wp-router" },
+                "network": { "const": "kivo-wp" },
+                "networkDeclared": { "type": "boolean" }
               }
             }
           ]

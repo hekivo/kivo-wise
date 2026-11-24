@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# router: status or logs of the global kivo-wp-router container (fixture).
+set -euo pipefail
+source "$(dirname "$0")/_lib.sh"
+case "${1:-status}" in
+  logs) docker logs -f kivo-wp-router ;;
+  *) docker ps --filter name=kivo-wp-router ;;
+esac

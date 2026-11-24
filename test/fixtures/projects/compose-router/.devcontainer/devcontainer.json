@@ -1,0 +1,6 @@
+{
+  "name": "kivo-wp workspace",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": { "ghcr.io/devcontainers/features/docker-in-docker:2": {} },
+  "containerEnv": { "KIVO_WP_CONTEXT": "devcontainer" }
+}

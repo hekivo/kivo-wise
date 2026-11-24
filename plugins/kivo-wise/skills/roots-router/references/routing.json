@@ -366,7 +366,9 @@
         "devcontainer",
         "codespace",
         "kivo-wp",
-        "localhost certificate"
+        "localhost certificate",
+        "kivowp.dev",
+        "bin/router"
       ],
       "skill": "compose-wp",
       "profiles": [

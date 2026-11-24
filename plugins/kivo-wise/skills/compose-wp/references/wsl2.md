@@ -13,7 +13,7 @@ Keep the repository on the distribution's Linux filesystem (for example `~/proje
 
 ## Certificates in Windows browsers
 
-The CA that `bin/trust-cert` exports lives on the Linux side, so Windows browsers do not trust it yet.
+The CA that `bin/trust-cert` exports (Caddy's on contract 1, the machine-local one on contract 2) lives on the Linux side, so Windows browsers do not trust it yet. On contract 2 with the team's wildcard certificate there is nothing to import.
 
 1. Run `bin/trust-cert` in the distribution; note the file it writes.
 2. From an elevated Windows prompt, import that file into the Windows Root store through the WSL path:
@@ -27,6 +27,6 @@ The CA that `bin/trust-cert` exports lives on the Linux side, so Windows browser
 
 ## Reaching the site from Windows
 
-WSL forwards `localhost` ports to Windows, so `https://<project>.localhost` (with the port `bin/info` prints) opens in a Windows browser once the CA is trusted. If it does not, check that `localhostForwarding` is not disabled in `%UserProfile%\.wslconfig`, and restart WSL with `wsl --shutdown`.
+WSL forwards `localhost` ports to Windows, so the site opens in a Windows browser once the certificate is trusted: `https://<project>.localhost` with the port `bin/info` prints on contract 1, `https://<host>.<domain>` with no port on contract 2 (the name resolves to `127.0.0.1`, which WSL forwards to the router). If it does not, check that `localhostForwarding` is not disabled in `%UserProfile%\.wslconfig`, and restart WSL with `wsl --shutdown`.
 
 Sources: https://docs.docker.com/desktop/features/wsl/ · https://learn.microsoft.com/windows/wsl/filesystems · https://learn.microsoft.com/windows/wsl/networking · https://learn.microsoft.com/windows-server/administration/windows-commands/certutil
