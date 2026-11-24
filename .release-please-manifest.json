@@ -1,5 +1,5 @@
 {
-  ".": "3.2.0",
-  "plugins/kivo-creator": "0.2.0",
-  "plugins/kivo-rebuild": "0.2.0"
+  ".": "3.3.0",
+  "plugins/kivo-creator": "0.3.0",
+  "plugins/kivo-rebuild": "0.3.0"
 }

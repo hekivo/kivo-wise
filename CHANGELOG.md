@@ -1,5 +1,24 @@
 # Changelog
 
+## [3.3.0](https://github.com/hekivo/kivo-wise/compare/kivo-wise-v3.2.0...kivo-wise-v3.3.0) (2026-11-24)
+
+
+### Features
+
+* **detector:** read kivo-wp Compose contract 2 and its global router ([ed44eac](https://github.com/hekivo/kivo-wise/commit/ed44eac12317422de93f9d7f670ec4812a4675a5))
+* **skills:** describe kivo-wp contract 2 next to contract 1 ([4d54ea7](https://github.com/hekivo/kivo-wise/commit/4d54ea743b960f3197f8f492b682c1c2b8508dc9))
+* support the kivo-wp Compose contract 2 (global router) ([7ece98e](https://github.com/hekivo/kivo-wise/commit/7ece98e432725c9b6789aebf0cea6ed5ca90606c))
+* **sync:** self-sufficient project copies, --plugin-root and a deterministic manifest ([530b1a4](https://github.com/hekivo/kivo-wise/commit/530b1a4dcc12b1c6e1b5ffb6940b4e396f3ce8b7))
+* **sync:** self-sufficient project copies, --plugin-root and a deterministic manifest ([03cf385](https://github.com/hekivo/kivo-wise/commit/03cf38517340a8f1df1c773170162e2a3cbd31c6))
+
+
+### Documentation
+
+* **spec:** plan kivo-wp Compose contract 2 support ([50ee0cc](https://github.com/hekivo/kivo-wise/commit/50ee0cc86a8f737328e4648f902e124dd9add385))
+* **spec:** plan kivo-wp Compose contract 2 support ([3ee4c54](https://github.com/hekivo/kivo-wise/commit/3ee4c5490a9d346f2c28cad9972244a9cc5e2aef))
+* **study:** record the component 04 implementation notes ([5df6691](https://github.com/hekivo/kivo-wise/commit/5df66915af454addb69efbf88f617bd20ad0ecab))
+* **study:** record the pinned skill copy fixes ([481f7c4](https://github.com/hekivo/kivo-wise/commit/481f7c458256559fcb0c7d6d352b482922656cd4))
+
 ## [3.2.0](https://github.com/hekivo/kivo-wise/compare/kivo-wise-v3.1.0...kivo-wise-v3.2.0) (2026-11-23)
 
 
