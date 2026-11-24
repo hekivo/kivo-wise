@@ -18,7 +18,11 @@ Plan `docs/plans/2026-11-23-compose-contract-2/plan.md`; spec
 ## CI
 
 - #64 and #66: no failure; each merged through the queue about one minute after the enqueue.
-- This pull request: local runs of every CI step green before the push.
+- This pull request: local runs green, then the first CI run failed on the `compose-router` detector
+  test: the fixture's `compose.override.yaml` is gitignored by the fixture's own `.gitignore` (it
+  mirrors a real project), so `git add -A` left it out and CI saw only `compose.yaml`. Fixed with
+  `git add -f`, as `compose-bin` does. Lesson: copying a fixture with ignored files needs `git status
+  --ignored` before the commit.
 
 ## Decisions taken inside the spec
 
